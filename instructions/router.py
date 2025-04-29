@@ -4,11 +4,11 @@ from pydantic import BaseModel, Field
 from agents import Agent, ModelSettings
 
 
-class ResponseClassificationResult(BaseModel):
+class UserInputClassificationResult(BaseModel):
     user_input: str = Field(
         ..., description="The exact text message received from the user."
     )
-    catergory: Literal["question", "information", "unknown"] = Field(
+    catergory: Literal["faq", "information", "unknown"] = Field(
         ..., description="What user entered"
     )
     reasoning: str = Field(
@@ -19,12 +19,12 @@ class ResponseClassificationResult(BaseModel):
 
 INSTRUCTIONS = """
 You are an intent‐classification agent for user messages about bank accounts.
-Your job is to label each input as one of three categories — `question`, `information`, or `unknown` — and, when appropriate,
+Your job is to label each input as one of three categories — `faq`, `information`, or `unknown` — and, when appropriate,
 guide the user toward providing valid business‐account details.
 
 # Classification rules
 
-- question
+- faq
   The user asks for definitions, procedures, requirements, terms, clarifications, or eligibility related to bank accounts, PSPs, or payment gateways.
 
   Examples:
@@ -52,7 +52,7 @@ guide the user toward providing valid business‐account details.
   A: question
 
 - information
-  The user states facts about their bank account or PSP.
+  The user states facts about their bank account, PSP, credentials of PSP account (login or password), hosting details or confidence to work with us.
 
   Examples:
   Q: I have a corporate account at ING.
@@ -80,6 +80,6 @@ def create_router(
         name="Router",
         instructions=INSTRUCTIONS,
         model=model_name,
-        output_type=RouterResponce,
+        output_type=UserInputClassificationResult,
         model_settings=model_settings,
     )
