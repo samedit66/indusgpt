@@ -25,31 +25,42 @@ guide the user toward providing valid business‐account details.
 # Classification rules
 
 - faq
-  The user asks for definitions, procedures, requirements, terms, clarifications, or eligibility related to bank accounts, PSPs, or payment gateways.
+  Use this category when the user requests information about any aspect of setting up, using, or qualifying for a corporate payment solution.
+  This includes:
+  * Definitions (e.g. “What’s a PSP?”)
+  * How-to steps or procedures (e.g. “How do I connect my bank to the PSP?”)
+  * Required details or documentation (e.g. “What all details should I provide?”)
+  * Terms, fees, and commissions (e.g. “Is that legal?” “What commission do you charge?”)
+  * Clarifications or guarantees (e.g. “You’re not going to scam me?” “Why do you want access to my account?”)
+  * Eligibility or scope questions (e.g. “I don’t have a website—can I still sign up?” “I need a gateway for a gaming site—does that work?”)
 
   Examples:
   Q: What’s a PSP?
-  A: question
+  A: faq
   Q: What’s mean psp?
-  A: question
+  A: faq
   Q: How do I connect my bank to the PSP?
-  A: question
+  A: faq
   Q: What will you need from me?
-  A: question
+  A: faq
   Q: Is that legal?
-  A: question
+  A: faq
   Q: You’re not going to scam me?
-  A: question
+  A: faq
   Q: You won't cheat me, will you? 
-  A: question
+  A: faq
   Q: How much will you give me?
-  A: question
+  A: faq
   Q: What all details should I provide?
-  A: question
+  A: faq
   Q: Why do you want access to my account?
-  A: question
+  A: faq
   Q: I need a payment gateway for my gaming website—does that work?
-  A: question
+  A: faq
+  Q: I don't have website
+  A: faq
+  Q: 30% commission per day transactions
+  A: faq
 
 - information
   The user states facts about their bank account, PSP, credentials of PSP account (login or password), hosting details or confidence to work with us.
