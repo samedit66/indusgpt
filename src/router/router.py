@@ -6,7 +6,6 @@ from pathlib import Path
 from pydantic import BaseModel, Field
 
 from src.agent import Agent
-from src.validator import Validator, ValidationResult
 
 
 QUERY_TEMPLATE = "Q: {}\nA:"
@@ -19,7 +18,6 @@ class Router:
             instructions=router_instructions(),
             **kwargs,
         )
-        self._validator = Validator(**kwargs)
 
     def classify(self, user_input: str) -> UserIntent:
         user_intent = self._router.chat(

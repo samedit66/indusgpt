@@ -6,12 +6,13 @@ from datetime import datetime
 from aiogram import Bot, Dispatcher, F
 from aiogram.types import Message
 from aiogram.filters.command import Command
+from aiogram.fsm.context import FSMContext
+from aiogram.fsm.state import State, StatesGroup
 from dotenv import load_dotenv
+
+from src.dialog_flow_agent import DialogFlowAgent, DialogFlowAgentAnswer
+
 load_dotenv()
-
-from src.router.router import classify_user_intent, UserIntent
-from src.faq_agent.faq_agent import answer_faq
-
 
 API_TOKEN = os.getenv("TELEGRAM_API_TOKEN")
 if not API_TOKEN:
@@ -38,8 +39,8 @@ CREATE TABLE IF NOT EXISTS messages (
     user_name TEXT,
     user_message TEXT,
     bot_response TEXT,
-    intent_category TEXT,
-    intent_reasoning TEXT,
+    ready_for_next_question BOOLEAN,
+    extracted_data TEXT,
     timestamp TEXT
 )
 """
@@ -50,106 +51,134 @@ def init_db():
     conn.commit()
     return conn
 
-async def log_interaction(msg: Message, intent: UserIntent, response: str, conn: sqlite3.Connection):
+async def log_interaction(
+    msg: Message,
+    answer: DialogFlowAgentAnswer,
+    question: str,
+    conn: sqlite3.Connection
+):
     ts = datetime.utcnow().isoformat()
     conn.execute(
         """
         INSERT INTO messages
-          (user_id, user_name, user_message, bot_response, intent_category, intent_reasoning, timestamp)
+          (user_id, user_name, user_message, bot_response, ready_for_next_question, extracted_data, timestamp)
         VALUES (?, ?, ?, ?, ?, ?, ?)
         """,
         (
             msg.from_user.id,
             msg.from_user.username or "",
             msg.text,
-            response,
-            intent.category,
-            intent.reasoning,
+            answer.answer,
+            answer.ready_for_next_question,
+            answer.extracted_data,
             ts
         )
     )
     conn.commit()
-    logger.info(f"Logged message from {msg.from_user.id}: intent={intent.category}")
+    logger.info(f"Logged interaction for {msg.from_user.id}: question={question}")
+
+# Define questionnaire
+questions_and_rules = [
+    {
+        "question": "Do you have corporate (business) accounts? In which banks?",
+        "val_rule": "User response **must** confirm that they have a corporate/business bank account and say the bank name."
+    },
+    {
+        "question": "Are your corporate accounts connected to any PSP (e.g., Razorpay, Cashfree, PayU, Getepay)?",
+        "val_rule": "User response **must** include the name of the **PSP** to which their corporate account is connected."
+    },
+    {
+        "question": "Can you provide login and password access to the PSP account?",
+        "val_rule": "User response **must** clearly answer “yes” or “no” and, if yes, indicate readiness to **share login credentials**."
+    },
+    {
+        "question": (
+            "Do you already have a website approved by the PSP?\n"
+            "If yes — please give us hosting access (we may need to adjust code or API)\n"
+            "If not — we will create the website ourselves"
+        ),
+        "val_rule": (
+            "User response **must** answer “yes” or “no.” "
+            "If “yes,” they **must** mention they can provide **hosting access**. "
+            "If “no”, only \"no\" is required."
+        )
+    },
+    {
+        "question": "Are you open to working under a profit‑sharing model (5% of transaction volume) instead of a one‑time deal?",
+        "val_rule": "User response **must** clearly say \"yes\" or \"no\"."
+    }
+]
+
+# Create FSM states
+class Questionnaire(StatesGroup):
+    q0 = State()
+    q1 = State()
+    q2 = State()
+    q3 = State()
+    q4 = State()
+
+agent = DialogFlowAgent(model_name=os.environ["MODEL"])
 
 @dp.message(Command("start"))
-async def cmd_start(message: Message):
-    start_message = """
-Hi brother!  
-Thanks for reaching out 🙏  
+async def cmd_start(message: Message, state: FSMContext):
+    intro = (
+        "Hi there! 🙏\n\n"
+        "We work with high-volume traffic and process over ₹12,000,000 daily. "
+        "We're looking to buy or rent corporate accounts in India connected to a PSP.\n\n"
+        "Let's get started. Please answer the following questions one by one."
+    )
+    await message.answer(intro)
 
-We work with high-volume traffic (gaming-related) and process over ₹12,000,000+ in daily incoming transactions. We are looking to buy or rent corporate accounts in India that can be connected to a PSP (such as Razorpay, Cashfree, PayU, Getepay, etc.) to accept payments.
+    # Move to first state and ask Q0
+    await state.set_state(Questionnaire.q0)
+    await message.answer(questions_and_rules[0]["question"])
 
-We are ready for long-term cooperation and offer up to 5% of the profit for stable account performance. For example: ₹500,000 daily volume = ₹25,000 your share (5%).
-
----
-
-Please answer the following:
-
-1. Do you have corporate accounts? In which banks?  
-2. Are they connected to any PSP (Razorpay, Cashfree, PayU, etc.)?  
-3. Can you provide login and password access to the PSP account?  
-4. Do you already have a website approved by the PSP?  
-  → If yes — please give us hosting access (we may need to adjust code or API)  
-  → If not — we will create the website ourselves  
-5. Are you open to working under a profit-sharing model instead of just a one-time deal?
-
----
-
-Our Work Process:
-
-1. Access to PSP account  
- – You share the login + password (e.g. Razorpay)  
- – We review dashboard, limits, API access, status
-
-2. Website check  
- – If already available — great, we’ll need hosting access  
- – If not — we’ll create a bridge website (services, education, consulting, etc.)
-
-3. Submit for moderation  
- – We use your account + our site  
- – Fill forms, upload docs, complete verification
-
-4. API integration  
- – Our dev team integrates PSP to our backend  
- – We test deposit flow, webhook, and transaction statuses
-
-5. Start working  
- – Begin with small volumes, check stability  
- – If everything is good — we scale
-
----
-
-If you’re ready:
-
-- Share PSP login + password  
-- Let us know if you already have a website  
- → If yes — provide hosting access  
- → If not — we’ll handle it  
-- Confirm if you can provide company documents (GST, PAN, etc.)
-
-Let’s build a strong and profitable partnership 💪
-
-❗️ PLEASE WRITE AND ANSWER ALL THE QUESTIONS! SO THAT OUR COMMUNICATION AND WORK IS PRODUCTIVE. IF YOU ANSWER ALL THE QUESTIONS — I WILL REPLY TO YOU.
-"""
-    await message.answer(start_message)
-
-# Handlers
 @dp.message(F.text)
-async def handle_message(message: Message):
-    intent = classify_user_intent(message.text)
-    response = f"Intent: {intent.category}\nReasoning: {intent.reasoning}\nInput: {intent.user_input}"
-    await message.reply(response, parse_mode="HTML")
+async def handle_answers(message: Message, state: FSMContext):
+    current = await state.get_state()  # e.g. "Questionnaire:q0"
+    if not current:
+        # Not in our flow—ignore or prompt
+        return
 
-    # Log once per process
-    #await log_interaction(message, intent, response, dp['db_conn'])
+    # Map state strings to their index
+    mapping = {
+        Questionnaire.q0: 0,
+        Questionnaire.q1: 1,
+        Questionnaire.q2: 2,
+        Questionnaire.q3: 3,
+        Questionnaire.q4: 4,
+    }
+    idx = mapping.get(current)
+    if idx is None:
+        return
+
+    q = questions_and_rules[idx]
+    answer: DialogFlowAgentAnswer = agent.respond(
+        user_input=message.text,
+        question=q["question"],
+        validation_rule=q["val_rule"],
+    )
+
+    # Reply & log
+    await message.reply(answer.answer)
+    await log_interaction(message, answer, q["question"], dp["db_conn"])
+
+    # Advance or finish
+    if idx + 1 < len(questions_and_rules):
+        if answer.ready_for_next_question:
+            next_state = getattr(Questionnaire, f"q{idx+1}")
+            await state.set_state(next_state)
+            await message.answer(questions_and_rules[idx+1]["question"])
+    else:
+        await message.answer("Thank you! We have collected all the info.")
+        await state.clear()
 
 async def on_startup():
-    # Ensure DB and pass connection in dp storage
-    dp['db_conn'] = init_db()
+    dp["db_conn"] = init_db()
     logger.info("Database initialized.")
 
 async def on_shutdown():
-    dp['db_conn'].close()
+    dp["db_conn"].close()
     logger.info("Database connection closed.")
 
 if __name__ == "__main__":

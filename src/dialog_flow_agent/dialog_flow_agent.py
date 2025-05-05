@@ -25,29 +25,39 @@ class DialogFlowAgent:
     ) -> DialogFlowAgentAnswer:
         user_intent = self._router.classify(user_input)
 
+        ready_for_next_question = False
+        extracted_data = None
         match user_intent.category:
             case "faq":
-                return self._faq_agent.respond(user_input)
+                answer = self._faq_agent.respond(user_input)
             case "information":
-                val_result = self._validate(user_input, question, validation_rule)
-                
+                val_result = self._validate(user_input, question, user_intent.reasoning, validation_rule)
+
                 if val_result.is_valid_user_answer.answer_kind == "yes":
                     answer = self._agenerator.generate_answer(
                         "User succesfully responded correct."
                         f"Their answer: {val_result.is_valid_user_answer.extracted_data}"
                     )
                     extracted_data = val_result.is_valid_user_answer.extracted_data
+                    ready_for_next_question = True
                 else:
                     answer = self._agenerator.generate_answer(
                         val_result.is_valid_user_answer.reason_why_invalid
                     )
-                    extracted_data = None
-                return DialogFlowAgentAnswer(answer=answer, extracted_data=extracted_data)
+            case x:
+                raise RuntimeError(f"This should not happen, got unknown category '{x}'")
+
+        return DialogFlowAgentAnswer(
+            answer=answer,
+            ready_for_next_question=ready_for_next_question,
+            extracted_data=extracted_data,
+        )
             
     def _validate(
         self,
         user_input: str,
         question: str,
+        model_reason: str,
         validation_rule: str,
     ) -> ValidationResult:
         validator = Agent(
@@ -67,8 +77,12 @@ Look to FAQ if you are not sure:
         )
 
         query_template = f"""
-Does the user answer '{user_input}' correspond to the given question '{question}'?
-Use validation rules: '{validation_rule}'. Tell me yes/no with brief explanation.
+Evaluate the following user response: '{user_input}'
+Question: '{question}'
+Analysis from another agent: '{model_reason}'
+Validation criteria: '{validation_rule}'
+Does the user's response appropriately address the question and meet the validation criteria?
+Provide a 'yes' or 'no' answer, followed by a brief explanation.
 """
         val_result = validator.chat(
             user_input=query_template,
@@ -79,8 +93,9 @@ Use validation rules: '{validation_rule}'. Tell me yes/no with brief explanation
 
 class DialogFlowAgentAnswer(BaseModel):
     answer: str
+    ready_for_next_question: bool
     extracted_data: Union[str, None]
-
+    
 
 class ValidationResult(BaseModel):
     question: str = Field(

@@ -6,12 +6,14 @@ from src.dialog_flow_agent.dialog_flow_agent import DialogFlowAgent
 load_dotenv()
 
 bot = DialogFlowAgent(model_name="google/gemma-3-4b-it")
-
 questions_and_rules = [
     {
         "question": "Do you have corporate (business) accounts? In which banks?",
         "val_rule": """
-User response **must** mention at least one **bank name** and explicitly state it is a **corporate/business** account.
+User response **must** confirm that they have a corporate/business bank account and say the bank name.
+Examples:
+- I have a corporate account in Sber bank.
+- I got a business account in Bank of Baroda.
 """
     },
     {
@@ -50,3 +52,4 @@ while True:
     for qa in questions_and_rules:
         user_input = input(f"USER> ({qa['question']}) ")
         print(bot.respond(user_input, qa["question"], qa["val_rule"]), end="\n\n")
+        break
