@@ -1,4 +1,5 @@
 import logging
+from collections import defaultdict
 import os
 import sqlite3
 from datetime import datetime
@@ -81,15 +82,31 @@ async def log_interaction(
 questions_and_rules = [
     {
         "question": "Do you have corporate (business) accounts? In which banks?",
-        "val_rule": "User response **must** confirm that they have a corporate/business bank account and say the bank name."
+        "val_rule": """
+User response **must** confirm that they have a corporate/business bank account and say the bank name.
+Examples:
+- I have a corporate account in Sber bank.
+- I got a business account in Bank of Baroda.
+"""
     },
     {
         "question": "Are your corporate accounts connected to any PSP (e.g., Razorpay, Cashfree, PayU, Getepay)?",
-        "val_rule": "User response **must** include the name of the **PSP** to which their corporate account is connected."
+        "val_rule": """
+User response **must** include the name of the **PSP** to which their corporate account is connected.
+Examples:
+- Yes my account is connected to Razorpay.
+- Yes it is PayU.
+- My PSP is Gatepay.
+"""
     },
     {
         "question": "Can you provide login and password access to the PSP account?",
-        "val_rule": "User response **must** clearly answer “yes” or “no” and, if yes, indicate readiness to **share login credentials**."
+        "val_rule": """
+User response **must** clearly answer “yes” or “no” and, if yes, indicate readiness to **share login credentials**.
+Collect any additional information user may provide about their PSP account.
+Examples:
+- Yes, my login is admin, password is 123341.
+"""
     },
     {
         "question": (
@@ -97,15 +114,23 @@ questions_and_rules = [
             "If yes — please give us hosting access (we may need to adjust code or API)\n"
             "If not — we will create the website ourselves"
         ),
-        "val_rule": (
-            "User response **must** answer “yes” or “no.” "
-            "If “yes,” they **must** mention they can provide **hosting access**. "
-            "If “no”, only \"no\" is required."
-        )
+        "val_rule": """
+User response **must** answer “yes” or “no.” If “yes,” they **must** mention they can provide **hosting access**. If "no", only "no" is required.
+Examples:
+- No.
+- Yes. Next goes any details about hosting access.
+"""
     },
     {
         "question": "Are you open to working under a profit‑sharing model (5% of transaction volume) instead of a one‑time deal?",
-        "val_rule": "User response **must** clearly say \"yes\" or \"no\"."
+        "val_rule": """
+User response **must** clearly say "yes" or "no".
+Examples:
+- Yes.
+- No.
+- Of course.
+- Sure.
+"""
     }
 ]
 
@@ -118,6 +143,7 @@ class Questionnaire(StatesGroup):
     q4 = State()
 
 agent = DialogFlowAgent(model_name=os.environ["MODEL"])
+info = defaultdict(list)
 
 @dp.message(Command("start"))
 async def cmd_start(message: Message, state: FSMContext):
@@ -166,11 +192,13 @@ async def handle_answers(message: Message, state: FSMContext):
     # Advance or finish
     if idx + 1 < len(questions_and_rules):
         if answer.ready_for_next_question:
+            info[message.from_user.id].append(answer.extracted_data)
             next_state = getattr(Questionnaire, f"q{idx+1}")
             await state.set_state(next_state)
             await message.answer(questions_and_rules[idx+1]["question"])
     else:
         await message.answer("Thank you! We have collected all the info.")
+        await message.answer('\n'.join(info[message.from_user.id]))
         await state.clear()
 
 async def on_startup():

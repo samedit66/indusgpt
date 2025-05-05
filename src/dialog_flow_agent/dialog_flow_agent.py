@@ -31,7 +31,9 @@ class DialogFlowAgent:
             case "faq":
                 answer = self._faq_agent.respond(user_input)
             case "information":
+                print(user_intent, end="\n\n")
                 val_result = self._validate(user_input, question, user_intent.reasoning, validation_rule)
+                print(val_result, end="\n\n")
 
                 if val_result.is_valid_user_answer.answer_kind == "yes":
                     answer = self._agenerator.generate_answer(
@@ -112,7 +114,7 @@ class ValidationResult(BaseModel):
 class YesAnswer(BaseModel):
     answer_kind: Literal["yes"]
     extracted_data: str = Field(
-        ..., description="Consice and concrete user answer to the given question."
+        ..., description="Consice and concrete user answer to the given question starting with 'User responded that...'."
     )
 
 
