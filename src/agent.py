@@ -29,7 +29,6 @@ class Agent:
     def chat(
         self,
         user_input: str,
-        instructions_prefix: str | None = None,
         output_type=None,
         temperature: float = 0,
         **kwargs,
@@ -37,14 +36,10 @@ class Agent:
         if not self._initilized:
             self._initialize()
 
-        instructions = self.instructions
-        if instructions_prefix is not None:
-            instructions = instructions_prefix + instructions
-
         messages = [
             {
                 "role": "system",
-                "content": instructions,
+                "content": self.instructions,
             },
             {
                 "role": "user",

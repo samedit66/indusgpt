@@ -1,1 +1,1 @@
-from .faq_agent import FAQAgent
+from .faq_agent import FAQAgent, faq

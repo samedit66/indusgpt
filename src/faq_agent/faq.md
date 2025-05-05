@@ -3,7 +3,7 @@ We work with high-volume traffic (gaming-related) and process over ₹12,000,000
 We are ready for long-term cooperation and offer up to 5% of the profit for stable account performance. For example: ₹500,000 daily volume = ₹25,000 your share (5%).
 
 **Required Questions**
-1. Do you have corporate accounts? In which banks?  
+1. Do you have corporate/business accounts? In which banks?  
 2. Are they connected to any PSP (Razorpay, Cashfree, PayU, etc.)?  
 3. Can you provide login and password access to the PSP account?  
 4. Do you already have a website approved by the PSP?  
