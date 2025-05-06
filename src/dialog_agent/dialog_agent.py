@@ -12,7 +12,6 @@ from src.dialog_agent.answer_generator import AnswerGenerator
 class DialogAgent:
     
     def __init__(self, **kwargs) -> None:
-        self.kwargs = kwargs
         self._router = Router(**kwargs)
         self._faq_agent = FAQAgent(**kwargs)
         self._answer_generator = AnswerGenerator(**kwargs)
