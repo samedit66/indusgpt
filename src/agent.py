@@ -31,6 +31,7 @@ class Agent:
         user_input: str,
         output_type=None,
         temperature: float = 0,
+        max_tokens: int = 4096,
         **kwargs,
     ) -> str:
         if not self._initilized:
@@ -52,7 +53,7 @@ class Agent:
                 model=self.model_name,
                 messages=messages,
                 temperature=temperature,
-                max_tokens=4096,
+                max_tokens=max_tokens,
                 **kwargs,
             )
             return completion.choices[0].message.content
@@ -61,7 +62,7 @@ class Agent:
             model=self.model_name,
             messages=messages,
             temperature=temperature,
-            max_tokens=4096,
+            max_tokens=max_tokens,
             response_format=output_type,
             **kwargs,
         )
