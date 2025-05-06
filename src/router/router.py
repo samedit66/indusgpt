@@ -19,15 +19,15 @@ class Router:
             **kwargs,
         )
 
-    def classify(self, user_input: str) -> UserIntent:
+    def classify(self, user_input: str) -> Intent:
         user_intent = self._router.chat(
             user_input=QUERY_TEMPLATE.format(user_input),
-            output_type=UserIntent,
+            output_type=Intent,
         )
         return user_intent
 
 
-class UserIntent(BaseModel):
+class Intent(BaseModel):
     user_input: str = Field(
         ..., description="The exact text message received from the user."
     )

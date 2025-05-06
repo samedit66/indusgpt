@@ -1,12 +1,12 @@
 import os
 from dotenv import load_dotenv
 
-from src.dialog_flow_agent.dialog_flow_agent import DialogFlowAgent
+from src.dialog_agent import DialogueAgent
 
 
 load_dotenv()
 
-bot = DialogFlowAgent(model_name=os.environ["MODEL"])
+bot = DialogueAgent(model_name=os.environ["MODEL"])
 questions_and_rules = [
     {
         "question": "Do you have corporate (business) accounts? In which banks?",

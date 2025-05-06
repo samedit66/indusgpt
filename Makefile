@@ -4,6 +4,10 @@ GEMMA12B = google/gemma-3-12b-it
 GEMMA27B = google/gemma-3-27b-it
 HERMES = NousResearch/Hermes-2-Pro-Mistral-7B
 
+.PHONY: cli
+cli:
+	uv run cli.py
+
 .PHONY: serve
 serve:
 	vllm serve $(GEMMA)

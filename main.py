@@ -11,7 +11,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from dotenv import load_dotenv
 
-from src.dialog_flow_agent import DialogFlowAgent, DialogFlowAgentAnswer
+from src.dialog_agent import DialogueAgent, DialogFlowAgentAnswer
 
 load_dotenv()
 
@@ -142,7 +142,7 @@ class Questionnaire(StatesGroup):
     q3 = State()
     q4 = State()
 
-agent = DialogFlowAgent(model_name=os.environ["MODEL"])
+agent = DialogueAgent(model_name=os.environ["MODEL"])
 info = defaultdict(list)
 
 @dp.message(Command("start"))
@@ -182,7 +182,7 @@ async def handle_answers(message: Message, state: FSMContext):
     answer: DialogFlowAgentAnswer = agent.respond(
         user_input=message.text,
         question=q["question"],
-        validation_rule=q["val_rule"],
+        val_rule=q["val_rule"],
     )
 
     # Reply & log
