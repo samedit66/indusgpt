@@ -9,7 +9,7 @@ from src.faq_agent import FAQAgent, faq
 from src.dialog_agent.answer_generator import AnswerGenerator
 
 
-class DialogueAgent:
+class DialogAgent:
     
     def __init__(self, **kwargs) -> None:
         self.kwargs = kwargs
@@ -22,7 +22,7 @@ class DialogueAgent:
         user_input: str,
         question: str,
         val_rule: str,
-    ) -> DialogFlowAgentAnswer:
+    ) -> Answer:
         intent = self._router.classify(user_input)
         print(intent, end="\n\n")
 
@@ -32,10 +32,10 @@ class DialogueAgent:
             case Intent(category="information"):
                 return self._generate_question_answer(intent, question, val_rule)
     
-    def _generate_faq_answer(self, user_input: str) -> DialogFlowAgentAnswer:
-        return DialogFlowAgentAnswer(
+    def _generate_faq_answer(self, user_input: str) -> Answer:
+        return Answer(
             answer=self._faq_agent.respond(user_input),
-            ready_for_next_question=True,
+            ready_for_next_question=False,
             extracted_data=None,
         )
 
@@ -81,7 +81,7 @@ Provide a 'yes' or 'no' answer, followed by a brief explanation.
         intent: Intent,
         question: str,
         val_rule: str,
-    ) -> DialogFlowAgentAnswer:
+    ) -> Answer:
         val_result = self._validate(
             intent.user_input,
             question,
@@ -110,15 +110,15 @@ Provide a 'yes' or 'no' answer, followed by a brief explanation.
             )
     
         answer = self._answer_generator.generate_answer(prompt)
-        return DialogFlowAgentAnswer(
-            answer=answer,
+        return Answer(
+            text=answer,
             ready_for_next_question=ready_for_next_question,
             extracted_data=extracted_data,
         )
 
 
-class DialogFlowAgentAnswer(BaseModel):
-    answer: str
+class Answer(BaseModel):
+    text: str
     ready_for_next_question: bool
     extracted_data: Union[str, None]
     

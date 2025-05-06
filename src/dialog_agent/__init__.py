@@ -1,1 +1,1 @@
-from .dialog_agent import DialogueAgent, DialogFlowAgentAnswer
+from .dialog_agent import DialogAgent, Answer

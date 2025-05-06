@@ -1,12 +1,12 @@
 import os
 from dotenv import load_dotenv
 
-from src.dialog_agent import DialogueAgent
+from src.dialog_agent import DialogAgent
 
 
 load_dotenv()
 
-bot = DialogueAgent(model_name=os.environ["MODEL"])
+bot = DialogAgent(model_name=os.environ["MODEL"])
 questions_and_rules = [
     {
         "question": "Do you have corporate (business) accounts? In which banks?",
@@ -68,7 +68,7 @@ while True:
     for qa in questions_and_rules:
         user_input = input(f"USER> ({qa['question']}) ")
         answer = bot.respond(user_input, qa["question"], qa["val_rule"])
-        print(answer.answer)
+        print(answer.text)
 
         if answer.extracted_data is not None:
             data.append(answer.extracted_data)

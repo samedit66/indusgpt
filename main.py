@@ -11,7 +11,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from dotenv import load_dotenv
 
-from src.dialog_agent import DialogueAgent, DialogFlowAgentAnswer
+from src.dialog_agent import DialogAgent, Answer
 
 load_dotenv()
 
@@ -54,7 +54,7 @@ def init_db():
 
 async def log_interaction(
     msg: Message,
-    answer: DialogFlowAgentAnswer,
+    answer: Answer,
     question: str,
     conn: sqlite3.Connection
 ):
@@ -142,7 +142,7 @@ class Questionnaire(StatesGroup):
     q3 = State()
     q4 = State()
 
-agent = DialogueAgent(model_name=os.environ["MODEL"])
+agent = DialogAgent(model_name=os.environ["MODEL"])
 info = defaultdict(list)
 
 @dp.message(Command("start"))
@@ -179,14 +179,14 @@ async def handle_answers(message: Message, state: FSMContext):
         return
 
     q = questions_and_rules[idx]
-    answer: DialogFlowAgentAnswer = agent.respond(
+    answer: Answer = agent.respond(
         user_input=message.text,
         question=q["question"],
         val_rule=q["val_rule"],
     )
 
     # Reply & log
-    await message.reply(answer.answer)
+    await message.reply(answer.text)
     await log_interaction(message, answer, q["question"], dp["db_conn"])
 
     # Advance or finish
