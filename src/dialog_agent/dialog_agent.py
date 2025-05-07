@@ -16,7 +16,7 @@ class DialogAgent:
         self._faq_agent = FAQAgent(**kwargs)
         self._answer_generator = AnswerGenerator(**kwargs)
 
-    def respond(
+    def reply(
         self,
         user_input: str,
         question: str,
@@ -33,7 +33,7 @@ class DialogAgent:
     
     def _generate_faq_answer(self, user_input: str) -> Answer:
         return Answer(
-            answer=self._faq_agent.respond(user_input),
+            answer=self._faq_agent.reply(user_input),
             ready_for_next_question=False,
             extracted_data=None,
         )

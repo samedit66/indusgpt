@@ -16,7 +16,7 @@ class FAQAgent:
             **kwargs,
         )
 
-    def respond(self, user_input: str) -> str:
+    def reply(self, user_input: str) -> str:
         return self._faq_agent.chat(
             user_input=QUERY_TEMPLATE.format(user_input),
         )
