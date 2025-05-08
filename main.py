@@ -23,7 +23,10 @@ if not API_TOKEN:
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s | %(levelname)s | %(message)s",
-    handlers=[logging.FileHandler("bot.log", encoding="utf-8"), logging.StreamHandler()]
+    handlers=[
+        logging.FileHandler("bot.log", encoding="utf-8"),
+        logging.StreamHandler(),
+    ],
 )
 logger = logging.getLogger(__name__)
 
@@ -46,17 +49,16 @@ CREATE TABLE IF NOT EXISTS messages (
 )
 """
 
+
 def init_db():
     conn = sqlite3.connect(DB_PATH)
     conn.execute(CREATE_TABLE_SQL)
     conn.commit()
     return conn
 
+
 async def log_interaction(
-    msg: Message,
-    answer: Answer,
-    question: str,
-    conn: sqlite3.Connection
+    msg: Message, answer: Answer, question: str, conn: sqlite3.Connection
 ):
     ts = datetime.utcnow().isoformat()
     conn.execute(
@@ -72,11 +74,12 @@ async def log_interaction(
             answer.answer,
             answer.ready_for_next_question,
             answer.extracted_data,
-            ts
-        )
+            ts,
+        ),
     )
     conn.commit()
     logger.info(f"Logged interaction for {msg.from_user.id}: question={question}")
+
 
 # Define questionnaire
 questions_and_rules = [
@@ -87,7 +90,7 @@ User response **must** confirm that they have a corporate/business bank account 
 Examples:
 - I have a corporate account in Sber bank.
 - I got a business account in Bank of Baroda.
-"""
+""",
     },
     {
         "question": "Are your corporate accounts connected to any PSP (e.g., Razorpay, Cashfree, PayU, Getepay)?",
@@ -97,7 +100,7 @@ Examples:
 - Yes my account is connected to Razorpay.
 - Yes it is PayU.
 - My PSP is Gatepay.
-"""
+""",
     },
     {
         "question": "Can you provide login and password access to the PSP account?",
@@ -106,7 +109,7 @@ User response **must** clearly answer “yes” or “no” and, if yes, indicat
 Collect any additional information user may provide about their PSP account.
 Examples:
 - Yes, my login is admin, password is 123341.
-"""
+""",
     },
     {
         "question": (
@@ -119,7 +122,7 @@ User response **must** answer “yes” or “no.” If “yes,” they **must**
 Examples:
 - No.
 - Yes. Next goes any details about hosting access.
-"""
+""",
     },
     {
         "question": "Are you open to working under a profit‑sharing model (5% of transaction volume) instead of a one‑time deal?",
@@ -130,9 +133,10 @@ Examples:
 - No.
 - Of course.
 - Sure.
-"""
-    }
+""",
+    },
 ]
+
 
 # Create FSM states
 class Questionnaire(StatesGroup):
@@ -142,8 +146,10 @@ class Questionnaire(StatesGroup):
     q3 = State()
     q4 = State()
 
+
 agent = DialogAgent(model_name=os.environ["MODEL"])
 info = defaultdict(list)
+
 
 @dp.message(Command("start"))
 async def cmd_start(message: Message, state: FSMContext):
@@ -158,6 +164,7 @@ async def cmd_start(message: Message, state: FSMContext):
     # Move to first state and ask Q0
     await state.set_state(Questionnaire.q0)
     await message.answer(questions_and_rules[0]["question"])
+
 
 @dp.message(F.text)
 async def handle_answers(message: Message, state: FSMContext):
@@ -179,7 +186,7 @@ async def handle_answers(message: Message, state: FSMContext):
         return
 
     q = questions_and_rules[idx]
-    answer: Answer = agent.respond(
+    answer: Answer = agent.reply(
         user_input=message.text,
         question=q["question"],
         val_rule=q["val_rule"],
@@ -193,21 +200,24 @@ async def handle_answers(message: Message, state: FSMContext):
     if idx + 1 < len(questions_and_rules):
         if answer.ready_for_next_question:
             info[message.from_user.id].append(answer.extracted_data)
-            next_state = getattr(Questionnaire, f"q{idx+1}")
+            next_state = getattr(Questionnaire, f"q{idx + 1}")
             await state.set_state(next_state)
-            await message.answer(questions_and_rules[idx+1]["question"])
+            await message.answer(questions_and_rules[idx + 1]["question"])
     else:
         await message.answer("Thank you! We have collected all the info.")
-        await message.answer('\n'.join(info[message.from_user.id]))
+        await message.answer("\n".join(info[message.from_user.id]))
         await state.clear()
+
 
 async def on_startup():
     dp["db_conn"] = init_db()
     logger.info("Database initialized.")
 
+
 async def on_shutdown():
     dp["db_conn"].close()
     logger.info("Database connection closed.")
+
 
 if __name__ == "__main__":
     dp.startup.register(on_startup)

@@ -9,7 +9,6 @@ QUERY_TEMPLATE = "Q: {}\nA:"
 
 
 class FAQAgent:
-    
     def __init__(self, **kwargs) -> None:
         self._faq_agent = Agent(
             instructions=faq_instructions(),

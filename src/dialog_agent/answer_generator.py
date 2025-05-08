@@ -3,7 +3,6 @@ from src.faq_agent.faq_agent import faq
 
 
 class AnswerGenerator:
-    
     def __init__(self, **kwargs) -> None:
         self._generator = Agent(
             instructions=f"""
@@ -32,7 +31,7 @@ You work for a gaming‑traffic company processing ₹12,000,000+ daily. We buy 
 
 See the following FAQ if not sure how to answer: {faq()}
 """,
-            **kwargs
+            **kwargs,
         )
 
     def generate_answer(self, model_response: str) -> str:

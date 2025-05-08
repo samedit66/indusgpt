@@ -4,7 +4,6 @@ from openai import OpenAI
 
 
 class Agent:
-    
     def __init__(
         self,
         *,
@@ -42,10 +41,7 @@ class Agent:
                 "role": "system",
                 "content": self.instructions,
             },
-            {
-                "role": "user",
-                "content": user_input
-            }
+            {"role": "user", "content": user_input},
         ]
 
         if output_type is None:
@@ -57,7 +53,7 @@ class Agent:
                 **kwargs,
             )
             return completion.choices[0].message.content
-        
+
         completion = self.client.beta.chat.completions.parse(
             model=self.model_name,
             messages=messages,

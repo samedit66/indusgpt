@@ -63,9 +63,7 @@ class Question:
 def default_context() -> ChatContext:
     questions_data = [
         {
-            "question": (
-                "Do you have corporate (business) accounts? In which banks?"
-            ),
+            "question": ("Do you have corporate (business) accounts? In which banks?"),
             "val_rule": (
                 "User response **must** confirm that they have a corporate/business bank account "
                 "and say the bank name.\nExamples:\n"
@@ -102,7 +100,7 @@ def default_context() -> ChatContext:
             ),
             "val_rule": (
                 "User response **must** answer “yes” or “no.” If “yes,” they **must** mention they can "
-                "provide **hosting access**. If \"no\", only \"no\" is required.\nExamples:\n"
+                'provide **hosting access**. If "no", only "no" is required.\nExamples:\n'
                 "- No.\n"
                 "- Yes. Next goes any details about hosting access."
             ),
@@ -112,7 +110,7 @@ def default_context() -> ChatContext:
                 "Are you open to working under a profit‑sharing model (5% of transaction volume) instead of a one‑time deal?"
             ),
             "val_rule": (
-                "User response **must** clearly say \"yes\" or \"no\".\nExamples:\n"
+                'User response **must** clearly say "yes" or "no".\nExamples:\n'
                 "- Yes.\n"
                 "- No.\n"
                 "- Of course\n"
@@ -122,7 +120,7 @@ def default_context() -> ChatContext:
     ]
 
     questions = [
-        Question(text=item["question"], val_rule=item["val_rule"])
+        Question(text=item["question"], requirement=item["val_rule"])
         for item in questions_data
     ]
     return ChatContext(questions)

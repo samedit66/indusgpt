@@ -12,7 +12,6 @@ QUERY_TEMPLATE = "Q: {}\nA:"
 
 
 class Router:
-
     def __init__(self, **kwargs) -> None:
         self._router = Agent(
             instructions=router_instructions(),

@@ -10,8 +10,8 @@ from src.dialog_agent.answer_generator import AnswerGenerator
 
 
 class DialogAgent:
-    
     def __init__(self, **kwargs) -> None:
+        self._kwargs = kwargs
         self._router = Router(**kwargs)
         self._faq_agent = FAQAgent(**kwargs)
         self._answer_generator = AnswerGenerator(**kwargs)
@@ -30,7 +30,7 @@ class DialogAgent:
                 return self._generate_faq_answer(user_input)
             case Intent(category="information"):
                 return self._generate_question_answer(intent, question, val_rule)
-    
+
     def _generate_faq_answer(self, user_input: str) -> Answer:
         return Answer(
             answer=self._faq_agent.reply(user_input),
@@ -58,7 +58,7 @@ Extracted data should be as concrete as possible.
 Look to FAQ if you are not sure:
 {faq()}
 """,
-        **self.kwargs,
+            **self._kwargs,
         )
 
         query_template = f"""
@@ -74,7 +74,7 @@ Provide a 'yes' or 'no' answer, followed by a brief explanation.
             output_type=ValidationResult,
         )
         return val_result
-    
+
     def _generate_question_answer(
         self,
         intent: Intent,
@@ -97,17 +97,17 @@ Provide a 'yes' or 'no' answer, followed by a brief explanation.
             prompt = (
                 "User succesfully provided required information. "
                 f"Their answer: {extracted_data}."
-            )  
+            )
         else:
             if isinstance(val_result.is_valid_user_answer, NoAnswer):
                 postfix = f"Analysis from other agent: '{val_result.is_valid_user_answer.reason_why_invalid}'"
             else:
                 postfix = f"User input: '{intent.user_input}'"
             prompt = (
-                "Seems like the user didn't provide a correct answer or wishes to stop the dialogue. " +
-                postfix
+                "Seems like the user didn't provide a correct answer or wishes to stop the dialogue. "
+                + postfix
             )
-    
+
         answer = self._answer_generator.generate_answer(prompt)
         return Answer(
             text=answer,
@@ -120,15 +120,11 @@ class Answer(BaseModel):
     text: str
     ready_for_next_question: bool
     extracted_data: Union[str, None]
-    
+
 
 class ValidationResult(BaseModel):
-    question: str = Field(
-        ..., description="Exact question for user."
-    )
-    user_answer: str = Field(
-        ..., description="Exact user answer."
-    )
+    question: str = Field(..., description="Exact question for user.")
+    user_answer: str = Field(..., description="Exact user answer.")
     is_valid_user_answer: Union[YesAnswer, NoAnswer] = Field(
         ..., description="Validation result."
     )
@@ -137,28 +133,30 @@ class ValidationResult(BaseModel):
     )
 
     def user_answered_properly(self) -> bool:
-        return self.wants_to_continue.status \
+        return (
+            self.wants_to_continue.status
             and self.is_valid_user_answer.answer_kind == "yes"
+        )
 
 
 class YesAnswer(BaseModel):
     answer_kind: Literal["yes"]
     extracted_data: str = Field(
-        ..., description="Consice and concrete user answer to the given question starting with 'User responded that...'."
+        ...,
+        description="Consice and concrete user answer to the given question starting with 'User responded that...'.",
     )
 
 
 class NoAnswer(BaseModel):
     answer_kind: Literal["no"]
     reason_why_invalid: str = Field(
-        ..., description="Explanation why the user answer doesn't correspond to the given question."
+        ...,
+        description="Explanation why the user answer doesn't correspond to the given question.",
     )
 
 
 class WantsToContinue(BaseModel):
-    status: bool = Field(
-        ..., description="Does the user want to continue?"
-    )
+    status: bool = Field(..., description="Does the user want to continue?")
     reasoning: str = Field(
         ..., description="Explanation why the user wants or not to continue."
     )
