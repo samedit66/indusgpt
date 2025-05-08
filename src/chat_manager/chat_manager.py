@@ -26,15 +26,48 @@ GOODBYE_PHRASES = [
 
 class ChatManager:
     """
-    Orchestrates per‑user ChatContext + the DialogAgent.
+    Orchestrates per‑user ChatContext, DialogAgent interactions, and InfoExtractor usage.
+    Manages conversation flow: asking questions, recording answers, extracting final data,
+    and generating a closing reply.
     """
 
     def __init__(self, **agent_kwargs) -> None:
         self._dialog_agent = DialogAgent(**agent_kwargs)
         self._extractor = InfoExtactor(**agent_kwargs)
         self._storage = Storage()
+        self._callbacks = []
 
     def reply(self, user_id: Any, user_input: str) -> str:
+        """
+        Process a user's message and return the agent's reply.
+
+        Workflow:
+        1. Load or initialize the ChatContext for `user_id`.
+        2. If the context has a pending question:
+           - Forward `user_input` along with the current question text and requirement
+             to the DialogAgent.
+           - Capture the agent's answer text.
+           - If the answer indicates readiness for the next question, record
+             the extracted data in the context and persist the updated context.
+        3. If there are still unanswered questions:
+           - Return the agent's answer followed by the next question text.
+        4. Otherwise (no more questions):
+           - Gather all recorded answers.
+           - Clear the stored context for the user.
+           - Concatenate answers into a single string.
+           - Extract structured `integration_info` via the InfoExtractor.
+           - Append a random goodbye phrase.
+           - Return the final reply text.
+
+        Args:
+            user_id:       Unique identifier for the user/session.
+            user_input:    The latest message from the user.
+
+        Returns:
+            A string containing the agent's reply, which may include:
+              - The next question to ask.
+              - A closing message with a goodbye phrase once all questions are answered.
+        """
         # 1. Load (or auto‑init) context
         context = self._storage.get(user_id)
 
@@ -78,8 +111,52 @@ class ChatManager:
         return reply_text
 
     def current_question(self, user_id: Any) -> str:
+        """
+        Return the text of the user's current pending question.
+        """
         return self._storage.get(user_id).current_question.text
-    
+
+    def on_info_ready(self, callback=None):
+        """
+        Register a callback to be invoked when integration info is ready.
+        
+        Can be used either as a decorator or by passing the callback directly.
+
+        The callback will be called with two arguments:
+          - user_id: the identifier of the user whose data was collected
+          - integration_info: extracted integration data
+
+        Usage:
+
+        1. As a decorator:
+        
+            ```python
+            @chat_manager.on_info_ready()
+            def handle_info(user_id, integration_info):
+                # process integration_info...
+            ```
+
+        2. By passing the function directly:
+        
+            ```python
+            def handle_info(user_id, integration_info):
+                # process integration_info...
+            
+            chat_manager.on_info_ready(handle_info)
+            ```
+        """
+        # If used as direct registration
+        if callback is not None:
+            self._callbacks.append(callback)
+            return callback
+
+        # If used as a decorator
+        def decorator(func):
+            self._callbacks.append(func)
+            return func
+
+        return decorator
+
     @property
     def intro(self) -> str:
         return """
