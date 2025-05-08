@@ -91,7 +91,9 @@ class ChatManager:
 
         # 3. If more questions remain, just return the answer
         if context.has_more_questions():
-            assert reply_text is not None, "More questions implies that reply_text is not None, how that happened?"
+            assert reply_text is not None, (
+                "More questions implies that reply_text is not None, how that happened?"
+            )
             return f"{reply_text}\n{self.current_question(user_id)}"
 
         # 4. Otherwise, process all answers and extract info
@@ -119,7 +121,7 @@ class ChatManager:
     def on_info_ready(self, callback=None):
         """
         Register a callback to be invoked when integration info is ready.
-        
+
         Can be used either as a decorator or by passing the callback directly.
 
         The callback will be called with two arguments:
@@ -129,7 +131,7 @@ class ChatManager:
         Usage:
 
         1. As a decorator:
-        
+
             ```python
             @chat_manager.on_info_ready()
             def handle_info(user_id, integration_info):
@@ -137,11 +139,11 @@ class ChatManager:
             ```
 
         2. By passing the function directly:
-        
+
             ```python
             def handle_info(user_id, integration_info):
                 # process integration_info...
-            
+
             chat_manager.on_info_ready(handle_info)
             ```
         """
