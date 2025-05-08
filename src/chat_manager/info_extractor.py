@@ -7,7 +7,7 @@ from src.agent import Agent
 
 
 QUERY_TEMPLATE = """
-Extract information from the following user text:
+Extract information from the following user text.
 User text:
 {}
 """
@@ -41,7 +41,9 @@ class IntegrationSetup(BaseModel):
     )
     psps: list[PSPAccount] = Field(..., description="List of connected PSPs.")
     hosting: HostingInfo = Field(..., description="Hosting information.")
-    profit_sharing: ProfitSharingAgreement = Field(..., description="Profit-sharing agreement.")
+    profit_sharing: ProfitSharingAgreement = Field(
+        ..., description="Profit-sharing agreement."
+    )
 
 
 class CorporateAccount(BaseModel):
