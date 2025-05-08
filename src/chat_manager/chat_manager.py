@@ -1,5 +1,6 @@
 from __future__ import annotations
 from typing import Any
+import random
 
 from src.dialog_agent import (
     DialogAgent,
@@ -13,7 +14,14 @@ from src.chat_manager.info_extractor import (
 )
 
 
-GOODBYE_PHRASES = ["Let us check the data and get back later"]
+GOODBYE_PHRASES = [
+    "I’ve received all the details—will review and be in touch soon!",
+    "Got everything—checking now and will update you shortly!",
+    "All data’s here—going through it and will get back ASAP!",
+    "Thanks for the info—review in progress, talk soon!",
+    "Received your answers—verifying now and will follow up!",
+    "All set on my end—reviewing details and will reply shortly!",
+]
 
 
 class ChatManager:
@@ -61,10 +69,11 @@ class ChatManager:
         integration_info = self._extractor.extract(text_information)
         # print(integration_info)
 
+        goodbye = random.choice(GOODBYE_PHRASES)
         if reply_text is not None:
-            reply_text += f"\n{GOODBYE_PHRASES[0]}"
+            reply_text += f"\n{goodbye}"
         else:
-            reply_text = GOODBYE_PHRASES[0]
+            reply_text = goodbye
 
         return reply_text
 
