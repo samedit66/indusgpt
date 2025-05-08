@@ -23,7 +23,7 @@ class DialogAgent:
         val_rule: str,
     ) -> Answer:
         intent = self._router.classify(user_input)
-        print(intent, end="\n\n")
+        #print(intent, end="\n\n")
 
         match intent:
             case Intent(category="faq"):
@@ -33,7 +33,7 @@ class DialogAgent:
 
     def _generate_faq_answer(self, user_input: str) -> Answer:
         return Answer(
-            answer=self._faq_agent.reply(user_input),
+            text=self._faq_agent.reply(user_input),
             ready_for_next_question=False,
             extracted_data=None,
         )
@@ -87,7 +87,7 @@ Provide a 'yes' or 'no' answer, followed by a brief explanation.
             intent.reasoning,
             val_rule,
         )
-        print(val_result, end="\n\n")
+        #print(val_result, end="\n\n")
 
         ready_for_next_question = False
         extracted_data = None

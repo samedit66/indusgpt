@@ -1,5 +1,4 @@
 from __future__ import annotations
-from dataclasses import dataclass
 from typing import Any
 
 from src.dialog_agent import (
@@ -51,8 +50,8 @@ class ChatManager:
 
         # 3. If more questions remain, just return the answer
         if context.has_more_questions():
-            # 3.1. Should be changed later...
-            return "..." if reply_text is None else reply_text
+            assert reply_text is not None, "More questions implies that reply_text is not None, how that happened?"
+            return f"{reply_text}\n{self.current_question(user_id)}"
 
         # 4. Otherwise, process all answers and extract info
         all_answers = context.get_answers()
@@ -60,7 +59,7 @@ class ChatManager:
 
         text_information = "\n".join(qa["answer"] for qa in all_answers)
         integration_info = self._extractor.extract(text_information)
-        print(integration_info)
+        # print(integration_info)
 
         if reply_text is not None:
             reply_text += f"\n{GOODBYE_PHRASES[0]}"
@@ -71,6 +70,16 @@ class ChatManager:
 
     def current_question(self, user_id: Any) -> str:
         return self._storage.get(user_id).current_question.text
+    
+    @property
+    def intro(self) -> str:
+        return """
+Hi brother!  
+Thanks for reaching out 🙏  
+We work with high-volume traffic (gaming-related) and process over ₹12,000,000+ in daily incoming transactions.
+We are looking to buy or rent corporate accounts in India that can be connected to a PSP (such as Razorpay, Cashfree, PayU, Getepay, etc.) to accept payments.
+We are ready for long-term cooperation and offer up to 5% of the profit for stable account performance. For example: ₹500,000 daily volume = ₹25,000 your share (5%).
+"""
 
 
 class Storage:
