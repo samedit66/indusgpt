@@ -1,6 +1,5 @@
 from __future__ import annotations
 from typing import Any
-import random
 
 from src.dialog_agent import (
     DialogAgent,
@@ -17,68 +16,68 @@ from src.chat_manager.info_extractor import (
 
 class ChatManager:
     """
-    Orchestrates per‑user ChatContext, DialogAgent interactions, and InfoExtractor usage.
-    Manages conversation flow: asking questions, recording answers, extracting final data,
-    and generating a closing reply.
+    Manages a user's multi-step chat session: prompts questions, collects answers,
+    extracts final data, and triggers callbacks with the assembled information.
     """
 
     def __init__(self, **agent_kwargs) -> None:
+        """
+        Initialize DialogAgent, InfoExtractor, and in-memory Storage.
+
+        Args:
+            **agent_kwargs: forwarded to DialogAgent and InfoExtractor.
+        """
         self._dialog_agent = DialogAgent(**agent_kwargs)
         self._extractor = InfoExtactor(**agent_kwargs)
         self._storage = Storage()
         self._callbacks = []
 
-    def reply(self, user_id: Any, user_input: str) -> str:
+    def is_talking_with(self, user_id) -> bool:
         """
-        Process a user's message and return the agent's reply.
-
-        Workflow:
-        1. Load or initialize the ChatContext for `user_id`.
-        2. If the context has a pending question:
-           - Forward `user_input` along with the current question text and requirement
-             to the DialogAgent.
-           - Capture the agent's answer text.
-           - If the answer indicates readiness for the next question, record
-             the extracted data in the context and persist the updated context.
-        3. If there are still unanswered questions:
-           - Return the agent's answer followed by the next question text.
-        4. Otherwise (no more questions):
-           - Gather all recorded answers.
-           - Clear the stored context for the user.
-           - Concatenate answers into a single string.
-           - Extract structured `integration_info` via the InfoExtractor.
-           - Append a random goodbye phrase.
-           - Return the final reply text.
+        Check if a chat context exists for the given user.
 
         Args:
-            user_id:       Unique identifier for the user/session.
-            user_input:    The latest message from the user.
+            user_id: identifier for the session.
 
         Returns:
-            A string containing the agent's reply, which may include:
-              - The next question to ask.
-              - A closing message with a goodbye phrase once all questions are answered.
+            True if the user has an active context, False otherwise.
         """
-        # 1. Load (or auto‑init) context
+        return self._storage.contains(user_id)
+
+    def reply(self, user_id: Any, user_input: str) -> str:
+        """
+        Process incoming message, advance the dialog, and return the agent's response.
+
+        Workflow:
+          1. Retrieve or create chat context for user_id.
+          2. If awaiting an answer:
+             a. Send user_input plus question info to DialogAgent.
+             b. If agent signals readiness, store extracted answer.
+          3. If more questions remain, return agent's prompt/answer.
+          4. Otherwise, compile all answers, clear context, extract structured data,
+             invoke callbacks, and return final message.
+
+        Args:
+            user_id: session identifier.
+            user_input: text from the user.
+
+        Returns:
+            Agent's reply, which may include the next question or a closing message.
+        """
+        # 1. Load or init context
         context = self._storage.get(user_id)
 
-        # 2. If there’s a pending question, record the answer
+        # 2. If a question is pending, handle answer
         reply_text = None
         if context.current_question is not None:
-            question, requirement = (
-                context.current_question.text,
-                context.current_question.requirement,
-            )
+            question = context.current_question.text
+            requirement = context.current_question.requirement
             next_question = (
-                context.next_question.text
-                if context.next_question else None
+                context.next_question.text if context.next_question else None
             )
 
             answer = self._dialog_agent.reply(
-                user_input,
-                question,
-                requirement,
-                next_question,
+                user_input, question, requirement, next_question
             )
             reply_text = answer.text
 
@@ -86,67 +85,62 @@ class ChatManager:
                 context.record_answer(answer.extracted_data)
                 self._storage.set(user_id, context)
 
-        # 3. If more questions remain, just return the answer
+        # 3. Continue with next question if any
         if context.has_more_questions():
-            assert reply_text is not None, (
-                "More questions implies that reply_text is not None, how that happened?"
-            )
             return reply_text
 
-        # 4. Otherwise, process all answers and extract info
+        # 4. Finalize when all questions answered
         all_answers = context.get_answers()
         self._storage.clear(user_id)
 
-        text_information = "\n".join(qa["answer"] for qa in all_answers)
-        user_info = self._extractor.extract(text_information)
-        self._notify_callbacks(user_id, user_info)
+        concatenated = "\n".join(qa["answer"] for qa in all_answers)
+        integration_info = self._extractor.extract(concatenated)
+        self._notify_callbacks(user_id, integration_info)
         return reply_text
 
     def _notify_callbacks(self, user_id, user_info: UserInformation) -> None:
+        """
+        Invoke all registered callbacks with collected user information.
+
+        Args:
+            user_id: session identifier whose data is ready.
+            user_info: structured data extracted from answers.
+        """
         for callback in self._callbacks:
             callback(user_id, user_info)
 
     def current_question(self, user_id: Any) -> str:
         """
-        Return the text of the user's current pending question.
+        Get the text of the next pending question for the user.
+
+        Args:
+            user_id: session identifier.
+
+        Returns:
+            The question text.
         """
         return self._storage.get(user_id).current_question.text
 
     def on_info_ready(self, callback=None):
         """
-        Register a callback to be invoked when integration info is ready.
-
-        Can be used either as a decorator or by passing the callback directly.
-
-        The callback will be called with two arguments:
-          - user_id: the identifier of the user whose data was collected
-          - integration_info: extracted integration data
+        Register a function to receive final user data when ready.
 
         Usage:
+          - As decorator: @chat_manager.on_info_ready()
+          - Direct: chat_manager.on_info_ready(func)
 
-        1. As a decorator:
+        The callback will be called as callback(user_id, integration_info).
 
-            ```python
-            @chat_manager.on_info_ready()
-            def handle_info(user_id, integration_info):
-                # process integration_info...
-            ```
+        Args:
+            callback: optional function to register immediately.
 
-        2. By passing the function directly:
-
-            ```python
-            def handle_info(user_id, integration_info):
-                # process integration_info...
-
-            chat_manager.on_info_ready(handle_info)
-            ```
+        Returns:
+            The original function when used as decorator or callback.
         """
-        # If used as direct registration
-        if callback is not None:
+        if callback:
             self._callbacks.append(callback)
             return callback
 
-        # If used as a decorator
         def decorator(func):
             self._callbacks.append(func)
             return func
@@ -155,6 +149,14 @@ class ChatManager:
 
     @property
     def intro(self) -> str:
+        """
+        Text of the offer we provide to users.
+
+        Exists in case when this information needs to be sent automatically.
+
+        Returns:
+            Text of the offer.
+        """
         return """
 Hi brother!  
 Thanks for reaching out 🙏  
@@ -216,6 +218,9 @@ class Storage:
 
     def __init__(self) -> None:
         self._store: dict[Any, ChatContext] = {}
+
+    def contains(self, user_id) -> bool:
+        return user_id in self._store
 
     def get(self, user_id: Any) -> ChatContext:
         """
