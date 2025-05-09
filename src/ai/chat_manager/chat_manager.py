@@ -1,14 +1,14 @@
 from __future__ import annotations
 from typing import Any
 
-from src.dialog_agent import (
+from src.ai.dialog_agent import (
     DialogAgent,
 )
-from src.chat_manager.chat_context import (
+from src.ai.chat_manager.chat_context import (
     ChatContext,
     default_context,
 )
-from src.chat_manager.info_extractor import (
+from src.ai.chat_manager.info_extractor import (
     InfoExtactor,
     UserInformation,
 )

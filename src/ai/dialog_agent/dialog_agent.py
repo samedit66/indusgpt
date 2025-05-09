@@ -3,10 +3,10 @@ from typing import Literal, Union
 
 from pydantic import BaseModel, Field
 
-from src.agent import Agent
-from src.router.router import Router, Intent
-from src.faq_agent import FAQAgent, faq
-from src.dialog_agent.answer_generator import AnswerGenerator
+from src.ai.agent import Agent
+from src.ai.router.router import Router, Intent
+from src.ai.faq_agent import FAQAgent, faq
+from src.ai.dialog_agent.answer_generator import AnswerGenerator
 
 
 class DialogAgent:

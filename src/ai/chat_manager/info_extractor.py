@@ -3,7 +3,7 @@ from typing import Literal, Optional
 
 from pydantic import BaseModel, Field
 
-from src.agent import Agent
+from src.ai.agent import Agent
 
 
 QUERY_TEMPLATE = """

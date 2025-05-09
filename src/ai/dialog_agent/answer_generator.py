@@ -1,5 +1,5 @@
-from src.agent import Agent
-from src.faq_agent.faq_agent import faq
+from src.ai.agent import Agent
+from src.ai.faq_agent.faq_agent import faq
 
 
 class AnswerGenerator:
