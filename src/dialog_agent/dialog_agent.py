@@ -28,7 +28,9 @@ class DialogAgent:
             case Intent(category="faq"):
                 return self._generate_faq_answer(user_input, question)
             case Intent(category="information"):
-                return self._generate_question_answer(intent, question, val_rule, next_question)
+                return self._generate_question_answer(
+                    intent, question, val_rule, next_question
+                )
 
     def _generate_faq_answer(self, user_input: str, question: str) -> Answer:
         return Answer(
@@ -79,7 +81,7 @@ Provide a 'yes' or 'no' answer, followed by a brief explanation.
         intent: Intent,
         question: str,
         val_rule: str,
-        next_question: str | None = None
+        next_question: str | None = None,
     ) -> Answer:
         val_result = self._validate(
             intent.user_input,
@@ -109,7 +111,9 @@ and that you're going to check/analyze/verify and talk back soon.
             if isinstance(val_result.is_valid_user_answer, NoAnswer):
                 postfix = f"Analysis from other agent: '{val_result.is_valid_user_answer.reason_why_invalid}'"
             else:
-                postfix = f"Asked question: '{question}'\nUser input: '{intent.user_input}'"
+                postfix = (
+                    f"Asked question: '{question}'\nUser input: '{intent.user_input}'"
+                )
             prompt = (
                 "Seems like the user didn't provide a correct answer or wishes to stop the dialogue. "
                 + postfix
