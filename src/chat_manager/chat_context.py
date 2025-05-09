@@ -25,7 +25,7 @@ class ChatContext:
             "question": self.current_question.text,
             "answer": answer,
         }
-        self.next_question()
+        self._prepare_next_question()
 
     def get_answers(self) -> list[dict[str, str]]:
         """
@@ -40,7 +40,11 @@ class ChatContext:
         """
         return self._questions[0] if self._questions else None
 
-    def next_question(self) -> None:
+    @property
+    def next_question(self) -> Question | None:
+        return self._questions[1] if len(self._questions) >= 2 else None
+
+    def _prepare_next_question(self) -> None:
         """
         Discard the current question (called after recording its answer).
         """

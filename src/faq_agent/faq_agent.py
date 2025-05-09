@@ -5,7 +5,10 @@ from pathlib import Path
 from src.agent import Agent
 
 
-QUERY_TEMPLATE = "Q: {}\nA:"
+QUERY_TEMPLATE = """
+User was asked the following question: '{}'.
+They replied: '{}'.
+"""
 
 
 class FAQAgent:
@@ -15,9 +18,9 @@ class FAQAgent:
             **kwargs,
         )
 
-    def reply(self, user_input: str) -> str:
+    def reply(self, user_input: str, question: str) -> str:
         return self._faq_agent.chat(
-            user_input=QUERY_TEMPLATE.format(user_input),
+            user_input=QUERY_TEMPLATE.format(question, user_input),
         )
 
 

@@ -11,6 +11,7 @@ from src.chat_manager.chat_context import (
 )
 from src.chat_manager.info_extractor import (
     InfoExtactor,
+    UserInformation,
 )
 
 
@@ -78,10 +79,16 @@ class ChatManager:
                 context.current_question.text,
                 context.current_question.requirement,
             )
+            next_question = (
+                context.next_question.text
+                if context.next_question else None
+            )
+
             answer = self._dialog_agent.reply(
                 user_input,
                 question,
                 requirement,
+                next_question,
             )
             reply_text = answer.text
 
@@ -94,23 +101,23 @@ class ChatManager:
             assert reply_text is not None, (
                 "More questions implies that reply_text is not None, how that happened?"
             )
-            return f"{reply_text}\n{self.current_question(user_id)}"
+            return reply_text
 
         # 4. Otherwise, process all answers and extract info
         all_answers = context.get_answers()
         self._storage.clear(user_id)
 
         text_information = "\n".join(qa["answer"] for qa in all_answers)
-        integration_info = self._extractor.extract(text_information)
-        # print(integration_info)
+        user_info = self._extractor.extract(text_information)
+        self._notify_callbacks(user_id, user_info)
 
-        goodbye = random.choice(GOODBYE_PHRASES)
-        if reply_text is not None:
-            reply_text += f"\n{goodbye}"
-        else:
-            reply_text = goodbye
-
+        if reply_text is None:
+            reply_text = random.choice(GOODBYE_PHRASES)
         return reply_text
+
+    def _notify_callbacks(self, user_id, user_info: UserInformation) -> None:
+        for callback in self._callbacks:
+            callback(user_id, user_info)
 
     def current_question(self, user_id: Any) -> str:
         """
