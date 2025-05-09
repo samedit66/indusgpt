@@ -15,16 +15,6 @@ from src.chat_manager.info_extractor import (
 )
 
 
-GOODBYE_PHRASES = [
-    "I’ve received all the details—will review and be in touch soon!",
-    "Got everything—checking now and will update you shortly!",
-    "All data’s here—going through it and will get back ASAP!",
-    "Thanks for the info—review in progress, talk soon!",
-    "Received your answers—verifying now and will follow up!",
-    "All set on my end—reviewing details and will reply shortly!",
-]
-
-
 class ChatManager:
     """
     Orchestrates per‑user ChatContext, DialogAgent interactions, and InfoExtractor usage.
@@ -110,9 +100,6 @@ class ChatManager:
         text_information = "\n".join(qa["answer"] for qa in all_answers)
         user_info = self._extractor.extract(text_information)
         self._notify_callbacks(user_id, user_info)
-
-        if reply_text is None:
-            reply_text = random.choice(GOODBYE_PHRASES)
         return reply_text
 
     def _notify_callbacks(self, user_id, user_info: UserInformation) -> None:

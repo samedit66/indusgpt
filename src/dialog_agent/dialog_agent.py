@@ -100,6 +100,11 @@ Provide a 'yes' or 'no' answer, followed by a brief explanation.
 
             if next_question:
                 prompt += f"Include next question into your reply: '{next_question}'"
+            else:
+                prompt += """
+Include into your replay information that you've received everything you need
+and that you're going to check/analyze/verify and talk back soon.
+"""
         else:
             if isinstance(val_result.is_valid_user_answer, NoAnswer):
                 postfix = f"Analysis from other agent: '{val_result.is_valid_user_answer.reason_why_invalid}'"
