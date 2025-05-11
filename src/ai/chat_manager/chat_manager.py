@@ -44,7 +44,7 @@ class ChatManager:
         """
         return self._storage.contains(user_id)
 
-    def reply(self, user_id: Any, user_input: str) -> str:
+    async def reply(self, user_id: Any, user_input: str) -> str:
         """
         Process incoming message, advance the dialog, and return the agent's response.
 
@@ -95,10 +95,10 @@ class ChatManager:
 
         concatenated = "\n".join(qa["answer"] for qa in all_answers)
         integration_info = self._extractor.extract(concatenated)
-        self._notify_callbacks(user_id, integration_info)
+        await self._notify_callbacks(user_id, integration_info)
         return reply_text
 
-    def _notify_callbacks(self, user_id, user_info: UserInformation) -> None:
+    async def _notify_callbacks(self, user_id, user_info: UserInformation) -> None:
         """
         Invoke all registered callbacks with collected user information.
 
@@ -106,8 +106,9 @@ class ChatManager:
             user_id: session identifier whose data is ready.
             user_info: structured data extracted from answers.
         """
+        print(f"Called a time?: callbacks count {len(self._callbacks)}")
         for callback in self._callbacks:
-            callback(user_id, user_info)
+            await callback(user_id, user_info)
 
     def current_question(self, user_id: Any) -> str:
         """
