@@ -1,6 +1,6 @@
 import os
 
-from openai import OpenAI
+from openai import AsyncOpenAI
 
 
 class Agent:
@@ -22,10 +22,10 @@ class Agent:
     def _initialize(self) -> None:
         self.api_key = self.api_key or os.getenv("OPENAI_API_KEY")
         self.base_url = self.base_url or os.getenv("OPENAI_API_BASE_URL")
-        self.client = OpenAI(api_key=self.api_key, base_url=self.base_url)
+        self.client = AsyncOpenAI(api_key=self.api_key, base_url=self.base_url)
         self._initilized = True
 
-    def chat(
+    async def chat(
         self,
         user_input: str,
         output_type=None,
@@ -45,7 +45,7 @@ class Agent:
         ]
 
         if output_type is None:
-            completion = self.client.chat.completions.create(
+            completion = await self.client.chat.completions.create(
                 model=self.model_name,
                 messages=messages,
                 temperature=temperature,
@@ -54,7 +54,7 @@ class Agent:
             )
             return completion.choices[0].message.content
 
-        completion = self.client.beta.chat.completions.parse(
+        completion = await self.client.beta.chat.completions.parse(
             model=self.model_name,
             messages=messages,
             temperature=temperature,

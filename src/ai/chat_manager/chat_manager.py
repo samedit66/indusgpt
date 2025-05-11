@@ -76,7 +76,7 @@ class ChatManager:
                 context.next_question.text if context.next_question else None
             )
 
-            answer = self._dialog_agent.reply(
+            answer = await self._dialog_agent.reply(
                 user_input, question, requirement, next_question
             )
             reply_text = answer.text
@@ -94,7 +94,7 @@ class ChatManager:
         self._storage.clear(user_id)
 
         concatenated = "\n".join(qa["answer"] for qa in all_answers)
-        integration_info = self._extractor.extract(concatenated)
+        integration_info = await self._extractor.extract(concatenated)
         await self._notify_callbacks(user_id, integration_info)
         return reply_text
 

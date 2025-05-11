@@ -16,30 +16,30 @@ class DialogAgent:
         self._faq_agent = FAQAgent(**kwargs)
         self._answer_generator = AnswerGenerator(**kwargs)
 
-    def reply(
+    async def reply(
         self,
         user_input: str,
         question: str,
         val_rule: str,
         next_question: str | None = None,
     ) -> Answer:
-        intent = self._router.classify(user_input)
+        intent = await self._router.classify(user_input)
         match intent:
             case Intent(category="faq"):
-                return self._generate_faq_answer(user_input, question)
+                return await self._generate_faq_answer(user_input, question)
             case Intent(category="information"):
-                return self._generate_question_answer(
+                return await self._generate_question_answer(
                     intent, question, val_rule, next_question
                 )
 
-    def _generate_faq_answer(self, user_input: str, question: str) -> Answer:
+    async def _generate_faq_answer(self, user_input: str, question: str) -> Answer:
         return Answer(
-            text=self._faq_agent.reply(user_input, question),
+            text=await self._faq_agent.reply(user_input, question),
             ready_for_next_question=False,
             extracted_data=None,
         )
 
-    def _validate(
+    async def _validate(
         self,
         user_input: str,
         question: str,
@@ -70,20 +70,20 @@ Validation criteria: '{validation_rule}'
 Does the user's response appropriately address the question and meet the validation criteria?
 Provide a 'yes' or 'no' answer, followed by a brief explanation.
 """
-        val_result = validator.chat(
+        val_result = await validator.chat(
             user_input=query_template,
             output_type=ValidationResult,
         )
         return val_result
 
-    def _generate_question_answer(
+    async def _generate_question_answer(
         self,
         intent: Intent,
         question: str,
         val_rule: str,
         next_question: str | None = None,
     ) -> Answer:
-        val_result = self._validate(
+        val_result = await self._validate(
             intent.user_input,
             question,
             intent.reasoning,
@@ -119,7 +119,7 @@ and that you're going to check/analyze/verify and talk back soon.
                 + postfix
             )
 
-        answer = self._answer_generator.generate_answer(prompt)
+        answer = await self._answer_generator.generate_answer(prompt)
         return Answer(
             text=answer,
             ready_for_next_question=ready_for_next_question,

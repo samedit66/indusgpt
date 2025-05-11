@@ -18,8 +18,8 @@ class FAQAgent:
             **kwargs,
         )
 
-    def reply(self, user_input: str, question: str) -> str:
-        return self._faq_agent.chat(
+    async def reply(self, user_input: str, question: str) -> str:
+        return await self._faq_agent.chat(
             user_input=QUERY_TEMPLATE.format(question, user_input),
         )
 

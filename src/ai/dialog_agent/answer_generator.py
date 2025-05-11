@@ -34,6 +34,6 @@ See the following FAQ if not sure how to answer: {faq()}
             **kwargs,
         )
 
-    def generate_answer(self, model_response: str) -> str:
+    async def generate_answer(self, model_response: str) -> str:
         query_template = f"Make a reply using this information about user's answer: '{model_response}'"
-        return self._generator.chat(query_template)
+        return await self._generator.chat(query_template)

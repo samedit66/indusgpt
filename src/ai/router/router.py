@@ -18,8 +18,8 @@ class Router:
             **kwargs,
         )
 
-    def classify(self, user_input: str) -> Intent:
-        user_intent = self._router.chat(
+    async def classify(self, user_input: str) -> Intent:
+        user_intent = await self._router.chat(
             user_input=QUERY_TEMPLATE.format(user_input),
             output_type=Intent,
         )

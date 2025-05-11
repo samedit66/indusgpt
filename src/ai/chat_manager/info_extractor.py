@@ -27,8 +27,8 @@ Your job is to collect the following information from users' answers:
             **kwargs,
         )
 
-    def extract(self, text_information: str) -> UserInformation:
-        information = self._extractor.chat(
+    async def extract(self, text_information: str) -> UserInformation:
+        information = await self._extractor.chat(
             user_input=QUERY_TEMPLATE.format(text_information),
             output_type=UserInformation,
         )
