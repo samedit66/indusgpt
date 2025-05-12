@@ -69,8 +69,8 @@ def default_context() -> ChatContext:
         {
             "question": "User greets you or wants to start conversation or uses special commands like '/start'",
             "val_rule": (
-                "User greets you or wants to start conversation or uses special commands like '/start'.\n"
-                "Examples:\n"
+                "Accept every user message.\n"
+                "Greetings examples:\n"
                 "- /start\n"
                 "- Hello!\n"
                 "- Hi\n"
