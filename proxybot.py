@@ -31,8 +31,12 @@ chat_manager = ChatManager(
 )
 
 
-@dp.message(Command("setdefault"), F.chat.type == "supergroup")
-async def set_default(message: types.Message) -> None:
+@dp.message(Command("attach"), F.chat.type == "supergroup")
+async def attach(message: types.Message) -> None:
+    """
+    Set the default supergroup for this bot if not already configured, or inform that it is set.
+    Command `/attach` needs to be called in the General chat to attach the bot to the supergroup.
+    """
     group_id = await get_super_group_id()
     if group_id is None:
         group_id = message.chat.id
@@ -40,6 +44,22 @@ async def set_default(message: types.Message) -> None:
         reply = f"Default supergroup set to {group_id}"
     else:
         reply = f"Supergroup already set: {group_id}"
+
+    await message.reply(reply)
+
+
+@dp.message(Command("detach"), F.chat.type == "supergroup")
+async def detach(message: types.Message) -> None:
+    """
+    Unset default supergroup for this bot.
+    Command `/detach` should be called in case you want to stop using bot for this supergroup.
+    """
+    group_id = await get_super_group_id()
+    if group_id is None:
+        reply = "Default supergroup is not set"
+    else:
+        await set_super_group_id(None)
+        reply = f"Supergroup ({group_id}) unset"
 
     await message.reply(reply)
 
@@ -56,7 +76,11 @@ async def get_super_group_id(db) -> int | None:
 
 
 @db.connect()
-async def set_super_group_id(db, group_id: int) -> None:
+async def set_super_group_id(db, group_id: int | None) -> None:
+    if group_id is None:
+        await db.execute("DELETE FROM super_groups;")
+        return
+
     await db.execute("INSERT INTO super_groups (group_id) VALUES (?)", [group_id])
 
 
@@ -77,7 +101,7 @@ async def handle_private_message(message: types.Message) -> None:
     group_id = await get_super_group_id()
     if group_id is None:
         await message.reply(
-            "No supergroup selected. Use /setdefault in a supergroup first."
+            "No supergroup selected. Use /attach in a supergroup first."
         )
         return
 
@@ -141,6 +165,7 @@ async def create_or_get_user_topic(db, user_id: int, user_name: str) -> int:
 
 
 def make_topic_group_name(user_name: str) -> str:
+    """Exists in a case if `user_name` will need to be, for example, highlighted."""
     return user_name
 
 
