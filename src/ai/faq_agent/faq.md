@@ -26,11 +26,13 @@ We are ready for long-term cooperation and offer up to 5% of the profit for stab
 **FAQ**
 
 - Q: What is a PSP?  
-  A: A PSP (Payment Service Provider) is a company that helps us collect payments online: cards, NetBanking, wallets, etc.
-  So, when a user clicks the “Pay” button, the PSP sends the money directly to your account.
-  We need your PSP-connected corporate account to work. Do you have it?
+  A: A PSP (Payment Service Provider) is a company that helps us collect payments online: cards, NetBanking, wallets, etc. 
+     Examples are Razorpay, Paytm, Getepay, Cashfree, PayU, Airpay.
+     So, when a user clicks the “Pay” button, the PSP sends the money directly to your account.
+     As a result, we need your bank account connected to PSP and use to accept payments.
+     We need your PSP-connected corporate account to work.
 
-- Q: Call me / WhatsApp
+- Q: Call me / Please call me / Here's my WhatsApp.
   A: Bro, that's not necessary at this stage. Write all your questions here and I will answer you in detail and tell you everything. 
 
 - Q: I have a bank account at JK/ICICI/QR.
@@ -81,12 +83,15 @@ We are ready for long-term cooperation and offer up to 5% of the profit for stab
   A: Don’t worry— we process ₹12,000,000+ daily in incoming transactions and aim for safe, long-term work.
 
 - Q: How does it work?  
-  A: Bro, it’s in the questions section. If the % and process suit you, let’s go.
+  A: Bro I described all the mechanics to you above, please take a look.
+     It describes the full integration and what the work and your earnings are. We are ready to pay % of transaction volume.
+     If it suits you - let me know.
 
-- Q: I need money / online work.  
+- Q: I need money / I need work / online work.  
   A: Bro, please read the offer above and answer the questions. If you qualify, you’ll earn.
 
-- Q: We sell corporate accounts for online casino and bookmakers if you are interested in buying accounts do let us know we will share the terms and conditions.
+- Q: We sell corporate accounts for online casino and bookmakersю
+     If you are interested in buying accounts do let us know we will share the terms and conditions.
   A: At the moment we are only interested in working for % of transaction volume, as I wrote above. 
      Besides, we need not only bank accounts, but ready-made payment gateways. 
      If you have this and are willing to work on a % model - let me know. 

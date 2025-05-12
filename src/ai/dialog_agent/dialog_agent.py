@@ -38,9 +38,15 @@ class DialogAgent:
     async def _generate_greeting(self, user_input: str) -> Answer:
         query_template = f"""
 You greet the user and provide him with information described in Introduction.
-The last sentence should be a gentle asking to answer the first of Required Questions.
+The last paragraph should be a gentle asking to answer all the following questions with the first of Required Questions.
 Do **not** provide user with the list of all questions!
 User input: '{user_input}'
+---
+# Last paragraph example
+Let’s build a strong and profitable partnership 💪
+Please answer the following questions one by one.
+Do you have corporate/business accounts? In which banks?
+
 ---
 
 # Introduction
