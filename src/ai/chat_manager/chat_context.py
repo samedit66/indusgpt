@@ -67,6 +67,10 @@ class Question:
 def default_context() -> ChatContext:
     questions_data = [
         {
+            "question": "User greets you or wants to start conversation.",
+            "val_rule": "User greets you or wants to start conversation.",
+        },
+        {
             "question": ("Do you have corporate (business) accounts? In which banks?"),
             "val_rule": (
                 "User response **must** confirm that they have a corporate/business bank account "

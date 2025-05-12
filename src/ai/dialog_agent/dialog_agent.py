@@ -7,6 +7,7 @@ from src.ai.agent import Agent
 from src.ai.router.router import Router, Intent
 from src.ai.faq_agent import FAQAgent, faq
 from src.ai.dialog_agent.answer_generator import AnswerGenerator
+from src.ai.dialog_agent.introduction import introduction
 
 
 class DialogAgent:
@@ -25,12 +26,34 @@ class DialogAgent:
     ) -> Answer:
         intent = await self._router.classify(user_input)
         match intent:
+            case Intent(category="start"):
+                return await self._generate_greeting(user_input)
             case Intent(category="faq"):
                 return await self._generate_faq_answer(user_input, question)
             case Intent(category="information"):
                 return await self._generate_question_answer(
                     intent, question, val_rule, next_question
                 )
+
+    async def _generate_greeting(self, user_input: str) -> Answer:
+        query_template = f"""
+You greet the user and provide him with information described in Introduction.
+The last sentence should be a gentle asking to answer the first required question from FAQ.
+User input: '{user_input}'
+---
+
+# Introduction
+{introduction()}
+---
+
+# FAQ
+{faq()}
+"""
+        return Answer(
+            text=await self._answer_generator.generate_answer(query_template),
+            ready_for_next_question=True,
+            extracted_data=None,
+        )
 
     async def _generate_faq_answer(self, user_input: str, question: str) -> Answer:
         return Answer(

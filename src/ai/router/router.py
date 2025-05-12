@@ -30,7 +30,7 @@ class Intent(BaseModel):
     user_input: str = Field(
         ..., description="The exact text message received from the user."
     )
-    category: Literal["faq", "information"] = Field(
+    category: Literal["faq", "information", "start"] = Field(
         ..., description="Category of user input."
     )
     reasoning: str = Field(
@@ -41,7 +41,7 @@ class Intent(BaseModel):
 @lru_cache
 def router_instructions() -> str:
     instructions = f"""
-You must classify each user input into one of two categories — `faq` or `information`
+You must classify each user input into one of three categories — `start`, `faq` or `information`
 Respond **only** with the category name and explanation why you chose the selected category.
 
 ---
