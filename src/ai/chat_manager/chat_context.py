@@ -67,8 +67,15 @@ class Question:
 def default_context() -> ChatContext:
     questions_data = [
         {
-            "question": "User greets you or wants to start conversation.",
-            "val_rule": "User greets you or wants to start conversation.",
+            "question": "User greets you or wants to start conversation or uses special commands like '/start'",
+            "val_rule": (
+                "User greets you or wants to start conversation or uses special commands like '/start'.\n"
+                "Examples:\n"
+                "- /start\n"
+                "- Hello!\n"
+                "- Hi\n"
+                "- Good day!\n"
+            ),
         },
         {
             "question": ("Do you have corporate (business) accounts? In which banks?"),
@@ -81,7 +88,7 @@ def default_context() -> ChatContext:
         },
         {
             "question": (
-                "Are your corporate accounts connected to any PSP (e.g., Razorpay, Cashfree, PayU, Getepay)?"
+                "Are your corporate accounts connected to` any PSP (e.g., Razorpay, Cashfree, PayU, Getepay)?"
             ),
             "val_rule": (
                 "User response **must** include the name of the **PSP** to which their corporate account "

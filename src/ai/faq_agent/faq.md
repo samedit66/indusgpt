@@ -2,15 +2,6 @@
 We work with high-volume traffic (gaming-related) and process over ₹12,000,000+ in daily incoming transactions. We are looking to buy or rent corporate accounts in India that can be connected to a PSP (such as Razorpay, Cashfree, PayU, Getepay, etc.) to accept payments.
 We are ready for long-term cooperation and offer up to 5% of the profit for stable account performance. For example: ₹500,000 daily volume = ₹25,000 your share (5%).
 
-**Required Questions**
-1. Do you have corporate/business accounts? In which banks?  
-2. Are they connected to any PSP (Razorpay, Cashfree, PayU, etc.)?  
-3. Can you provide login and password access to the PSP account?  
-4. Do you already have a website approved by the PSP?  
-  → If yes — please give us hosting access (we may need to adjust code or API)  
-  → If not — we will create the website ourselves  
-5. Are you open to working under a profit-sharing model instead of just a one-time deal?
-
 **Work Process**
 1. Access to PSP account  
  – You share the login + password (e.g. Razorpay)  

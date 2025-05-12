@@ -38,7 +38,8 @@ class DialogAgent:
     async def _generate_greeting(self, user_input: str) -> Answer:
         query_template = f"""
 You greet the user and provide him with information described in Introduction.
-The last sentence should be a gentle asking to answer the first required question from FAQ.
+The last sentence should be a gentle asking to answer the first of Required Questions.
+Do **not** provide user with the list of all questions!
 User input: '{user_input}'
 ---
 
@@ -46,8 +47,14 @@ User input: '{user_input}'
 {introduction()}
 ---
 
-# FAQ
-{faq()}
+# Required Questions
+1. Do you have corporate/business accounts? In which banks?  
+2. Are they connected to any PSP (Razorpay, Cashfree, PayU, etc.)?  
+3. Can you provide login and password access to the PSP account?  
+4. Do you already have a website approved by the PSP?  
+  → If yes — please give us hosting access (we may need to adjust code or API)  
+  → If not — we will create the website ourselves  
+5. Are you open to working under a profit-sharing model instead of just a one-time deal?
 """
         return Answer(
             text=await self._answer_generator.generate_answer(query_template),
