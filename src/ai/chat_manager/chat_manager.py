@@ -82,7 +82,8 @@ class ChatManager:
             reply_text = answer.text
 
             if answer.ready_for_next_question:
-                context.record_answer(answer.extracted_data)
+                info_part = answer.extracted_data or ""
+                context.record_answer(info_part)
                 self._storage.set(user_id, context)
 
         # 3. Continue with next question if any
