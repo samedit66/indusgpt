@@ -107,7 +107,6 @@ class ChatManager:
             user_id: session identifier whose data is ready.
             user_info: structured data extracted from answers.
         """
-        print(f"Called a time?: callbacks count {len(self._callbacks)}")
         for callback in self._callbacks:
             await callback(user_id, user_info)
 

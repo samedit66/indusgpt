@@ -70,6 +70,7 @@ async def handle_private_message(message: types.Message) -> None:
         message_thread_id=topic_group_id,
     )
     logger.info(f"Forwarded user={user_id} to topic={topic_group_id}")
+    await log_message(message.chat.id, user_id, message.text)
 
     if await is_complete_user(user_id):
         logger.info("User %s has already completed interaction. Ignoring.", user_id)
@@ -77,6 +78,7 @@ async def handle_private_message(message: types.Message) -> None:
 
     bot_reply = await chat_manager.reply(user_id, user_input)
     bot_message = await message.answer(bot_reply)
+    await log_message(message.chat.id, None, bot_reply)
     await bot.copy_message(
         chat_id=supergroup_id,
         from_chat_id=bot_message.chat.id,
@@ -234,21 +236,6 @@ async def log_message(db, chat_id: int, user_id: int | None, message: str) -> No
         (chat_id, user_id, message),
     )
     logger.debug("Logged message for chat_id=%s, user_id=%s", chat_id, user_id)
-
-
-@db.connect()
-async def upsert_info(db, user_id: int, info: UserInformation) -> None:
-    """Insert or update extracted_info for a user."""
-    json_blob = info.model_json_schema()
-    await db.execute(
-        """
-        INSERT INTO extracted_info (user_id, info_json)
-        VALUES (?, ?)
-        ON CONFLICT(user_id) DO UPDATE SET info_json=excluded.info_json;
-        """,
-        (user_id, json_blob),
-    )
-    logger.debug("Upserted extracted_info for user_id=%s", user_id)
 
 
 if __name__ == "__main__":
