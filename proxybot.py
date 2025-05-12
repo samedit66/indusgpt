@@ -9,8 +9,6 @@ from src.utils.db import Database
 from src.utils.config import load_config
 
 
-supergroup_id: int | None = None
-
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s | %(levelname)s | %(message)s",
@@ -35,14 +33,31 @@ chat_manager = ChatManager(
 
 @dp.message(Command("setdefault"), F.chat.type == "supergroup")
 async def set_default(message: types.Message) -> None:
-    global supergroup_id
-    if supergroup_id is None:
-        supergroup_id = message.chat.id
-        reply = f"Default supergroup set to {supergroup_id}"
+    group_id = await get_super_group_id()
+    if group_id is None:
+        group_id = message.chat.id
+        await set_super_group_id(group_id)
+        reply = f"Default supergroup set to {group_id}"
     else:
-        reply = f"Supergroup already set: {supergroup_id}"
+        reply = f"Supergroup already set: {group_id}"
 
     await message.reply(reply)
+
+
+@db.connect()
+async def get_super_group_id(db) -> int | None:
+    async with db.execute("SELECT group_id FROM super_groups") as cursor:
+        row = await cursor.fetchone()
+
+    if row:
+        return row["group_id"]
+
+    return None
+
+
+@db.connect()
+async def set_super_group_id(db, group_id: int) -> None:
+    await db.execute("INSERT INTO super_groups (group_id) VALUES (?)", [group_id])
 
 
 @dp.message(F.content_type == ContentType.VOICE, F.chat.type == "private")
@@ -59,8 +74,8 @@ async def not_text_message(message: types.Message):
 
 @dp.message(F.chat.type == "private")
 async def handle_private_message(message: types.Message) -> None:
-    global supergroup_id
-    if supergroup_id is None:
+    group_id = await get_super_group_id()
+    if group_id is None:
         await message.reply(
             "No supergroup selected. Use /setdefault in a supergroup first."
         )
@@ -72,7 +87,7 @@ async def handle_private_message(message: types.Message) -> None:
     topic_group_id = await create_or_get_user_topic(user_id, user_name)
 
     await bot.forward_message(
-        chat_id=supergroup_id,
+        chat_id=group_id,
         from_chat_id=message.chat.id,
         message_id=message.message_id,
         message_thread_id=topic_group_id,
@@ -88,7 +103,7 @@ async def handle_private_message(message: types.Message) -> None:
     bot_message = await message.answer(bot_reply)
     await log_message(message.chat.id, None, bot_reply)
     await bot.copy_message(
-        chat_id=supergroup_id,
+        chat_id=group_id,
         from_chat_id=bot_message.chat.id,
         message_id=bot_message.message_id,
         message_thread_id=topic_group_id,
@@ -110,8 +125,9 @@ async def create_or_get_user_topic(db, user_id: int, user_name: str) -> int:
         logger.info(f"Found existing topic {row['topic_group_id']} for user {user_id}")
         return row["topic_group_id"]
 
+    group_id = await get_super_group_id()
     topic = await bot.create_forum_topic(
-        chat_id=supergroup_id,
+        chat_id=group_id,
         name=make_topic_group_name(user_name),
     )
     thread_id = topic.message_thread_id
@@ -205,6 +221,12 @@ async def init_db(db) -> None:
         CREATE TABLE IF NOT EXISTS topic_groups (
             user_id        INTEGER NOT NULL,
             topic_group_id INTEGER NOT NULL
+        );
+    """)
+
+    await db.execute("""
+        CREATE TABLE IF NOT EXISTS super_groups (
+            group_id INTEGER NOT NULL
         );
     """)
 
