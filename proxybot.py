@@ -195,47 +195,38 @@ async def save_information(db, user_id, info: UserInformation) -> None:
 @db.before()
 async def init_db(db) -> None:
     logger.info("Initializing database with foreign keys and tables.")
-    await db.execute("PRAGMA foreign_keys = ON;")
 
-    await db.execute("""
+    await db.executescript("""
+        PRAGMA foreign_keys = ON;
+                               
         CREATE TABLE IF NOT EXISTS complete_users (
-            user_id INTEGER PRIMARY KEY
+                user_id INTEGER PRIMARY KEY
         );
-    """)
-    await db.execute("""
+                               
         CREATE TABLE IF NOT EXISTS conversation_history (
             chat_id    INTEGER     NOT NULL,
             user_id    INTEGER     NULL,
             message    TEXT        NOT NULL,
             created_at TEXT DEFAULT (STRFTIME('%Y-%m-%dT%H:%M:%fZ','NOW'))
         );
-    """)
-    await db.execute("""
+                               
         CREATE TABLE IF NOT EXISTS extracted_info (
             user_id   INTEGER PRIMARY KEY,
             info_json TEXT        NOT NULL
         );
-    """)
-
-    await db.execute("""
+                               
         CREATE TABLE IF NOT EXISTS topic_groups (
             user_id        INTEGER NOT NULL,
             topic_group_id INTEGER NOT NULL
         );
-    """)
-
-    await db.execute("""
+                               
         CREATE TABLE IF NOT EXISTS super_groups (
             group_id INTEGER NOT NULL
         );
+                               
+        CREATE INDEX IF NOT EXISTS idx_history_chat ON conversation_history(chat_id);
+        CREATE INDEX IF NOT EXISTS idx_history_user ON conversation_history(user_id);                    
     """)
-
-    await db.execute(
-        "CREATE INDEX IF NOT EXISTS idx_history_chat ON conversation_history(chat_id);"
-    )
-    await db.execute(
-        "CREATE INDEX IF NOT EXISTS idx_history_user ON conversation_history(user_id);"
-    )
 
 
 @db.connect()
