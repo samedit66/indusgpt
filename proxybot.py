@@ -3,6 +3,8 @@ import logging
 from aiogram import Bot, Dispatcher, F, types
 from aiogram.filters import Command
 from aiogram.types import ContentType
+from aiogram.client.default import DefaultBotProperties
+from aiogram.enums import ParseMode
 
 from src.ai import ChatManager, UserInformation
 from src.utils.db import Database
@@ -23,7 +25,12 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 config = load_config()
-bot = Bot(token=config.bot_token)
+bot = Bot(
+    token=config.bot_token,
+    default=DefaultBotProperties(
+        parse_mode=ParseMode.MARKDOWN_V2,
+    ),
+)
 dp = Dispatcher()
 db = Database(config.db_path)
 chat_manager = ChatManager(
