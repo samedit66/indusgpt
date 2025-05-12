@@ -3,8 +3,6 @@ import logging
 from aiogram import Bot, Dispatcher, F, types
 from aiogram.filters import Command
 from aiogram.types import ContentType
-from aiogram.client.default import DefaultBotProperties
-from aiogram.enums import ParseMode
 
 from src.ai import ChatManager, UserInformation
 from src.utils.db import Database
@@ -25,12 +23,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 config = load_config()
-bot = Bot(
-    token=config.bot_token,
-    default=DefaultBotProperties(
-        parse_mode=ParseMode.MARKDOWN_V2,
-    ),
-)
+bot = Bot(token=config.bot_token)
 dp = Dispatcher()
 db = Database(config.db_path)
 chat_manager = ChatManager(
@@ -45,9 +38,11 @@ async def set_default(message: types.Message) -> None:
     global supergroup_id
     if supergroup_id is None:
         supergroup_id = message.chat.id
-        await message.reply(f"Default supergroup set to {supergroup_id}")
+        reply = f"Default supergroup set to {supergroup_id}"
     else:
-        await message.reply(f"Supergroup already set: {supergroup_id}")
+        reply = f"Supergroup already set: {supergroup_id}"
+
+    await message.reply(reply)
 
 
 @dp.message(F.content_type != ContentType.TEXT, F.chat.type == "private")
@@ -66,7 +61,6 @@ async def handle_private_message(message: types.Message) -> None:
 
     user_id = message.from_user.id
     user_input = message.text
-    # TODO: логгирование сообщение пользователя
     user_name = message.from_user.full_name
     topic_group_id = await create_or_get_user_topic(user_id, user_name)
 
@@ -111,7 +105,7 @@ async def create_or_get_user_topic(db, user_id: int, user_name: str) -> int:
 
     topic = await bot.create_forum_topic(
         chat_id=supergroup_id,
-        name=user_name,
+        name=make_topic_group_name(user_name),
     )
     thread_id = topic.message_thread_id
     await db.execute(
@@ -121,6 +115,10 @@ async def create_or_get_user_topic(db, user_id: int, user_name: str) -> int:
 
     logger.info(f"Created new topic {thread_id} for user {user_id}")
     return thread_id
+
+
+def make_topic_group_name(user_name: str) -> str:
+    return user_name
 
 
 @dp.message(
