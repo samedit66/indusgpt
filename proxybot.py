@@ -45,9 +45,16 @@ async def set_default(message: types.Message) -> None:
     await message.reply(reply)
 
 
+@dp.message(F.content_type == ContentType.VOICE, F.chat.type == "private")
+async def voice_message(message: types.Message):
+    await message.answer(
+        "Bro, please write the lyrics, I can't listen to it right now. "
+    )
+
+
 @dp.message(F.content_type != ContentType.TEXT, F.chat.type == "private")
-async def not_text(message: types.Message):
-    await message.reply("Please write lyrics, bro")
+async def not_text_message(message: types.Message):
+    await message.answer("Bro, please write the lyrics")
 
 
 @dp.message(F.chat.type == "private")
