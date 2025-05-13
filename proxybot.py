@@ -1,3 +1,4 @@
+import asyncio
 import logging
 
 from aiogram import Bot, Dispatcher, F, types
@@ -135,7 +136,20 @@ async def handle_private_message(message: types.Message) -> None:
 
     if not chat_manager.is_talking_with(user_id):
         await complete_user(user_id)
-        logger.info("Conversation completed for user_id=%s", user_id)
+        user_info = await get_user_info(user_id)
+        if user_info:
+            formatted_info = format_user_info(user_info)
+            await bot.send_message(
+                chat_id=group_id,
+                message_thread_id=topic_group_id,
+                text=formatted_info,
+            )
+            logger.info("Conversation completed for user_id=%s", user_id)
+        else:
+            logger.warning(
+                "Somehow user %s has not provided any information... That should not happen",
+                user_id,
+            )
 
 
 @db.connect()
@@ -167,6 +181,65 @@ async def create_or_get_user_topic(db, user_id: int, user_name: str) -> int:
 def make_topic_group_name(user_name: str) -> str:
     """Exists in a case if `user_name` will need to be, for example, highlighted."""
     return user_name
+
+
+@db.connect()
+async def get_user_info(db, user_id: int) -> UserInformation | None:
+    """Get user information from the database."""
+    async with db.execute(
+        "SELECT info_json FROM extracted_info WHERE user_id = ?;", (user_id,)
+    ) as cursor:
+        row = await cursor.fetchone()
+
+    if row:
+        return UserInformation.model_validate_json(row["info_json"])
+
+    return None
+
+
+def format_user_info(user: UserInformation) -> str:
+    """
+    Makes up a human-readable string from the user information.
+    """
+    lines = []
+
+    if user.accounts:
+        lines.append("Корпоративные банковские счета:")
+        for i, account in enumerate(user.accounts, 1):
+            lines.append(f"  {i}. Банк: {account.bank_name}")
+    else:
+        lines.append("Корпоративных банковских счетов не указано.")
+
+    if user.psps:
+        lines.append("\nПодключенные PSP:")
+        for i, psp in enumerate(user.psps, 1):
+            lines.append(f"  {i}. PSP: {psp.psp_name}")
+            lines.append(f"     Логин: {psp.login}")
+            lines.append(f"     Пароль: {psp.password}")
+            if psp.details:
+                lines.append(f"     Дополнительно: {psp.details}")
+    else:
+        lines.append("\nPSP аккаунты не указаны.")
+
+    lines.append("\nИнформация по хостингу:")
+    if user.hosting.has_website:
+        lines.append("  Пользователь имеет одобренный веб-сайт с PSP.")
+        if user.hosting.access_details:
+            lines.append(f"  Данные доступа: {user.hosting.access_details}")
+        else:
+            lines.append("  Данные доступа не предоставлены.")
+    else:
+        lines.append("  У пользователя нет одобренного веб-сайта с PSP.")
+
+    lines.append("\nДоговор о распределении прибыли:")
+    if user.profit_sharing.agreement.lower() == "yes":
+        lines.append(
+            "  Пользователь согласен на модель распределения прибыли вместо разовой оплаты."
+        )
+    else:
+        lines.append(f"  Статус соглашения: {user.profit_sharing.agreement}")
+
+    return "\n".join(lines)
 
 
 @dp.message(
@@ -288,6 +361,11 @@ async def log_message(db, chat_id: int, user_id: int | None, message: str) -> No
     logger.debug("Logged message for chat_id=%s, user_id=%s", chat_id, user_id)
 
 
-if __name__ == "__main__":
+async def main():
     logger.info("Application start.")
-    dp.run_polling(bot)
+    await bot.set_my_description("Hi! Greet me or just write /start")
+    await dp.start_polling(bot)
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
