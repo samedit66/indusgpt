@@ -16,8 +16,79 @@ class DialogAgent:
         self._router = Router(**kwargs)
         self._faq_agent = FAQAgent(**kwargs)
         self._answer_generator = AnswerGenerator(**kwargs)
+        self._requests_splitter = Agent(
+            instructions="You split user input into separate requests. "
+            "Each request should be a single question or answer. "
+            "If the user input is a single question or answer, return it as is. "
+            "If the user input is empty, return an empty list.",
+            **kwargs,
+        )
 
     async def reply(
+        self,
+        user_input: str,
+        question: str,
+        val_rule: str,
+        next_question: str | None = None,
+    ) -> Answer:
+        """
+        Process user input and generate a response.
+
+        Args:
+            user_input: The user's input message.
+            question: The question to be asked.
+            val_rule: The validation rule for the answer.
+            next_question: The next question to be asked (if any).
+
+        Returns:
+            An Answer object containing the generated response.
+        """
+        # 1. Split into atomic requests
+        splitter_prompt = (
+            f"Split user input into separate requests.\nUser input: '{user_input}'"
+        )
+        requests = await self._requests_splitter.chat(
+            splitter_prompt,
+            output_type=Requests,
+        )
+
+        # 2. Handle each slice
+        raw_parts = []
+        extracted_data = []
+        ready_for_next = False
+
+        for req in requests.requests:
+            ans = await self._single_reply(req, question, val_rule, next_question)
+            raw_parts.append(f"User request: '{req}'\nAnswer: '{ans.text}'\n\n")
+
+            if ans.extracted_data:
+                extracted_data.append(ans.extracted_data)
+            if ans.ready_for_next_question:
+                ready_for_next = True
+
+        # 3. Combine the raw pieces
+        combined_text = "\n".join(raw_parts)
+        combined_data = "\n".join(extracted_data) if extracted_data else None
+
+        # 4. Polish with the AnswerGenerator
+        polish_prompt = (
+            "Please merge the following individual replies into one concise, coherent, and friendly message: "
+            "- Preserve any prompts for a next question at the end. "
+            "- If a reply shows that the user has already answered the asked question, remove any restatement of that question. "
+            f"Asked question: {question}\n"
+            "Replies:\n\n"
+            f"{combined_text}"
+        )
+        polished = await self._answer_generator.generate_answer(polish_prompt)
+
+        # 5. Return the polished answer
+        return Answer(
+            text=polished,
+            ready_for_next_question=ready_for_next,
+            extracted_data=combined_data,
+        )
+
+    async def _single_reply(
         self,
         user_input: str,
         question: str,
@@ -161,6 +232,13 @@ and that you're going to check/analyze/verify and talk back soon.
             ready_for_next_question=ready_for_next_question,
             extracted_data=extracted_data,
         )
+
+
+class Requests(BaseModel):
+    requests: list[str] = Field(
+        ...,
+        description="List of user requests to be processed. They may include questions, answers, or other types of messages.",
+    )
 
 
 class Answer(BaseModel):

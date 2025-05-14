@@ -25,7 +25,7 @@ We are ready for long-term cooperation and offer up to 5% of the profit for stab
 
 **FAQ**
 
-- Q: What is a PSP?  
+- Q: What is a PSP? / What's mean PSP?
   A: A PSP (Payment Service Provider) is a company that helps us collect payments online: cards, NetBanking, wallets, etc. 
      Examples are Razorpay, Paytm, Getepay, Cashfree, PayU, Airpay.
      So, when a user clicks the “Pay” button, the PSP sends the money directly to your account.
