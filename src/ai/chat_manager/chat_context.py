@@ -96,6 +96,8 @@ def default_context() -> ChatContext:
                 "- Yes my account is connected to Razorpay.\n"
                 "- Yes it is PayU.\n"
                 "- My PSP is Gatepay."
+                "- I have a Razorpay\n"
+                "- Razorpay.\n"
             ),
         },
         {

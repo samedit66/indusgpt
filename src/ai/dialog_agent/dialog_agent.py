@@ -38,8 +38,7 @@ class DialogAgent:
     async def _generate_greeting(self, user_input: str) -> Answer:
         query_template = f"""
 You greet the user and provide him with **FULL** information described in Introduction.
-The last paragraph should be a gentle asking to answer all the following questions with the first of Required Questions.
-Do **not** provide user with the list of all questions!
+The last paragraph should be a gentle asking to start the dialog and answer the first question.
 User input: '{user_input}'
 ---
 # Last paragraph example
@@ -140,7 +139,7 @@ Provide a 'yes' or 'no' answer, followed by a brief explanation.
                 prompt += f"Include next question into your reply: '{next_question}'"
             else:
                 prompt += """
-Include into your replay information that you've received everything you need
+Include into your reply information that you've received everything you need
 and that you're going to check/analyze/verify and talk back soon.
 """
         else:
@@ -151,7 +150,8 @@ and that you're going to check/analyze/verify and talk back soon.
                     f"Asked question: '{question}'\nUser input: '{intent.user_input}'"
                 )
             prompt = (
-                "Seems like the user didn't provide a correct answer or wishes to stop the dialogue. "
+                "Seems like the user didn't provide a correct answer or wishes to stop the dialogue.\n"
+                "If user answer looks like it could be an answer, but not precise, tell him to answer more precisely.\n"
                 + postfix
             )
 
