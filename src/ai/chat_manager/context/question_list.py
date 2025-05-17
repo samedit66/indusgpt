@@ -13,6 +13,7 @@ class QuestionList(ABC):
     def register_user(self, user_id: int) -> None:
         """
         Registers a new user in the storage.
+        Nothing happens if the user is already registered.
 
         :param user_id: identifier for the conversation participant
         """
@@ -41,13 +42,15 @@ class QuestionList(ABC):
         Provides the next pending question for a user without advancing the pointer.
 
         :param user_id: identifier for the conversation participant
-        :return: a Question tuple containing the prompt and any metadata (None if all questions are answered)
+        :return: a Question tuple containing the prompt and any metadata
+            (None if all questions are answered or user is not registered)
         """
 
     @abstractmethod
     def forth(self, user_id: int, answer: str) -> None:
         """
         Accepts a finalized answer and steps forward to the subsequent question.
+        Does nothing if the user is not registered.
 
         :param user_id: identifier for the conversation participant
         :param answer: the completed response to the current question
