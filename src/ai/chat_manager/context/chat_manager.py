@@ -38,7 +38,7 @@ class ChatManager:
         self.dialog_agent = DialogAgent(**model_settings)
         self.chat_state_manager = ChatStateManager(
             question_list=question_list,
-            user_answer=user_answer_storage,
+            user_answer_storage=user_answer_storage,
             on_all_finished=on_all_finished,
         )
 
@@ -91,7 +91,7 @@ class ChatManager:
         self._update_state(user_id, agent_answer)
 
         # Build the outgoing reply
-        reply_text = self._build_reply_text(user_id, agent_answer.user_input)
+        reply_text = self._build_reply_text(user_id, agent_answer.text)
         return reply_text
 
     async def _talk(self, user_id: int, user_input: str) -> Answer:
@@ -136,14 +136,14 @@ class ChatManager:
             partial_answer,
         )
 
-    def _build_reply_text(self, user_id: int, answer_text: str) -> str:
+    def _build_reply_text(self, user_id: int, agent_answer_text: str) -> str:
         """
         Combine the latest agent-generated text with either the next question
         prompt or a final closing message if all questions are answered.
 
         Args:
             user_id (int): Session identifier to check state progress.
-            answer_text (str): Text produced by the DialogAgent for this turn.
+            agent_answer_text (str): Text produced by the DialogAgent for this turn.
 
         Returns:
             str: A single string containing the agent's answer and the next
@@ -151,15 +151,15 @@ class ChatManager:
         """
         if not self.chat_state_manager.all_finished(user_id):
             next_q, _ = self.chat_state_manager.current_state(user_id)
-            return f"{answer_text}\n{next_q.text}"
+            return f"{agent_answer_text}\n{next_q.text}"
 
         closing = (
             "Got all the info I need from you. "
             "I'll check everything out and get back to you soon. "
             "Looking forward to working together!"
         )
-        separator = "" if answer_text.endswith(".") else " "
-        return f"{answer_text}{separator}{closing}"
+        separator = "" if agent_answer_text.endswith(".") else " "
+        return f"{agent_answer_text}{separator}{closing}"
 
 
 def prompt_for_dialog_agent(user_input: str, partial_answer: str | None) -> str:

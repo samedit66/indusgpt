@@ -1,4 +1,4 @@
-from .question_list import QuestionList, Question
+from .question_list import QuestionList, Question, QaPair
 from .user_answer_storage import UserAnswerStorage
 
 
@@ -43,6 +43,16 @@ class InMemoryQuestionList(QuestionList):
     def all_finished(self, user_id: int) -> bool:
         idx = self._indices.get(user_id, 0)
         return idx >= len(self._questions)
+
+    def qa_pairs(self, user_id: int) -> list[QaPair]:
+        if not self.contains_user(user_id):
+            return []
+        idx = self._indices[user_id]
+        return [
+            QaPair(question=self._questions[i], answer=answer)
+            for i, answer in enumerate(self._answers[user_id])
+            if i < idx
+        ]
 
 
 class InMemoryUserAnswerStorage(UserAnswerStorage):

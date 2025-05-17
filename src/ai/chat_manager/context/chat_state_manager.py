@@ -18,16 +18,16 @@ class ChatStateManager:
     def __init__(
         self,
         question_list: QuestionList,
-        user_answer_storage_storage: UserAnswerStorage,
+        user_answer_storage: UserAnswerStorage,
         on_all_finished: Iterable[OnAllFinishedCallback] = None,
     ) -> None:
         """
         :param question_list: Source of questions and navigation controls
-        :param user_answer_storage_storage: Storage for accumulating each user’s in-progress answer
+        :param user_answer_storage: Storage for accumulating each user’s in-progress answer
         :param on_all_finished: Iterable of callbacks to be executed when a user finishes all questions
         """
         self.question_list = question_list
-        self.user_answer_storage_storage = user_answer_storage_storage
+        self.user_answer_storage = user_answer_storage
         self.on_all_finished_callbacks = on_all_finished or ()
 
     def start(self, user_id: int) -> None:
@@ -69,7 +69,7 @@ class ChatStateManager:
         :param user_id: identifier for the conversation participant
         :param partial_answer: text to store as the current, incomplete answer
         """
-        self.user_answer_storage.update(user_id, partial_answer)
+        self.user_answer_storage.append(user_id, partial_answer)
 
     def finish_question(self, user_id: int) -> None:
         """

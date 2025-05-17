@@ -83,6 +83,7 @@ class DialogAgent:
 
         # 5. Return the polished answer
         return Answer(
+            user_input=user_input,
             text=polished,
             ready_for_next_question=ready_for_next,
             extracted_data=combined_data,
@@ -133,6 +134,7 @@ Do you have corporate/business accounts? In which banks?
 5. Are you open to working under a profit-sharing model instead of just a one-time deal?
 """
         return Answer(
+            user_input=user_input,
             text=await self._answer_generator.generate_answer(query_template),
             ready_for_next_question=True,
             extracted_data=None,
@@ -140,6 +142,7 @@ Do you have corporate/business accounts? In which banks?
 
     async def _generate_faq_answer(self, user_input: str, question: str) -> Answer:
         return Answer(
+            user_input=user_input,
             text=await self._faq_agent.reply(user_input, question),
             ready_for_next_question=False,
             extracted_data=None,
@@ -228,6 +231,7 @@ and that you're going to check/analyze/verify and talk back soon.
 
         answer = await self._answer_generator.generate_answer(prompt)
         return Answer(
+            user_input=intent.user_input,
             text=answer,
             ready_for_next_question=ready_for_next_question,
             extracted_data=extracted_data,
@@ -242,6 +246,7 @@ class Requests(BaseModel):
 
 
 class Answer(BaseModel):
+    user_input: str
     text: str
     ready_for_next_question: bool
     extracted_data: Union[str, None]
