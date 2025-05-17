@@ -1,10 +1,13 @@
 from collections import namedtuple
+from typing import Any, Callable, Iterable
 
 from .question_list import QuestionList
 from .user_answer_storage import UserAnswerStorage
 
 
 State = namedtuple("State", ["question", "partial_answer"])
+
+type OnAllFinishedCallback = Callable[[int, str], Any]
 
 
 class ChatStateManager:
@@ -16,13 +19,16 @@ class ChatStateManager:
         self,
         question_list: QuestionList,
         user_answer_storage_storage: UserAnswerStorage,
+        on_all_finished: Iterable[OnAllFinishedCallback] = None,
     ) -> None:
         """
-        :param question_list: source of questions and navigation controls
-        :param user_answer_storage_storage: storage for accumulating each user’s in-progress answer
+        :param question_list: Source of questions and navigation controls
+        :param user_answer_storage_storage: Storage for accumulating each user’s in-progress answer
+        :param on_all_finished: Iterable of callbacks to be executed when a user finishes all questions
         """
         self.question_list = question_list
         self.user_answer_storage_storage = user_answer_storage_storage
+        self.on_all_finished_callbacks = on_all_finished or ()
 
     def start(self, user_id: int) -> None:
         """
@@ -68,12 +74,17 @@ class ChatStateManager:
     def finish_question(self, user_id: int) -> None:
         """
         Finalizes the current answer, clears the draft, and advances to the next question.
+        If all questions are answered, triggers any registered callbacks.
 
         :param user_id: identifier for the conversation participant
         """
         answer = self.user_answer_storage.get(user_id)
         self.user_answer_storage.clear(user_id)
         self.question_list.forth(user_id, answer)
+
+        if self.all_finished(user_id):
+            for callback in self.on_all_finished_callbacks:
+                callback(user_id, answer)
 
     def all_finished(self, user_id: int) -> bool:
         """

@@ -1,3 +1,5 @@
+from typing import Iterable
+
 from src.ai.dialog_agent import (
     DialogAgent,
     Answer,
@@ -5,7 +7,7 @@ from src.ai.dialog_agent import (
 
 from .question_list import QuestionList
 from .user_answer_storage import UserAnswerStorage
-from .chat_state_manager import ChatStateManager
+from .chat_state_manager import ChatStateManager, OnAllFinishedCallback
 
 
 class ChatManager:
@@ -17,6 +19,7 @@ class ChatManager:
         self,
         question_list: QuestionList,
         user_answer_storage: UserAnswerStorage,
+        on_all_finished: Iterable[OnAllFinishedCallback] = None,
         **model_settings,
     ) -> None:
         """
@@ -27,6 +30,8 @@ class ChatManager:
                 defining the conversation flow.
             user_answer (UserAnswerStorage): A storage interface for saving or retrieving
                 user-provided answers between sessions.
+            on_all_finished (Iterable[OnAllFinishedCallback]): A list of callback functions
+                to be executed when a user finishes all questions.
             **model_settings: Arbitrary keyword settings used to configure the
                 underlying DialogAgent (e.g., model name, temperature).
         """
@@ -34,6 +39,7 @@ class ChatManager:
         self.chat_state_manager = ChatStateManager(
             question_list=question_list,
             user_answer=user_answer_storage,
+            on_all_finished=on_all_finished,
         )
 
     def current_question(self, user_id: int) -> str | None:
