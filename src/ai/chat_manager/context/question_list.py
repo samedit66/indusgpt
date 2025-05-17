@@ -3,6 +3,8 @@ from collections import namedtuple
 
 Question = namedtuple("Question", ["text", "answer_requirement"])
 
+QaPair = namedtuple("AqPair", ["question", "answer"])
+
 
 class QuestionList(ABC):
     """
@@ -63,4 +65,14 @@ class QuestionList(ABC):
 
         :param user_id: identifier for the conversation participant
         :return: True if there are no further questions, False otherwise
+        """
+
+    @abstractmethod
+    def qa_pairs(self, user_id: int) -> list[QaPair]:
+        """
+        Returns a list of currently answered questions and their corresponding answers.
+
+        :param user_id: identifier for the conversation participant
+        :return: a list of tuples containing the question and its answer
+            (empty if the user is not registered)
         """

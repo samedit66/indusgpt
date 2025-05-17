@@ -1,13 +1,13 @@
 from collections import namedtuple
 from typing import Any, Callable, Iterable
 
-from .question_list import QuestionList
+from .question_list import QuestionList, QaPair
 from .user_answer_storage import UserAnswerStorage
 
 
 State = namedtuple("State", ["question", "partial_answer"])
 
-type OnAllFinishedCallback = Callable[[int, str], Any]
+type OnAllFinishedCallback = Callable[[int, list[QaPair]], Any]
 
 
 class ChatStateManager:
@@ -82,9 +82,10 @@ class ChatStateManager:
         self.user_answer_storage.clear(user_id)
         self.question_list.forth(user_id, answer)
 
+        # TODO: Возможно, стоит делать это в отдельном методе...
         if self.all_finished(user_id):
             for callback in self.on_all_finished_callbacks:
-                callback(user_id, answer)
+                callback(user_id, self.question_list.qa_pairs(user_id))
 
     def all_finished(self, user_id: int) -> bool:
         """
