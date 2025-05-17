@@ -130,10 +130,10 @@ class ChatManager:
             self.chat_state_manager.finish_question(user_id)
             return
 
-        # TODO: Возможно надо еще вставлять extracted_data из agent_answer
+        partial_answer = f"{agent_answer.user_input}\n{agent_answer.extracted_data}\n"
         self.chat_state_manager.update_answer(
             user_id,
-            agent_answer.user_input,
+            partial_answer,
         )
 
     def _build_reply_text(self, user_id: int, answer_text: str) -> str:
