@@ -31,7 +31,7 @@ class ResponseToUser(BaseModel):
     )
 
 
-async def handle_user_message(
+async def generate_response(
     user_input: str,
     question: Question,
     context: str | None = None,
