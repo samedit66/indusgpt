@@ -146,8 +146,6 @@ class ChatManager:
                 question, or a well-formed closing paragraph once complete.
         """
         if not self.chat_state_manager.all_finished(user_id):
-            # next_q, _ = self.chat_state_manager.current_state(user_id)
-            # return f"{agent_answer_text}\n{next_q.text}"
             return agent_answer_text
 
         closing = (
@@ -157,22 +155,3 @@ class ChatManager:
         )
         separator = "" if agent_answer_text.endswith(".") else " "
         return f"{agent_answer_text}{separator}{closing}"
-
-
-def prompt_for_dialog_agent(user_input: str, partial_answer: str | None) -> str:
-    """
-    Construct the input prompt for the DialogAgent by appending the latest user input
-    to any existing partial answer from previous turns.
-
-    Args:
-        user_input (str): The new message provided by the user.
-        partial_answer (str | None): Previously collected or partially generated text,
-            which can provide context to the agent. If None, starts fresh.
-
-    Returns:
-        str: A unified prompt string combining partial_answer (if any) and user_input,
-            separated by a newline.
-    """
-    prompt = partial_answer if partial_answer else ""
-    prompt += f"\n{user_input}"
-    return prompt
