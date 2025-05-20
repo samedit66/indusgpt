@@ -5,7 +5,7 @@ from .user_answer_storage import UserAnswerStorage
 from .chat_state import State
 from .chat_state_manager import ChatStateManager, OnAllFinishedCallback
 
-from .handle_user_message import ResponseToUser
+from .generate_response import ResponseToUser
 
 type ResponseGenerator = Callable[[str, State], ResponseToUser]
 """
@@ -73,7 +73,7 @@ class ChatManager:
         """
         if self.chat_state_manager.all_finished(user_id):
             return None
-        q, _ = self.chat_state_manager.current_state(user_id)
+        _, q, _ = self.chat_state_manager.current_state(user_id)
         return q.text
 
     async def reply(self, user_id: int, user_input: str) -> str | None:
@@ -110,7 +110,7 @@ class ChatManager:
 
         # Build the outgoing reply
         current_state = self.chat_state_manager.current_state(user_id)
-        return self.generate_reply(agent_response, current_state)
+        return await self.generate_reply(agent_response, current_state)
 
     async def _talk(self, user_id: int, user_input: str) -> ResponseToUser:
         """
