@@ -14,6 +14,7 @@ from .validator import (
     InvalidAnswer,
     NeedsMoreDetails,
 )
+from .atomic_requests import atomic_separator
 
 
 class ResponseToUser(BaseModel):
@@ -32,6 +33,50 @@ class ResponseToUser(BaseModel):
 
 
 async def generate_response(
+    user_input: str,
+    question: Question,
+    context: str | None = None,
+) -> ResponseToUser:
+    requests = await atomic_separator(user_input)
+    responses = await get_responses_for_requests(requests.requests, question, context)
+    return combine_responses(user_input, responses)
+
+
+async def get_responses_for_requests(
+    requests: list[str],
+    question: Question,
+    context: str | None,
+) -> list[ResponseToUser]:
+    responses = []
+    for request in requests:
+        response = await generate_single_response(
+            user_input=request,
+            question=question,
+            context=context,
+        )
+        responses.append(response)
+    return responses
+
+
+def combine_responses(
+    user_input: str,
+    responses: list[ResponseToUser],
+) -> ResponseToUser:
+    response_texts = [r.response_text for r in responses]
+    extracted_datas = [
+        r.extracted_data for r in responses if r.extracted_data is not None
+    ]
+    extracted_data = " ".join(extracted_datas) if extracted_datas else None
+
+    return ResponseToUser(
+        user_input=user_input,
+        response_text=" ".join(response_texts),
+        extracted_data=extracted_data,
+        ready_for_next_question=any(r.ready_for_next_question for r in responses),
+    )
+
+
+async def generate_single_response(
     user_input: str,
     question: Question,
     context: str | None = None,
