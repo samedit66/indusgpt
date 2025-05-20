@@ -2,9 +2,11 @@ import asyncio
 from dotenv import load_dotenv
 from colorama import init, Fore, Style
 
-from src.ai.question_list import Question
-from src.ai.in_memory import InMemoryQuestionList, InMemoryUserAnswerStorage
-from src.ai.chat_manager import ChatManager
+from src.chat.question_list import Question
+from src.chat.in_memory import InMemoryQuestionList, InMemoryUserAnswerStorage
+from src.chat.chat_manager import ChatManager
+from src.chat.generate_response import generate_response
+from src.chat.generate_reply import generate_reply
 
 
 def build_questions():
@@ -22,9 +24,12 @@ def build_questions():
         Question(
             text="Are your corporate accounts connected to any PSP (e.g., Razorpay, Cashfree, PayU, Getepay)?",
             answer_requirement=(
-                "User response **must** include the name of the **PSP**.\nExamples:\n"
-                "- Yes, Razorpay.\n"
-                "- My PSP is Gatepay."
+                "User response **must** confirm they have a connected PSP and include the PSP name. If user says they don't have a PSP or it's not connected, the answer is invalid.\nExamples:\n"
+                "- Yes, I have Razorpay connected.\n"
+                "- My account is integrated with PayU.\n"
+                "- We use Cashfree for payments."
+                "- Razorpay is connected.\n",
+                "- PayU.",
             ),
         ),
         Question(
@@ -43,7 +48,8 @@ def build_questions():
             ),
             answer_requirement=(
                 "User response **must** answer “yes” or “no.” If “yes,” they **must** mention they can "
-                "provide **hosting access**.\nExamples:\n"
+                "provide **hosting access**. If user cannot provide hosting access, that's fine."
+                "\nExamples:\n"
                 "- No.\n"
                 "- Yes, I can provide hosting credentials."
             ),
@@ -51,15 +57,19 @@ def build_questions():
         Question(
             text="Are you open to working under a profit-sharing model (5% of transaction volume) instead of a one-time deal?",
             answer_requirement=(
-                'User response **must** clearly say "yes" or "no".\nExamples:\n'
+                'User response **must** clearly say "yes" or "no". User may agree more informally, like "I agree" or "I don\'t mind".\nExamples:\n'
                 "- Yes.\n"
-                "- No."
+                "- No.\n"
+                "- Sure\n."
+                "- Of course\n."
             ),
         ),
     ]
 
 
 async def console_chat():
+    from pprint import pprint as pp
+
     # initialize colorama
     init(autoreset=True)
 
@@ -73,9 +83,13 @@ async def console_chat():
     cm = ChatManager(
         question_list=qlist,
         user_answer_storage=storage,
+        generate_response=generate_response,
+        generate_reply=generate_reply,
         on_all_finished=[
             lambda user_id, qa: print(
-                f"\n{Fore.MAGENTA}✅ All done! Stored {len(qa)} Q&A pairs."
+                f"\n{Fore.MAGENTA}✅ All done! Stored {len(qa)} Q&A pairs.\n"
+                f"Q&A pairs:\n"
+                f"{pp(qa)}"
             )
         ],
     )
@@ -94,12 +108,6 @@ async def console_chat():
         bot_reply = await cm.reply(user_id, answer)
         print(Fore.CYAN + "Bot: " + Style.BRIGHT + bot_reply)
         # get user input
-
-    # When done, dump all Q&A
-    print("\n" + Fore.GREEN + Style.BRIGHT + "Here’s what you answered:\n")
-    for idx, (question, answer) in enumerate(storage.get_all(user_id), start=1):
-        print(Fore.CYAN + f"{idx}. Q: {question.text}")
-        print(Fore.YELLOW + f"   A: {answer}\n")
 
 
 if __name__ == "__main__":
