@@ -5,7 +5,10 @@ from aiogram import Bot, Dispatcher, F, types
 from aiogram.filters import Command
 from aiogram.types import ContentType
 
-from src.ai import ChatManager, UserInformation
+# from src.ai import ChatManager, UserInformation
+from src.ai.chat_manager import ChatManager
+from src.ai.question_list import Question
+from src.ai.in_memory import InMemoryQuestionList, InMemoryUserAnswerStorage
 from src.utils.db import Database
 from src.utils.config import load_config
 
@@ -25,10 +28,69 @@ config = load_config()
 bot = Bot(token=config.bot_token)
 dp = Dispatcher()
 db = Database(config.db_path)
+questions = [
+    Question(
+        text="Do you have corporate (business) accounts? In which banks?",
+        answer_requirement=(
+            "User response **must** confirm that they have a corporate/business bank account "
+            "and say the bank name.\nExamples:\n"
+            "- Yes corporate account in ICICI\n"
+            "- Yes "
+            "- I have a corporate account in Sber bank.\n"
+            "- I got a business account in Bank of Baroda."
+        ),
+    ),
+    Question(
+        text="Are your corporate accounts connected to any PSP (e.g., Razorpay, Cashfree, PayU, Getepay)?",
+        answer_requirement=(
+            "User response **must** include the name of the **PSP** to which their corporate account "
+            "is connected.\nExamples:\n"
+            "- Yes my account is connected to Razorpay.\n"
+            "- Yes it is PayU.\n"
+            "- My PSP is Gatepay.\n"
+            "- I have a Razorpay\n"
+            "- Razorpay.\n"
+        ),
+    ),
+    Question(
+        text="Can you provide login and password access to the PSP account?",
+        answer_requirement=(
+            "User response **must** clearly answer “yes” or “no” and, if yes, indicate readiness to "
+            "**share login credentials**.\nCollect any additional information user may provide about their PSP account.\n"
+            "Examples:\n"
+            "- Yes, my login is admin, password is 123341."
+        ),
+    ),
+    Question(
+        text=(
+            "Do you already have a website approved by the PSP?\n"
+            "If yes — please give us hosting access (we may need to adjust code or API)\n"
+            "If not — we will create the website ourselves"
+        ),
+        answer_requirement=(
+            "User response **must** answer “yes” or “no.” If “yes,” they **must** mention they can "
+            'provide **hosting access**. If "no", only "no" is required.\nExamples:\n'
+            "- No.\n"
+            "- Yes. Next goes any details about hosting access."
+        ),
+    ),
+    Question(
+        text="Are you open to working under a profit-sharing model (5% of transaction volume) instead of a one-time deal?",
+        answer_requirement=(
+            'User response **must** clearly say "yes" or "no".\nExamples:\n'
+            "- Yes.\n"
+            "- No.\n"
+            "- Of course\n"
+            "- Sure."
+        ),
+    ),
+]
+quesiton_list = InMemoryQuestionList(questions)
+user_answer_storage = InMemoryUserAnswerStorage()
 chat_manager = ChatManager(
-    model_name=config.model_name,
-    api_key=config.openai_api_key,
-    base_url=config.openai_base_url,
+    question_list=quesiton_list,
+    user_answer_storage=user_answer_storage,
+    on_all_finished=[lambda user_id, qa_pairs: print(user_id, "\n", qa_pairs)],
 )
 
 
@@ -134,22 +196,22 @@ async def handle_private_message(message: types.Message) -> None:
         message_thread_id=topic_group_id,
     )
 
-    if not chat_manager.is_talking_with(user_id):
-        await complete_user(user_id)
-        user_info = await get_user_info(user_id)
-        if user_info:
-            formatted_info = format_user_info(user_info)
-            await bot.send_message(
-                chat_id=group_id,
-                message_thread_id=topic_group_id,
-                text=formatted_info,
-            )
-            logger.info("Conversation completed for user_id=%s", user_id)
-        else:
-            logger.warning(
-                "Somehow user %s has not provided any information... That should not happen",
-                user_id,
-            )
+    # if not chat_manager.is_talking_with(user_id):
+    #    await complete_user(user_id)
+    #    user_info = await get_user_info(user_id)
+    #    if user_info:
+    #        formatted_info = format_user_info(user_info)
+    #        await bot.send_message(
+    #            chat_id=group_id,
+    #            message_thread_id=topic_group_id,
+    #            text=formatted_info,
+    #        )
+    #        logger.info("Conversation completed for user_id=%s", user_id)
+    #    else:
+    #        logger.warning(
+    #            "Somehow user %s has not provided any information... That should not happen",
+    #            user_id,
+    #        )
 
 
 @db.connect()
@@ -183,63 +245,63 @@ def make_topic_group_name(user_name: str) -> str:
     return user_name
 
 
-@db.connect()
-async def get_user_info(db, user_id: int) -> UserInformation | None:
-    """Get user information from the database."""
-    async with db.execute(
-        "SELECT info_json FROM extracted_info WHERE user_id = ?;", (user_id,)
-    ) as cursor:
-        row = await cursor.fetchone()
+# @db.connect()
+# async def get_user_info(db, user_id: int) -> UserInformation | None:
+#    """Get user information from the database."""
+#    async with db.execute(
+#        "SELECT info_json FROM extracted_info WHERE user_id = ?;", (user_id,)
+#    ) as cursor:
+#        row = await cursor.fetchone()
+#
+#    if row:
+#        return UserInformation.model_validate_json(row["info_json"])
+#
+#    return None
 
-    if row:
-        return UserInformation.model_validate_json(row["info_json"])
 
-    return None
-
-
-def format_user_info(user: UserInformation) -> str:
-    """
-    Makes up a human-readable string from the user information.
-    """
-    lines = []
-
-    if user.accounts:
-        lines.append("Корпоративные банковские счета:")
-        for i, account in enumerate(user.accounts, 1):
-            lines.append(f"  {i}. Банк: {account.bank_name}")
-    else:
-        lines.append("Корпоративных банковских счетов не указано.")
-
-    if user.psps:
-        lines.append("\nПодключенные PSP:")
-        for i, psp in enumerate(user.psps, 1):
-            lines.append(f"  {i}. PSP: {psp.psp_name}")
-            lines.append(f"     Логин: {psp.login}")
-            lines.append(f"     Пароль: {psp.password}")
-            if psp.details:
-                lines.append(f"     Дополнительно: {psp.details}")
-    else:
-        lines.append("\nPSP аккаунты не указаны.")
-
-    lines.append("\nИнформация по хостингу:")
-    if user.hosting.has_website:
-        lines.append("  Пользователь имеет одобренный веб-сайт с PSP.")
-        if user.hosting.access_details:
-            lines.append(f"  Данные доступа: {user.hosting.access_details}")
-        else:
-            lines.append("  Данные доступа не предоставлены.")
-    else:
-        lines.append("  У пользователя нет одобренного веб-сайта с PSP.")
-
-    lines.append("\nДоговор о распределении прибыли:")
-    if user.profit_sharing.agreement.lower() == "yes":
-        lines.append(
-            "  Пользователь согласен на модель распределения прибыли вместо разовой оплаты."
-        )
-    else:
-        lines.append(f"  Статус соглашения: {user.profit_sharing.agreement}")
-
-    return "\n".join(lines)
+# def format_user_info(user: UserInformation) -> str:
+#    """
+#    Makes up a human-readable string from the user information.
+#    """
+#    lines = []
+#
+#    if user.accounts:
+#        lines.append("Корпоративные банковские счета:")
+#        for i, account in enumerate(user.accounts, 1):
+#            lines.append(f"  {i}. Банк: {account.bank_name}")
+#    else:
+#        lines.append("Корпоративных банковских счетов не указано.")
+#
+#    if user.psps:
+#        lines.append("\nПодключенные PSP:")
+#        for i, psp in enumerate(user.psps, 1):
+#            lines.append(f"  {i}. PSP: {psp.psp_name}")
+#            lines.append(f"     Логин: {psp.login}")
+#            lines.append(f"     Пароль: {psp.password}")
+#            if psp.details:
+#                lines.append(f"     Дополнительно: {psp.details}")
+#    else:
+#        lines.append("\nPSP аккаунты не указаны.")
+#
+#    lines.append("\nИнформация по хостингу:")
+#    if user.hosting.has_website:
+#        lines.append("  Пользователь имеет одобренный веб-сайт с PSP.")
+#        if user.hosting.access_details:
+#            lines.append(f"  Данные доступа: {user.hosting.access_details}")
+#        else:
+#            lines.append("  Данные доступа не предоставлены.")
+#    else:
+#        lines.append("  У пользователя нет одобренного веб-сайта с PSP.")
+#
+#    lines.append("\nДоговор о распределении прибыли:")
+#    if user.profit_sharing.agreement.lower() == "yes":
+#        lines.append(
+#            "  Пользователь согласен на модель распределения прибыли вместо разовой оплаты."
+#        )
+#    else:
+#        lines.append(f"  Статус соглашения: {user.profit_sharing.agreement}")
+#
+#    return "\n".join(lines)
 
 
 @dp.message(
@@ -277,17 +339,17 @@ async def get_user_id_by_topic_id(db, topic_group_id: int) -> int:
     return None
 
 
-@chat_manager.on_info_ready()
-@db.connect()
-async def save_information(db, user_id, info: UserInformation) -> None:
-    await db.execute(
-        """
-        INSERT OR REPLACE INTO extracted_info (user_id, info_json)
-        VALUES (?, ?)
-        """,
-        (user_id, info.model_dump_json()),
-    )
-    logger.info("Saved information about user=%s", user_id)
+# @chat_manager.on_info_ready()
+# @db.connect()
+# async def save_information(db, user_id, info: UserInformation) -> None:
+#    await db.execute(
+#        """
+#        INSERT OR REPLACE INTO extracted_info (user_id, info_json)
+#        VALUES (?, ?)
+#        """,
+#        (user_id, info.model_dump_json()),
+#    )
+#    logger.info("Saved information about user=%s", user_id)
 
 
 @db.before()

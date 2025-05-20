@@ -1,9 +1,18 @@
+from typing import Literal
+
+from pydantic import BaseModel, Field
+
+from .simple_agent import SimpleAgent
+
+
+INSTRUCTIONS = """
+You must classify each user input into one of three categories — `start`, `faq` or `information`
+Respond **only** with the category name and explanation why you chose the selected category.
 Classify each user message into one of two categories:
 
 1. **start**
 2. **faq**  
 3. **information**
-
 ---
 
 ### 1. start
@@ -18,7 +27,6 @@ Label a message **start** if the user is greeting.
 - “Hi there!”
 - “Hey, how’s it going?”
 - “Good morning!”
-
 ---
 
 ### 2. faq
@@ -38,7 +46,6 @@ Label a message **faq** if the user is asking for something or making any kind o
 - “Tell me details.”  
 - “I want a 30% commission.”  
 - “I don’t have a website—can I still sign up?”  
-
 ---
 
 ### 3. information
@@ -57,5 +64,29 @@ Label a message **information** if the user is just providing facts, confirmatio
 - “Okay.”  
 - “Thanks.”  
 - “xyz”  
-- “u”  
-- “t” 
+- “u”
+- “t”
+"""
+
+
+class Intent(BaseModel):
+    user_input: str = Field(
+        ..., description="The exact text message received from the user."
+    )
+    category: Literal["faq", "information", "start"] = Field(
+        ..., description="Category of user input."
+    )
+    reasoning: str = Field(
+        ..., description="Consice reasoning why you selected `category`."
+    )
+
+
+def expand_query(user_input: str, context: str | None = None) -> str:
+    return f"Take into account the context: {context}.\nClassify the following user request: {user_input}"
+
+
+router = SimpleAgent(
+    instructions=INSTRUCTIONS,
+    expand_query=expand_query,
+    output_type=Intent,
+)

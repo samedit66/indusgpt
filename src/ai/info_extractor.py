@@ -1,38 +1,9 @@
 from __future__ import annotations
-from typing import Literal, Optional
+from typing import Optional, Literal
 
 from pydantic import BaseModel, Field
 
-from src.ai.agent import Agent
-
-
-QUERY_TEMPLATE = """
-Extract information from the following user text.
-User text:
-{}
-"""
-
-
-class InfoExtactor:
-    def __init__(self, **kwargs) -> None:
-        self._extractor = Agent(
-            instructions="""
-You are a data extraction assistant.
-Your job is to collect the following information from users' answers:
-- Names of banks where the user has corporate accounts.
-- Connected PSPs.
-- Hostring information.
-- Agreement to work under a profit-sharing model.
-""",
-            **kwargs,
-        )
-
-    async def extract(self, text_information: str) -> UserInformation:
-        information = await self._extractor.chat(
-            user_input=QUERY_TEMPLATE.format(text_information),
-            output_type=UserInformation,
-        )
-        return information
+from .simple_agent import SimpleAgent
 
 
 class UserInformation(BaseModel):
@@ -74,7 +45,30 @@ class HostingInfo(BaseModel):
 
 
 class ProfitSharingAgreement(BaseModel):
-    agreement: Literal["yes"] = Field(
+    agreement: Literal["Yes."] = Field(
         ...,
         description="User agreement to work under a profit-sharing model instead of a one-time deal.",
     )
+
+
+INSTRUCTIONS = """
+You are a data extraction assistant.
+Your job is to collect the following information from users' answers:
+- Names of banks where the user has corporate accounts.
+- Connected PSPs.
+- Hostring information.
+- Agreement to work under a profit-sharing model.
+"""
+
+
+def expand_query(user_input: str) -> str:
+    return (
+        f"Extract information from the following user text.\n User text: {user_input}"
+    )
+
+
+info_extractor = SimpleAgent(
+    instructions=INSTRUCTIONS,
+    expand_query=expand_query,
+    output_type=UserInformation,
+)

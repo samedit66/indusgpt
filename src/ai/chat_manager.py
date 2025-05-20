@@ -1,13 +1,10 @@
 from typing import Iterable
 
-from src.ai.dialog_agent import (
-    DialogAgent,
-    Answer,
-)
-
 from .question_list import QuestionList
 from .user_answer_storage import UserAnswerStorage
 from .chat_state_manager import ChatStateManager, OnAllFinishedCallback
+
+from .handle_user_message import handle_user_message, AgentResponse
 
 
 class ChatManager:
@@ -20,7 +17,6 @@ class ChatManager:
         question_list: QuestionList,
         user_answer_storage: UserAnswerStorage,
         on_all_finished: Iterable[OnAllFinishedCallback] = None,
-        **model_settings,
     ) -> None:
         """
         Initialize ChatManager with question sequence and persistence layer for answers.
@@ -35,7 +31,6 @@ class ChatManager:
             **model_settings: Arbitrary keyword settings used to configure the
                 underlying DialogAgent (e.g., model name, temperature).
         """
-        self.dialog_agent = DialogAgent(**model_settings)
         self.chat_state_manager = ChatStateManager(
             question_list=question_list,
             user_answer_storage=user_answer_storage,
@@ -51,7 +46,7 @@ class ChatManager:
 
         Returns:
             str | None: The text of the current question. Returns None if all
-                questions have been answered.
+                questions have been answered or user is not registered.
         """
         if self.chat_state_manager.all_finished(user_id):
             return None
@@ -87,14 +82,17 @@ class ChatManager:
             return None
 
         # Invoke the dialog agent and update state
-        agent_answer = await self._talk(user_id, user_input)
-        self._update_state(user_id, agent_answer)
+        agent_response = await self._talk(user_id, user_input)
+        self._update_state(user_id, agent_response)
 
         # Build the outgoing reply
-        reply_text = self._build_reply_text(user_id, agent_answer.text)
+        reply_text = self._build_reply_text(
+            user_id,
+            agent_response.response_text,
+        )
         return reply_text
 
-    async def _talk(self, user_id: int, user_input: str) -> Answer:
+    async def _talk(self, user_id: int, user_input: str) -> AgentResponse:
         """
         Retrieve the current question and partial answer, compose a prompt,
         and query the DialogAgent for its next fragment of reply.
@@ -108,15 +106,14 @@ class ChatManager:
                 a flag 'ready_for_next_question', and the processed user_input.
         """
         question, partial_answer = self.chat_state_manager.current_state(user_id)
-        prompt = prompt_for_dialog_agent(user_input, partial_answer)
-        answer = await self.dialog_agent.reply(
-            user_input=prompt,
-            question=question.text,
-            val_rule=question.answer_requirement,
+        answer = await handle_user_message(
+            user_input=user_input,
+            question=question,
+            context=partial_answer,
         )
         return answer
 
-    def _update_state(self, user_id: int, agent_answer: Answer) -> None:
+    def _update_state(self, user_id: int, agent_responce: AgentResponse) -> None:
         """
         Update the ChatStateManager based on whether the agent has indicated
         readiness to move to the next question or needs more user input.
@@ -126,15 +123,14 @@ class ChatManager:
             agent_answer (Answer): The response from DialogAgent containing
                 a boolean 'ready_for_next_question' and the latest user_input.
         """
-        if agent_answer.ready_for_next_question:
-            self.chat_state_manager.finish_question(user_id)
-            return
+        if agent_responce.extracted_data is not None:
+            self.chat_state_manager.update_answer(
+                user_id,
+                agent_responce.extracted_data,
+            )
 
-        partial_answer = f"{agent_answer.user_input}\n{agent_answer.extracted_data}\n"
-        self.chat_state_manager.update_answer(
-            user_id,
-            partial_answer,
-        )
+        if agent_responce.ready_for_next_question:
+            self.chat_state_manager.finish_question(user_id)
 
     def _build_reply_text(self, user_id: int, agent_answer_text: str) -> str:
         """
@@ -150,11 +146,12 @@ class ChatManager:
                 question, or a well-formed closing paragraph once complete.
         """
         if not self.chat_state_manager.all_finished(user_id):
-            next_q, _ = self.chat_state_manager.current_state(user_id)
-            return f"{agent_answer_text}\n{next_q.text}"
+            # next_q, _ = self.chat_state_manager.current_state(user_id)
+            # return f"{agent_answer_text}\n{next_q.text}"
+            return agent_answer_text
 
         closing = (
-            "Got all the info I need from you. "
+            " Got all the info I need from you. "
             "I'll check everything out and get back to you soon. "
             "Looking forward to working together!"
         )
@@ -176,6 +173,6 @@ def prompt_for_dialog_agent(user_input: str, partial_answer: str | None) -> str:
         str: A unified prompt string combining partial_answer (if any) and user_input,
             separated by a newline.
     """
-    prompt = partial_answer or ""
+    prompt = partial_answer if partial_answer else ""
     prompt += f"\n{user_input}"
     return prompt

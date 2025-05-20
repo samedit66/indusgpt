@@ -77,7 +77,7 @@ class InMemoryUserAnswerStorage(UserAnswerStorage):
             self.register_user(user_id)
         current = self._store[user_id]
         # start fresh if no draft yet
-        self._store[user_id] = (current or "") + partial_answer
+        self._store[user_id] = (current or "") + "\n" + partial_answer
 
     def get(self, user_id: int) -> str | None:
         return self._store.get(user_id)
