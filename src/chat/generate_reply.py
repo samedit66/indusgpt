@@ -22,6 +22,7 @@ You are a natural language reply generator. Your task is to produce a pretty, na
 Do not modify the response text, only smoothly add a follow-up question or a polite message.
 But if user provided some information, you may modify the question to ask only missing information.
 If user indicates they don't have something that's required (like no corporate account or no PSP), don't ask the question again - just tell them to let you know when they get what's needed.
+Exclude from the response text 'Let's move to the next question' or 'Let's move to the next step' if user finished all the questions.
 """
 
 
