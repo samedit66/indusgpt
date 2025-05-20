@@ -33,25 +33,27 @@ class ChatManager:
         self,
         question_list: QuestionList,
         user_answer_storage: UserAnswerStorage,
-        handle_user_message: ResponseGenerator,
-        build_reply: ReplyGenerator,
+        generate_response: ResponseGenerator,
+        generate_reply: ReplyGenerator,
         on_all_finished: Iterable[OnAllFinishedCallback] = None,
     ) -> None:
         """
-        Initialize ChatManager with question sequence and persistence layer for answers.
+        Initialize ChatManager with question sequence, persistence layer, and response generators.
 
         Args:
             question_list (QuestionList): An ordered collection of Question objects
                 defining the conversation flow.
-            user_answer (UserAnswerStorage): A storage interface for saving or retrieving
+            user_answer_storage (UserAnswerStorage): A storage interface for saving or retrieving
                 user-provided answers between sessions.
+            generate_response (ResponseGenerator): A callable that generates responses to user input
+                based on the current chat state.
+            generate_reply (ReplyGenerator): A callable that produces natural language replies
+                by enriching responses with context like next questions.
             on_all_finished (Iterable[OnAllFinishedCallback]): A list of callback functions
                 to be executed when a user finishes all questions.
-            **model_settings: Arbitrary keyword settings used to configure the
-                underlying DialogAgent (e.g., model name, temperature).
         """
-        self.handle_user_message = handle_user_message
-        self.build_reply = build_reply
+        self.generate_response = generate_response
+        self.generate_reply = generate_reply
         self.chat_state_manager = ChatStateManager(
             question_list=question_list,
             user_answer_storage=user_answer_storage,
@@ -108,7 +110,7 @@ class ChatManager:
 
         # Build the outgoing reply
         current_state = self.chat_state_manager.current_state(user_id)
-        return self.build_reply(agent_response.response_text, current_state)
+        return self.generate_reply(agent_response, current_state)
 
     async def _talk(self, user_id: int, user_input: str) -> ResponseToUser:
         """
@@ -124,7 +126,7 @@ class ChatManager:
                 a flag 'ready_for_next_question', and the processed user_input.
         """
         _, question, partial_answer = self.chat_state_manager.current_state(user_id)
-        answer = await self.handle_user_message(
+        answer = await self.generate_response(
             user_input=user_input,
             question=question,
             context=partial_answer,
