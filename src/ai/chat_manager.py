@@ -5,6 +5,7 @@ from .user_answer_storage import UserAnswerStorage
 from .chat_state_manager import ChatStateManager, OnAllFinishedCallback
 
 from .handle_user_message import handle_user_message, AgentResponse
+from .build_reply import build_reply
 
 
 class ChatManager:
@@ -86,11 +87,8 @@ class ChatManager:
         self._update_state(user_id, agent_response)
 
         # Build the outgoing reply
-        reply_text = self._build_reply_text(
-            user_id,
-            agent_response.response_text,
-        )
-        return reply_text
+        q, _ = self.chat_state_manager.current_state(user_id)
+        return build_reply(agent_response.response_text, next_question=q)
 
     async def _talk(self, user_id: int, user_input: str) -> AgentResponse:
         """
@@ -146,7 +144,8 @@ class ChatManager:
                 question, or a well-formed closing paragraph once complete.
         """
         if not self.chat_state_manager.all_finished(user_id):
-            return agent_answer_text
+            q, _ = self.chat_state_manager.current_state(user_id)
+            return f"{agent_answer_text}\n{q.text}"
 
         closing = (
             " Got all the info I need from you. "

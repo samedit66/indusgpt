@@ -1,11 +1,9 @@
-from collections import namedtuple
 from typing import Any, Callable, Iterable
 
 from .question_list import QuestionList, QaPair
 from .user_answer_storage import UserAnswerStorage
 
-
-State = namedtuple("State", ["question", "partial_answer"])
+from .chat_state import State, StateType
 
 type OnAllFinishedCallback = Callable[[int, list[QaPair]], Any]
 
@@ -59,8 +57,11 @@ class ChatStateManager:
         :return: a State namedtuple of (question, partial_answer)
         """
         question = self.question_list.current_question(user_id)
+        if question is None:
+            return State(StateType.FINISHED, None, None)
+
         partial_answer = self.user_answer_storage.get(user_id)
-        return State(question, partial_answer)
+        return State(StateType.IN_PROGRESS, question, partial_answer)
 
     def update_answer(self, user_id: int, partial_answer: str) -> None:
         """
