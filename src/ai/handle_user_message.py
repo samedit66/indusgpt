@@ -16,7 +16,7 @@ from .validator import (
 )
 
 
-class AgentResponse(BaseModel):
+class ResponseToUser(BaseModel):
     user_input: str = Field(
         ..., description="The exact text message received from the user."
     )
@@ -35,14 +35,14 @@ async def handle_user_message(
     user_input: str,
     question: Question,
     context: str | None = None,
-) -> AgentResponse:
+) -> ResponseToUser:
     intent = await router(user_input, context=context)
 
     match intent:
         case Intent(category="faq"):
             # TODO: Возможно, стоит вынести в отдельную функцию
             agent_response = await faq_agent(user_input, question_text=question.text)
-            return AgentResponse(
+            return ResponseToUser(
                 user_input=user_input,
                 response_text=agent_response,
                 extracted_data=None,
@@ -82,7 +82,7 @@ async def evaluate_user_information(
     user_information: str,
     question: Question,
     context: str | None = None,
-) -> AgentResponse:
+) -> ResponseToUser:
     status = await validator(
         user_information,
         question=question,
@@ -110,7 +110,7 @@ async def evaluate_user_information(
             )
 
     agent_response = await response_maker(prompt)
-    return AgentResponse(
+    return ResponseToUser(
         user_input=user_information,
         response_text=agent_response,
         extracted_data=status.is_valid.extracted_data,

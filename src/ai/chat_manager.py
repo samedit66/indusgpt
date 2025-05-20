@@ -1,11 +1,27 @@
-from typing import Iterable
+from typing import Callable, Iterable
 
 from .question_list import QuestionList
 from .user_answer_storage import UserAnswerStorage
+from .chat_state import State
 from .chat_state_manager import ChatStateManager, OnAllFinishedCallback
 
-from .handle_user_message import handle_user_message, AgentResponse
-from .build_reply import build_reply
+from .handle_user_message import ResponseToUser
+
+type ResponseGenerator = Callable[[str, State], ResponseToUser]
+"""
+Callable which can generate a response to user.
+Takes user input and current chat state.
+Returns a `ResponseToUser`.
+"""
+
+type ReplyGenerator = Callable[[ResponseToUser, State], str]
+"""
+Callable which can produce a pretty reply to user.
+Usually to get a pretty-looking reply you might want to add a next question,
+or add a goodbye if conversation is finished -- more context needs to be provided.
+This callable takes a `ResponeToUser` to enrich the context and current chat state.
+Based on them, it returns a natural reply.
+"""
 
 
 class ChatManager:
@@ -17,6 +33,8 @@ class ChatManager:
         self,
         question_list: QuestionList,
         user_answer_storage: UserAnswerStorage,
+        handle_user_message: ResponseGenerator,
+        build_reply: ReplyGenerator,
         on_all_finished: Iterable[OnAllFinishedCallback] = None,
     ) -> None:
         """
@@ -32,6 +50,8 @@ class ChatManager:
             **model_settings: Arbitrary keyword settings used to configure the
                 underlying DialogAgent (e.g., model name, temperature).
         """
+        self.handle_user_message = handle_user_message
+        self.build_reply = build_reply
         self.chat_state_manager = ChatStateManager(
             question_list=question_list,
             user_answer_storage=user_answer_storage,
@@ -87,10 +107,10 @@ class ChatManager:
         self._update_state(user_id, agent_response)
 
         # Build the outgoing reply
-        q, _ = self.chat_state_manager.current_state(user_id)
-        return build_reply(agent_response.response_text, next_question=q)
+        current_state = self.chat_state_manager.current_state(user_id)
+        return self.build_reply(agent_response.response_text, current_state)
 
-    async def _talk(self, user_id: int, user_input: str) -> AgentResponse:
+    async def _talk(self, user_id: int, user_input: str) -> ResponseToUser:
         """
         Retrieve the current question and partial answer, compose a prompt,
         and query the DialogAgent for its next fragment of reply.
@@ -103,15 +123,15 @@ class ChatManager:
             Answer: The agent's response object, containing the generated text,
                 a flag 'ready_for_next_question', and the processed user_input.
         """
-        question, partial_answer = self.chat_state_manager.current_state(user_id)
-        answer = await handle_user_message(
+        _, question, partial_answer = self.chat_state_manager.current_state(user_id)
+        answer = await self.handle_user_message(
             user_input=user_input,
             question=question,
             context=partial_answer,
         )
         return answer
 
-    def _update_state(self, user_id: int, agent_responce: AgentResponse) -> None:
+    def _update_state(self, user_id: int, agent_responce: ResponseToUser) -> None:
         """
         Update the ChatStateManager based on whether the agent has indicated
         readiness to move to the next question or needs more user input.
@@ -129,28 +149,3 @@ class ChatManager:
 
         if agent_responce.ready_for_next_question:
             self.chat_state_manager.finish_question(user_id)
-
-    def _build_reply_text(self, user_id: int, agent_answer_text: str) -> str:
-        """
-        Combine the latest agent-generated text with either the next question
-        prompt or a final closing message if all questions are answered.
-
-        Args:
-            user_id (int): Session identifier to check state progress.
-            agent_answer_text (str): Text produced by the DialogAgent for this turn.
-
-        Returns:
-            str: A single string containing the agent's answer and the next
-                question, or a well-formed closing paragraph once complete.
-        """
-        if not self.chat_state_manager.all_finished(user_id):
-            q, _ = self.chat_state_manager.current_state(user_id)
-            return f"{agent_answer_text}\n{q.text}"
-
-        closing = (
-            " Got all the info I need from you. "
-            "I'll check everything out and get back to you soon. "
-            "Looking forward to working together!"
-        )
-        separator = "" if agent_answer_text.endswith(".") else " "
-        return f"{agent_answer_text}{separator}{closing}"
