@@ -79,6 +79,7 @@ Using that information and the current user's answer {user_input}, validate it.
 Do not validate only user answer, validate
 both combined what we found out about user earlier and the current user's answer.
 Do not be too strict, infer required information.
+If user is unsure about his answer, do not infer information - make user confirm.
 """
 
 
