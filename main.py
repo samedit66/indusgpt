@@ -2,11 +2,12 @@ import asyncio
 from dotenv import load_dotenv
 from colorama import init, Fore, Style
 
-from src.chat.question_list import Question
+from src.chat.question_list import Question, QaPair
 from src.chat.in_memory import InMemoryQuestionList, InMemoryUserAnswerStorage
 from src.chat.chat_manager import ChatManager
 from src.chat.generate_response import generate_response
 from src.chat.generate_reply import generate_reply
+from src.chat.info_extractor import extract_info
 
 
 def build_questions():
@@ -103,6 +104,10 @@ async def console_chat():
     # load any .env
     load_dotenv()
 
+    async def on_all_finished(user_id: int, qa_pairs: list[QaPair]):
+        info = await extract_info(qa_pairs)
+        pp(info)
+
     # set up our in-memory Q&A manager
     questions = build_questions()
     qlist = InMemoryQuestionList(questions)
@@ -112,18 +117,12 @@ async def console_chat():
         user_answer_storage=storage,
         generate_response=generate_response,
         generate_reply=generate_reply,
-        on_all_finished=[
-            lambda user_id, qa: print(
-                f"\n{Fore.MAGENTA}✅ All done! Stored {len(qa)} Q&A pairs.\n"
-                f"Q&A pairs:\n"
-                f"{pp(qa)}"
-            )
-        ],
+        on_all_finished=[on_all_finished],
     )
 
     user_id = 1  # single-console user
 
-    print(Fore.GREEN + "🤖 Bot: Hello! Let’s go through a few questions.\n")
+    print(Fore.GREEN + "🤖 Bot: Hello! Let's go through a few questions.\n")
     print(Fore.CYAN + "Bot: " + Style.BRIGHT + await cm.current_question(user_id))
 
     # Loop until ChatManager says we're finished
