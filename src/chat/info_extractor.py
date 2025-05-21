@@ -4,6 +4,7 @@ from typing import Optional, Literal
 from pydantic import BaseModel, Field
 
 from .simple_agent import SimpleAgent
+from .question_list import QaPair
 
 
 class UserInformation(BaseModel):
@@ -62,9 +63,7 @@ Your job is to collect the following information from users' answers:
 
 
 def expand_query(user_input: str) -> str:
-    return (
-        f"Extract information from the following user text.\n User text: {user_input}"
-    )
+    return f"Extract information from the following Q&A pairs.:\n{user_input}"
 
 
 info_extractor = SimpleAgent(
@@ -72,3 +71,8 @@ info_extractor = SimpleAgent(
     expand_query=expand_query,
     output_type=UserInformation,
 )
+
+
+async def extract_info(qa_pairs: list[QaPair]) -> UserInformation:
+    qa = "\n".join(f"Q: {q.question}\nA: {q.answer}\n" for q in qa_pairs)
+    return await info_extractor(qa)
