@@ -35,9 +35,19 @@ def build_questions():
         Question(
             text="Can you provide login and password access to the PSP account?",
             answer_requirement=(
-                "User response **must** clearly answer “yes” or “no” and, if yes, indicate readiness to "
-                "**share login credentials**.\nExamples:\n"
-                "- Yes, login is admin, password is 123341."
+                "User response **must** provide actual login credentials (login and password) or confirm and commit to "
+                "providing them. Any response indicating inability or unwillingness to share credentials is invalid.\n"
+                "Examples of valid responses:\n"
+                "- Login admin123, password test456\n"
+                "- Username is merchant_1, pass is secure123, API key is abcd1234\n"
+                "- Yes, I'll share them right now - login: mystore, password: shop2023\n"
+                "- Of course, the credentials are: user=admin pass=12345\n\n"
+                "Examples of invalid responses:\n"
+                "- I'll check with my team first\n"
+                "- I need to think about it\n"
+                "- I don't have access right now\n"
+                "- Let me get back to you on this\n"
+                "- I can't share these details"
             ),
         ),
         Question(
@@ -47,21 +57,38 @@ def build_questions():
                 "If not — we will create the website ourselves"
             ),
             answer_requirement=(
-                "User response **must** answer “yes” or “no.” If “yes,” they **must** mention they can "
-                "provide **hosting access**. If user cannot provide hosting access, that's fine."
-                "\nExamples:\n"
-                "- No.\n"
-                "- Yes, I can provide hosting credentials."
+                "User response **must** clearly indicate if they have a website. If they have one, they **must** "
+                "provide hosting access details (credentials, URL, etc). If they don't have a website or are unsure, "
+                "that's perfectly fine.\n\n"
+                "Examples of valid responses:\n"
+                "- No, I don't have a website yet\n"
+                "- Not sure, we're still working on it\n"
+                "- Yes, here's the hosting access - username: admin, password: secure123\n"
+                "- Yes, you can access it at mysite.com/admin with login: merchant, pass: shop2023\n"
+                "- Yes, FTP details are host: ftp.mysite.com, user: ftpuser, pass: ftppass123\n\n"
+                "Examples of invalid responses:\n"
+                "- Yes (without providing access details)\n"
+                "- I have a website but can't share access now\n"
+                "- Maybe\n"
+                "- I'll think about giving access\n"
+                "- The website is www.mysite.com (but no access details)"
             ),
         ),
         Question(
             text="Are you open to working under a profit-sharing model (5% of transaction volume) instead of a one-time deal?",
             answer_requirement=(
-                'User response **must** clearly say "yes" or "no". User may agree more informally, like "I agree" or "I don\'t mind".\nExamples:\n'
-                "- Yes.\n"
-                "- No.\n"
-                "- Sure\n."
-                "- Of course\n."
+                "User response **must** clearly indicate agreement or disagreement to the profit-sharing model.\n\n"
+                "Examples of valid responses:\n"
+                "- Yes, I agree to 5% profit sharing\n"
+                "- Sure, that works for me\n"
+                "- I accept those terms\n"
+                "- Absolutely, let's do profit sharing\n\n"
+                "Examples of invalid responses:\n"
+                "- Maybe later\n"
+                "- Need to think about it\n"
+                "- What about 3%?\n"
+                "- Let me check with my team\n"
+                "- I prefer fixed price\n"
             ),
         ),
     ]
