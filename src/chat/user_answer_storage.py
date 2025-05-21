@@ -7,7 +7,7 @@ class UserAnswerStorage(ABC):
     """
 
     @abstractmethod
-    def register_user(self, user_id: int) -> None:
+    async def register_user(self, user_id: int) -> None:
         """
         Registers a new user in the storage.
         Nothing happens if the user is already registered.
@@ -16,7 +16,7 @@ class UserAnswerStorage(ABC):
         """
 
     @abstractmethod
-    def delete_user(self, user_id: int) -> None:
+    async def delete_user(self, user_id: int) -> None:
         """
         Removes the user from the storage.
         Nothing happens if the user is not registered.
@@ -25,7 +25,7 @@ class UserAnswerStorage(ABC):
         """
 
     @abstractmethod
-    def contains_user(self, user_id: int) -> bool:
+    async def contains_user(self, user_id: int) -> bool:
         """
         Checks if the user is registered in the storage.
 
@@ -34,7 +34,7 @@ class UserAnswerStorage(ABC):
         """
 
     @abstractmethod
-    def append(self, user_id: int, partial_answer: str) -> None:
+    async def append(self, user_id: int, partial_answer: str) -> None:
         """
         Appends the draft response for a given user.
         Registers the user if not already present.
@@ -44,7 +44,7 @@ class UserAnswerStorage(ABC):
         """
 
     @abstractmethod
-    def get(self, user_id: int) -> str | None:
+    async def get(self, user_id: int) -> str | None:
         """
         Retrieves the current draft response, if any.
 
@@ -53,7 +53,7 @@ class UserAnswerStorage(ABC):
         """
 
     @abstractmethod
-    def clear(self, user_id: int) -> None:
+    async def clear(self, user_id: int) -> None:
         """
         Removes any saved draft for the specified user.
         Nothing happens if the user is not registered.

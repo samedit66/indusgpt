@@ -60,7 +60,7 @@ class ChatManager:
             on_all_finished=on_all_finished,
         )
 
-    def current_question(self, user_id: int) -> str | None:
+    async def current_question(self, user_id: int) -> str | None:
         """
         Retrieve the current question for a user without advancing the state.
 
@@ -71,9 +71,9 @@ class ChatManager:
             str | None: The text of the current question. Returns None if all
                 questions have been answered or user is not registered.
         """
-        if self.chat_state_manager.all_finished(user_id):
+        if await self.chat_state_manager.all_finished(user_id):
             return None
-        _, q, _ = self.chat_state_manager.current_state(user_id)
+        _, q, _ = await self.chat_state_manager.current_state(user_id)
         return q.text
 
     async def reply(self, user_id: int, user_input: str) -> str | None:
@@ -97,19 +97,19 @@ class ChatManager:
             question or a final summary. Returns None if the Q&A is complete.
         """
         # Start session if needed
-        if not self.chat_state_manager.has_started(user_id):
-            self.chat_state_manager.start(user_id)
+        if not await self.chat_state_manager.has_started(user_id):
+            await self.chat_state_manager.start(user_id)
 
         # If conversation is finished, no further replies
-        if self.chat_state_manager.all_finished(user_id):
+        if await self.chat_state_manager.all_finished(user_id):
             return None
 
         # Invoke the dialog agent and update state
         agent_response = await self._talk(user_id, user_input)
-        self._update_state(user_id, agent_response)
+        await self._update_state(user_id, agent_response)
 
         # Build the outgoing reply
-        current_state = self.chat_state_manager.current_state(user_id)
+        current_state = await self.chat_state_manager.current_state(user_id)
         return await self.generate_reply(agent_response, current_state)
 
     async def _talk(self, user_id: int, user_input: str) -> ResponseToUser:
@@ -125,7 +125,9 @@ class ChatManager:
             Answer: The agent's response object, containing the generated text,
                 a flag 'ready_for_next_question', and the processed user_input.
         """
-        _, question, partial_answer = self.chat_state_manager.current_state(user_id)
+        _, question, partial_answer = await self.chat_state_manager.current_state(
+            user_id
+        )
         answer = await self.generate_response(
             user_input=user_input,
             question=question,
@@ -133,7 +135,7 @@ class ChatManager:
         )
         return answer
 
-    def _update_state(self, user_id: int, agent_responce: ResponseToUser) -> None:
+    async def _update_state(self, user_id: int, agent_responce: ResponseToUser) -> None:
         """
         Update the ChatStateManager based on whether the agent has indicated
         readiness to move to the next question or needs more user input.
@@ -144,10 +146,10 @@ class ChatManager:
                 a boolean 'ready_for_next_question' and the latest user_input.
         """
         if agent_responce.extracted_data is not None:
-            self.chat_state_manager.update_answer(
+            await self.chat_state_manager.update_answer(
                 user_id,
                 agent_responce.extracted_data,
             )
 
         if agent_responce.ready_for_next_question:
-            self.chat_state_manager.finish_question(user_id)
+            await self.chat_state_manager.finish_question(user_id)

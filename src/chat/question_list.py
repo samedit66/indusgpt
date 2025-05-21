@@ -12,7 +12,7 @@ class QuestionList(ABC):
     """
 
     @abstractmethod
-    def register_user(self, user_id: int) -> None:
+    async def register_user(self, user_id: int) -> None:
         """
         Registers a new user in the storage.
         Nothing happens if the user is already registered.
@@ -21,7 +21,7 @@ class QuestionList(ABC):
         """
 
     @abstractmethod
-    def delete_user(self, user_id: int) -> None:
+    async def delete_user(self, user_id: int) -> None:
         """
         Removes the user from the storage.
         Nothing happens if the user is not registered.
@@ -30,7 +30,7 @@ class QuestionList(ABC):
         """
 
     @abstractmethod
-    def contains_user(self, user_id: int) -> bool:
+    async def contains_user(self, user_id: int) -> bool:
         """
         Checks if the user is registered in the storage.
 
@@ -39,7 +39,7 @@ class QuestionList(ABC):
         """
 
     @abstractmethod
-    def current_question(self, user_id: int) -> Question | None:
+    async def current_question(self, user_id: int) -> Question | None:
         """
         Provides the next pending question for a user without advancing the pointer.
 
@@ -49,7 +49,7 @@ class QuestionList(ABC):
         """
 
     @abstractmethod
-    def forth(self, user_id: int, answer: str) -> None:
+    async def forth(self, user_id: int, answer: str) -> None:
         """
         Accepts a finalized answer and steps forward to the subsequent question.
         Does nothing if the user is not registered.
@@ -59,7 +59,7 @@ class QuestionList(ABC):
         """
 
     @abstractmethod
-    def all_finished(self, user_id: int) -> bool:
+    async def all_finished(self, user_id: int) -> bool:
         """
         Checks whether the user has answered every question in the list.
 
@@ -68,7 +68,7 @@ class QuestionList(ABC):
         """
 
     @abstractmethod
-    def qa_pairs(self, user_id: int) -> list[QaPair]:
+    async def qa_pairs(self, user_id: int) -> list[QaPair]:
         """
         Returns a list of currently answered questions and their corresponding answers.
 

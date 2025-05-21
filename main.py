@@ -97,10 +97,10 @@ async def console_chat():
     user_id = 1  # single-console user
 
     print(Fore.GREEN + "🤖 Bot: Hello! Let’s go through a few questions.\n")
-    print(Fore.CYAN + "Bot: " + Style.BRIGHT + cm.current_question(user_id))
+    print(Fore.CYAN + "Bot: " + Style.BRIGHT + await cm.current_question(user_id))
 
     # Loop until ChatManager says we're finished
-    while not qlist.all_finished(user_id):
+    while not await qlist.all_finished(user_id):
         # get next question text
         # q = cm.current_question(user_id)
         # print bot prompt
