@@ -1,4 +1,4 @@
 .PHONY: run
 run:
-	uv run proxybot.py
+	uv run main.py
 	
