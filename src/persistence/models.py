@@ -4,6 +4,7 @@ from tortoise import fields
 
 class User(Model):
     id = fields.IntField(pk=True)
+    name = fields.TextField()
 
     class Meta:
         table = "user"
@@ -29,6 +30,7 @@ class QAEntry(Model):
     question_index = fields.IntField()
     question_text = fields.TextField()
     answer = fields.TextField()
+    created_at = fields.DatetimeField(auto_now_add=True)
 
     class Meta:
         table = "qa_entry"
