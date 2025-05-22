@@ -11,6 +11,7 @@ class Config:
     model_name: str
     bot_token: str
     db_path: str
+    log_file: str
 
 
 def load_config() -> Config:
@@ -22,4 +23,5 @@ def load_config() -> Config:
         model_name=os.environ["MODEL"],
         bot_token=os.environ["TELEGRAM_BOT_TOKEN"],
         db_path=os.environ["DATABASE"],
+        log_file=os.environ["LOG_FILE"],
     )
