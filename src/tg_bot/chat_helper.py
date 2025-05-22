@@ -92,6 +92,23 @@ def questions() -> list[Question]:
             ),
         ),
         Question(
+            text="Please provide the details of the company linked to your payment-gateway account:\n"
+            "- Company Name\n"
+            "- Registered Address\n"
+            "- Contact Phone Number\n"
+            "- Email Address",
+            answer_requirement=(
+                "User response **must** include all four items: company name, address, phone number, and email.\n\n"
+                "Examples of valid responses:\n"
+                "- Acme Corp, 123 Main St, Springfield, +1-555-1234, info@acme.com\n"
+                "- Company Name: Widget Co.; Address: 456 Elm Rd, Metropolis; Phone: +44-20-7946-0958; Email: support@widget.co.uk\n\n"
+                "Examples of invalid responses:\n"
+                "- Just Acme Corp and its address\n"
+                "- I’ll send it later\n"
+                "- Only phone number provided\n"
+            ),
+        ),
+        Question(
             text=(
                 "Do you already have a website approved by the PSP?\n"
                 "If yes — please give us hosting access (we may need to adjust code or API)\n"

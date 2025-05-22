@@ -12,6 +12,7 @@ class UserInformation(BaseModel):
         ..., description="List of corporate bank accounts."
     )
     psps: list[PSPAccount] = Field(..., description="List of connected PSPs.")
+    company_details: CompanyDetails = Field(..., description="Company details.")
     hosting: HostingInfo = Field(..., description="Hosting information.")
     profit_sharing: ProfitSharingAgreement = Field(
         ..., description="Profit-sharing agreement."
@@ -31,6 +32,28 @@ class PSPAccount(BaseModel):
     details: Optional[str] = Field(
         ...,
         description="Any additional information the user mentions about their PSP.",
+    )
+    company: CompanyDetails = Field(
+        ..., description="Details of the company linked to the PSP account."
+    )
+
+
+class CompanyDetails(BaseModel):
+    name: str = Field(
+        ...,
+        description="Name of the company linked to the payment gateway account.",
+    )
+    address: str = Field(
+        ...,
+        description="Company's registered address.",
+    )
+    phone: str = Field(
+        ...,
+        description="Company's contact phone number.",
+    )
+    email: str = Field(
+        ...,
+        description="Company's contact email address.",
     )
 
 
@@ -59,6 +82,7 @@ Your job is to collect the following information from users' answers:
 - Connected PSPs.
 - Hostring information.
 - Agreement to work under a profit-sharing model.
+- Company details for each payment gateway–linked company (name, address, phone, email).
 """
 
 
