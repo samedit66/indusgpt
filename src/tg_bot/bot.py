@@ -26,6 +26,6 @@ async def run_bot():
 
     await init_db("sqlite://db.sqlite3", ["src.persistence.models"])
 
-    await bot.set_description("Hi! To start the conversation, use /start command.")
+    await bot.set_my_description("Hi! To start the conversation, use /start command.")
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)
