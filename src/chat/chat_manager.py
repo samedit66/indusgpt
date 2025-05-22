@@ -60,6 +60,17 @@ class ChatManager:
             on_all_finished=on_all_finished,
         )
 
+    async def has_user_started(self, user_id: int) -> bool:
+        return await self.chat_state_manager.has_user_started(user_id)
+
+    async def is_user_talking(self, user_id: int) -> bool:
+        return await self.chat_state_manager.has_user_started(
+            user_id
+        ) and not await self.chat_state_manager.all_finished(user_id)
+
+    async def has_user_finished(self, user_id: int) -> bool:
+        return await self.chat_state_manager.all_finished(user_id)
+
     async def current_question(self, user_id: int) -> str | None:
         """
         Retrieve the current question for a user without advancing the state.
