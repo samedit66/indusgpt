@@ -24,7 +24,7 @@ class TortoiseUserAnswerStorage(UserAnswerStorage):
         return entry.content if entry else None
 
     async def clear(self, user_id: int) -> None:
-        await PartialAnswer.filter(user__id=user_id).delete()
+        await PartialAnswer.filter(user_id=user_id).delete()
 
 
 class TortoiseQuestionList(QuestionList):
@@ -32,13 +32,13 @@ class TortoiseQuestionList(QuestionList):
         self.questions = questions
 
     async def has_user_started(self, user_id: int) -> bool:
-        return await QAEntry.filter(user__id=user_id).exists()
+        return await QAEntry.filter(user_id=user_id).exists()
 
     async def current_question(self, user_id: int) -> Question | None:
         if not await User.filter(id=user_id).exists():
             return self.questions[0] if self.questions else None
 
-        answered = await QAEntry.filter(user__id=user_id).count()
+        answered = await QAEntry.filter(user_id=user_id).count()
         if answered >= len(self.questions):
             return None
         return self.questions[answered]
@@ -58,15 +58,13 @@ class TortoiseQuestionList(QuestionList):
             )
 
     async def all_finished(self, user_id: int) -> bool:
-        count = await QAEntry.filter(user__id=user_id).count()
+        count = await QAEntry.filter(user_id=user_id).count()
         return count >= len(self.questions)
 
     async def qa_pairs(self, user_id: int) -> list[QaPair]:
         # We do not check if the user exists, because
         # it must exist by the time we call this method
-        entries = (
-            await QAEntry.filter(user__id=user_id).order_by("question_index").all()
-        )
+        entries = await QAEntry.filter(user_id=user_id).order_by("question_index").all()
         pairs: list[QaPair] = []
         for entry in entries:
             idx = entry.question_index
