@@ -96,12 +96,10 @@ class ChatManager:
             The text the bot should reply with, including the next
             question or a final summary. Returns None if the Q&A is complete.
         """
-        # Start session if needed
-        if not await self.chat_state_manager.has_started(user_id):
-            await self.chat_state_manager.start(user_id)
-
         # If conversation is finished, no further replies
-        if await self.chat_state_manager.all_finished(user_id):
+        if await self.chat_state_manager.has_user_started(
+            user_id
+        ) and await self.chat_state_manager.all_finished(user_id):
             return None
 
         # Invoke the dialog agent and update state

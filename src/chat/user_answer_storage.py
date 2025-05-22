@@ -7,37 +7,9 @@ class UserAnswerStorage(ABC):
     """
 
     @abstractmethod
-    async def register_user(self, user_id: int) -> None:
-        """
-        Registers a new user in the storage.
-        Nothing happens if the user is already registered.
-
-        :param user_id: identifier for the conversation participant
-        """
-
-    @abstractmethod
-    async def delete_user(self, user_id: int) -> None:
-        """
-        Removes the user from the storage.
-        Nothing happens if the user is not registered.
-
-        :param user_id: identifier for the conversation participant
-        """
-
-    @abstractmethod
-    async def contains_user(self, user_id: int) -> bool:
-        """
-        Checks if the user is registered in the storage.
-
-        :param user_id: identifier for the conversation participant
-        :return: True if the user is registered, False otherwise
-        """
-
-    @abstractmethod
     async def append(self, user_id: int, partial_answer: str) -> None:
         """
         Appends the draft response for a given user.
-        Registers the user if not already present.
 
         :param user_id: identifier for the conversation participant
         :param partial_answer: the latest text to record
@@ -49,14 +21,13 @@ class UserAnswerStorage(ABC):
         Retrieves the current draft response, if any.
 
         :param user_id: identifier for the conversation participant
-        :return: the stored partial answer (None if nothing was stored or user is not registered)
+        :return: the stored partial answer (None if nothing was stored)
         """
 
     @abstractmethod
     async def clear(self, user_id: int) -> None:
         """
         Removes any saved draft for the specified user.
-        Nothing happens if the user is not registered.
 
         :param user_id: identifier for the conversation participant
         """

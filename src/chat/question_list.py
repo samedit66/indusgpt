@@ -12,36 +12,19 @@ class QuestionList(ABC):
     """
 
     @abstractmethod
-    async def register_user(self, user_id: int) -> None:
+    async def has_user_started(self, user_id: int) -> bool:
         """
-        Registers a new user in the storage.
-        Nothing happens if the user is already registered.
+        Checks if the user has ever started answering questions.
 
         :param user_id: identifier for the conversation participant
-        """
-
-    @abstractmethod
-    async def delete_user(self, user_id: int) -> None:
-        """
-        Removes the user from the storage.
-        Nothing happens if the user is not registered.
-
-        :param user_id: identifier for the conversation participant
-        """
-
-    @abstractmethod
-    async def contains_user(self, user_id: int) -> bool:
-        """
-        Checks if the user is registered in the storage.
-
-        :param user_id: identifier for the conversation participant
-        :return: True if the user is registered, False otherwise
+        :return: True if the user has started answering questions, False otherwise
         """
 
     @abstractmethod
     async def current_question(self, user_id: int) -> Question | None:
         """
         Provides the next pending question for a user without advancing the pointer.
+        If user has not started answering questions, returns the first question.
 
         :param user_id: identifier for the conversation participant
         :return: a Question tuple containing the prompt and any metadata
@@ -49,10 +32,10 @@ class QuestionList(ABC):
         """
 
     @abstractmethod
-    async def forth(self, user_id: int, answer: str) -> None:
+    async def advance(self, user_id: int, answer: str) -> None:
         """
-        Accepts a finalized answer and steps forward to the subsequent question.
-        Does nothing if the user is not registered.
+        Accepts a finalized answer and steps forward to the next question.
+        Nothing happens if all questions are answered.
 
         :param user_id: identifier for the conversation participant
         :param answer: the completed response to the current question
@@ -61,7 +44,7 @@ class QuestionList(ABC):
     @abstractmethod
     async def all_finished(self, user_id: int) -> bool:
         """
-        Checks whether the user has answered every question in the list.
+        Checks whether the user has answered all questions.
 
         :param user_id: identifier for the conversation participant
         :return: True if there are no further questions, False otherwise
@@ -74,5 +57,4 @@ class QuestionList(ABC):
 
         :param user_id: identifier for the conversation participant
         :return: a list of tuples containing the question and its answer
-            (empty if the user is not registered)
         """

@@ -28,26 +28,14 @@ class ChatStateManager:
         self.user_answer_storage = user_answer_storage
         self.on_all_finished_callbacks = on_all_finished or ()
 
-    async def start(self, user_id: int) -> None:
-        """
-        Initializes tracking for a new user by registering them in both the question sequence
-        and answer-storage systems.
-
-        :param user_id: identifier for the conversation participant
-        """
-        await self.question_list.register_user(user_id)
-        await self.user_answer_storage.register_user(user_id)
-
-    async def has_started(self, user_id: int) -> bool:
+    async def has_user_started(self, user_id: int) -> bool:
         """
         Checks if the conversation with the specified user has been ever started.
 
         :param user_id: identifier for the conversation participant
         :return: True if the user is in progress or completed all the questions; False otherwise
         """
-        return await self.question_list.contains_user(
-            user_id
-        ) and not await self.question_list.all_finished(user_id)
+        return await self.question_list.has_user_started(user_id)
 
     async def current_state(self, user_id: int) -> State:
         """
@@ -81,7 +69,7 @@ class ChatStateManager:
         """
         answer = await self.user_answer_storage.get(user_id)
         await self.user_answer_storage.clear(user_id)
-        await self.question_list.forth(user_id, answer)
+        await self.question_list.advance(user_id, answer)
 
         # TODO: Возможно, стоит делать это в отдельном методе...
         if await self.all_finished(user_id):
