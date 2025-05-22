@@ -93,7 +93,7 @@ async def generate_single_response(
                 extracted_data=None,
                 ready_for_next_question=False,
             )
-        case Intent(category="information"):
+        case _:
             return await evaluate_user_information(user_input, question, context)
 
 
