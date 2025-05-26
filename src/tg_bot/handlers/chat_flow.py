@@ -5,7 +5,7 @@ from aiogram.filters import Command
 from aiogram.types import ContentType
 
 from src.persistence.models import SuperGroup, TopicGroup, User
-from src.tg_bot.chat_helper import chat_manager, introduction
+from src.tg_bot.chat_helper import chat_manager, INTRODUCTION
 
 router = Router()
 logger = logging.getLogger(__name__)
@@ -18,7 +18,7 @@ async def start_chat(message: types.Message) -> None:
         user, _ = await User.get_or_create(
             id=user_id, defaults={"name": message.from_user.full_name}
         )
-        await message.answer(introduction())
+        await message.answer(INTRODUCTION)
         await message.answer(await chat_manager().current_question(user_id))
         return
 
