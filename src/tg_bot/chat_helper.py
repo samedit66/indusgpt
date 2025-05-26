@@ -149,6 +149,11 @@ QUESTIONS = [
 
 @lru_cache
 def chat_manager() -> ChatManager:
+    """
+    Create a chat manager instance.
+    It is cached to avoid creating a new instance every time, so
+    this is a singleton.
+    """
     return ChatManager(
         question_list=TortoiseQuestionList(QUESTIONS),
         user_answer_storage=TortoiseUserAnswerStorage(),
