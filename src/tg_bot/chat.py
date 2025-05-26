@@ -162,25 +162,38 @@ def chat_manager() -> ChatManager:
     )
 
 
-def has_user_started(user_id: int) -> bool:
+async def has_user_started(user_id: int) -> bool:
     """
     Check if the user has started the conversation.
     This is a shortcut for chat_manager().has_user_started(user_id).
     """
-    return chat_manager().has_user_started(user_id)
+    return await chat_manager().has_user_started(user_id)
 
 
-def is_user_talking(user_id: int) -> bool:
+async def is_user_talking(user_id: int) -> bool:
     """
     Check if the user is talking.
     This is a shortcut for chat_manager().is_user_talking(user_id).
     """
-    return chat_manager().is_user_talking(user_id)
+    return await chat_manager().is_user_talking(user_id)
 
 
-def has_user_finished(user_id: int) -> bool:
+async def has_user_finished(user_id: int) -> bool:
     """
     Check if the user has finished the conversation.
     This is a shortcut for chat_manager().has_user_finished(user_id).
     """
-    return chat_manager().has_user_finished(user_id)
+    return await chat_manager().has_user_finished(user_id)
+
+
+async def current_question(user_id: int) -> str | None:
+    current_question = await chat_manager().current_question(user_id)
+
+    if not await has_user_started(user_id):
+        return INTRODUCTION + "\n" + current_question
+
+    return current_question
+
+
+async def reply(user_id: int, user_input: str) -> str | None:
+    return await chat_manager().reply(user_id, user_input)

@@ -5,7 +5,7 @@ from aiogram.filters import Command
 from aiogram.types import ContentType
 
 from src.persistence.models import SuperGroup, TopicGroup, User
-from src.tg_bot.chat_helper import chat_manager, INTRODUCTION
+from src.tg_bot import chat
 
 router = Router()
 logger = logging.getLogger(__name__)
@@ -14,12 +14,11 @@ logger = logging.getLogger(__name__)
 @router.message(Command("start"))
 async def start_chat(message: types.Message) -> None:
     user_id = message.from_user.id
-    if not await chat_manager().has_user_started(user_id):
+    if not await chat.has_user_started(user_id):
         user, _ = await User.get_or_create(
             id=user_id, defaults={"name": message.from_user.full_name}
         )
-        await message.answer(INTRODUCTION)
-        await message.answer(await chat_manager().current_question(user_id))
+        await message.answer(await chat.current_question(user_id))
         return
 
     await handle_private_message(message)
@@ -51,7 +50,7 @@ async def voice_message(message: types.Message):
         thread_id = topic.topic_group_id
     await message.forward(chat_id=supergroup.group_id, message_thread_id=thread_id)
 
-    if not await chat_manager().is_user_talking(message.from_user.id):
+    if not await chat.is_user_talking(message.from_user.id):
         return
 
     await message.answer(
@@ -85,7 +84,7 @@ async def not_text_message(message: types.Message):
         thread_id = topic.topic_group_id
     await message.forward(chat_id=supergroup.group_id, message_thread_id=thread_id)
 
-    if not await chat_manager().is_user_talking(message.from_user.id):
+    if not await chat.is_user_talking(message.from_user.id):
         return
 
     await message.answer("Bro, please write the lyrics")
@@ -93,7 +92,7 @@ async def not_text_message(message: types.Message):
 
 @router.message(F.chat.type == "private")
 async def handle_private_message(message: types.Message) -> None:
-    if await chat_manager().has_user_finished(message.from_user.id):
+    if await chat.has_user_finished(message.from_user.id):
         return
 
     user_id = message.from_user.id
@@ -124,7 +123,7 @@ async def handle_private_message(message: types.Message) -> None:
     await message.forward(chat_id=supergroup.group_id, message_thread_id=thread_id)
     logger.info(f"Forwarded user={user_name} (id: {user_id}) to topic={thread_id}")
 
-    bot_reply = await chat_manager().reply(user_id, user_input)
+    bot_reply = await chat.reply(user_id, user_input)
     bot_message = await message.answer(bot_reply)
     await bot_message.send_copy(
         chat_id=supergroup.group_id, message_thread_id=thread_id
