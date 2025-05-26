@@ -6,8 +6,11 @@ from aiogram.types import ContentType
 
 from src.persistence.models import SuperGroup, TopicGroup, User
 from src.tg_bot import chat
+from src.tg_bot import middlewares
 
 router = Router()
+router.message.middleware(middlewares.FinishedUsersMiddleware())
+
 logger = logging.getLogger(__name__)
 
 
@@ -92,9 +95,6 @@ async def not_text_message(message: types.Message):
 
 @router.message(F.chat.type == "private")
 async def handle_private_message(message: types.Message) -> None:
-    if await chat.has_user_finished(message.from_user.id):
-        return
-
     user_id = message.from_user.id
     user_input = message.text
     user_name = message.from_user.full_name
