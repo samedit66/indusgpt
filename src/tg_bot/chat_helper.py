@@ -160,3 +160,27 @@ def chat_manager() -> ChatManager:
         generate_response=generate_response,
         generate_reply=generate_reply,
     )
+
+
+def has_user_started(user_id: int) -> bool:
+    """
+    Check if the user has started the conversation.
+    This is a shortcut for chat_manager().has_user_started(user_id).
+    """
+    return chat_manager().has_user_started(user_id)
+
+
+def is_user_talking(user_id: int) -> bool:
+    """
+    Check if the user is talking.
+    This is a shortcut for chat_manager().is_user_talking(user_id).
+    """
+    return chat_manager().is_user_talking(user_id)
+
+
+def has_user_finished(user_id: int) -> bool:
+    """
+    Check if the user has finished the conversation.
+    This is a shortcut for chat_manager().has_user_finished(user_id).
+    """
+    return chat_manager().has_user_finished(user_id)
