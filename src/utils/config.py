@@ -12,6 +12,7 @@ class Config:
     bot_token: str
     db_path: str
     log_file: str
+    google_credentials_path: str
 
 
 def load_config() -> Config:
@@ -24,4 +25,5 @@ def load_config() -> Config:
         bot_token=os.environ["TELEGRAM_BOT_TOKEN"],
         db_path=os.environ["DATABASE"],
         log_file=os.environ["LOG_FILE"],
+        google_credentials_path=os.environ["GOOGLE_CREDENTIALS_PATH"],
     )

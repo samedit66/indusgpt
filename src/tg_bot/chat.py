@@ -3,10 +3,15 @@ from functools import lru_cache
 from src.chat import (
     ChatManager,
     Question,
+    QaPair,
     generate_response,
     generate_reply,
+    extract_info,
 )
+from src.persistence.models import User
 from src.persistence import TortoiseQuestionList, TortoiseUserAnswerStorage
+from src.tg_bot.google_sheets_helper import write_user_info_to_sheet
+from src.utils.config import load_config
 
 
 INTRODUCTION = """
@@ -27,8 +32,8 @@ _For example: ₹500,000 daily volume = ₹25,000 your share (5%)._
    - We review dashboard, limits, API access, status  
 
 2. **Website check**  
-   - If already available — great, we’ll need hosting access  
-   - If not — we’ll create a bridge website (services, education, consulting, etc.)  
+   - If already available — great, we'll need hosting access  
+   - If not — we'll create a bridge website (services, education, consulting, etc.)  
 
 3. **Submit for moderation**  
    - We use your account + our site  
@@ -43,7 +48,7 @@ _For example: ₹500,000 daily volume = ₹25,000 your share (5%)._
    - If everything is good — we scale  
 ---
 
-Let’s build a **strong** and **profitable** partnership 💪
+Let's build a **strong** and **profitable** partnership 💪
 """
 
 QUESTIONS = [
@@ -133,9 +138,12 @@ QUESTIONS = [
             "User response **must** clearly indicate agreement or disagreement to the profit-sharing model.\n\n"
             "Examples of valid responses:\n"
             "- Yes, I agree to 5% profit sharing\n"
+            "- Of course.\n"
+            "- Sure.\n"
             "- Sure, that works for me\n"
             "- I accept those terms\n"
             "- Absolutely, let's do profit sharing\n\n"
+            "- I agree.\n"
             "Examples of invalid responses:\n"
             "- Maybe later\n"
             "- Need to think about it\n"
@@ -159,6 +167,9 @@ def chat_manager() -> ChatManager:
         user_answer_storage=TortoiseUserAnswerStorage(),
         generate_response=generate_response,
         generate_reply=generate_reply,
+        on_all_finished=[
+            write_to_google_sheet,
+        ],
     )
 
 
@@ -197,3 +208,12 @@ async def current_question(user_id: int) -> str | None:
 
 async def reply(user_id: int, user_input: str) -> str | None:
     return await chat_manager().reply(user_id, user_input)
+
+
+async def write_to_google_sheet(user_id: int, qa_pairs: list[QaPair]) -> None:
+    user_name = (await User.filter(id=user_id).first()).name
+    user_info = await extract_info(qa_pairs)
+    # TODO: переписать с заданием конфига извне
+    config = load_config()
+    credentials_path = config.google_credentials_path
+    write_user_info_to_sheet(user_name, user_info, credentials_path)

@@ -1,7 +1,7 @@
 from aiogram import Router, F, types
 from aiogram.filters import Command
 
-from src.persistence.models import SuperGroup
+from src.persistence.models import SuperGroup, TopicGroup
 
 
 router = Router()
@@ -37,3 +37,20 @@ async def detach(message: types.Message) -> None:
         reply = f"Supergroup ({group.group_id}) unset"
 
     await message.reply(reply)
+
+
+@router.message(
+    F.chat.type == "supergroup",
+    F.text.is_not(None),
+    F.message_thread_id.is_not(None),
+)
+async def handle_message_from_topic(message: types.Message) -> None:
+    topic = await TopicGroup.filter(topic_group_id=message.message_thread_id).first()
+    if topic is None:
+        return
+
+    await message.bot.copy_message(
+        chat_id=topic.user_id,
+        from_chat_id=message.chat.id,
+        message_id=message.message_id,
+    )

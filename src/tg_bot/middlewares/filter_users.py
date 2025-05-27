@@ -18,6 +18,13 @@ class FinishedUsersMiddleware(BaseMiddleware):
         event: Message,
         data: dict,
     ) -> Any:
+        # Пересылаем сообщение пользователя в топик-группу
+        # в любом случае, даже если пользователь закончил диалог
+        await event.forward(
+            chat_id=data["supergroup_id"],
+            message_thread_id=data["topic_group_id"],
+        )
+
         if await chat.has_user_finished(event.from_user.id):
             return
 
