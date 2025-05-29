@@ -1,4 +1,4 @@
-from src import chat
+from src import types
 
 
 INTRODUCTION = """
@@ -39,7 +39,7 @@ Let's build a **strong** and **profitable** partnership 💪
 """
 
 QUESTIONS = [
-    chat.Question(
+    types.Question(
         text="Do you have corporate (business) accounts? In which banks?",
         answer_requirement=(
             "User response **must** confirm that they have a corporate/business bank account "
@@ -49,7 +49,7 @@ QUESTIONS = [
             "- I got a business account in Bank of Baroda."
         ),
     ),
-    chat.Question(
+    types.Question(
         text="Are your corporate accounts connected to any PSP (e.g., Razorpay, Cashfree, PayU, Getepay)?",
         answer_requirement=(
             "User response **must** confirm they have a connected PSP and include the PSP name. If user says they don't have a PSP or it's not connected, the answer is invalid.\nExamples:\n"
@@ -60,7 +60,7 @@ QUESTIONS = [
             "- PayU.",
         ),
     ),
-    chat.Question(
+    types.Question(
         text="Can you provide login and password access to the PSP account?",
         answer_requirement=(
             "User response **must** provide actual login credentials (login and password) or confirm and commit to "
@@ -78,7 +78,7 @@ QUESTIONS = [
             "- I can't share these details"
         ),
     ),
-    chat.Question(
+    types.Question(
         text="Please provide the details of the company linked to your payment-gateway account:\n"
         "- Company Name\n"
         "- Registered Address\n"
@@ -95,7 +95,7 @@ QUESTIONS = [
             "- Only phone number provided\n"
         ),
     ),
-    chat.Question(
+    types.Question(
         text=(
             "Do you already have a website approved by the PSP?\n"
             "If yes — please give us hosting access (we may need to adjust code or API)\n"
@@ -119,7 +119,7 @@ QUESTIONS = [
             "- The website is www.mysite.com (but no access details)"
         ),
     ),
-    chat.Question(
+    types.Question(
         text="Are you open to working under a profit-sharing model (5% of transaction volume) instead of a one-time deal?",
         answer_requirement=(
             "User response **must** clearly indicate agreement or disagreement to the profit-sharing model.\n\n"
