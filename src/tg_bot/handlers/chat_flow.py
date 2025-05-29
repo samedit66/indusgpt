@@ -7,7 +7,7 @@ from aiogram.types import ContentType
 from src import chat
 from src.tg_bot import middlewares
 from src.tg_bot import chat_settings
-from src.persistence.models import Manager
+from src.persistence.models import Manager, UserManager, User
 
 router = Router()
 router.message.middleware(middlewares.ExpectSuperGroupSetMiddleware())
@@ -53,10 +53,13 @@ async def handle_message_from_user(
     )
 
     if await chat_manager.has_user_finished(message.from_user.id):
-        manager = await Manager.first()
-        if manager:
+        user = await User.filter(id=message.from_user.id).first()
+        user_manager = (
+            await UserManager.filter(user=user).first() or await Manager.first()
+        )
+        if user_manager:
             await message.answer(
-                f"This is your personal manager {manager.manager_link}, he'll contact you soon."
+                f"This is your personal manager {user_manager.manager_link}, he'll contact you soon."
             )
         else:
             await message.answer("A personal manager will contact you soon.")

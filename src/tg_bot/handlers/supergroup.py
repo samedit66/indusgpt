@@ -1,7 +1,12 @@
 from aiogram import Router, F, types
 from aiogram.filters import Command, CommandObject
 
-from src.persistence.models import SuperGroup, TopicGroup, Manager
+from src.persistence.models import (
+    SuperGroup,
+    TopicGroup,
+    Manager,
+    UserManager,
+)
 
 
 router = Router()
@@ -36,6 +41,56 @@ async def detach(message: types.Message) -> None:
         await group.delete()
         reply = f"Supergroup ({group.group_id}) unset"
 
+    await message.reply(reply)
+
+
+@router.message(
+    Command("set_manager"), F.chat.type == "supergroup", F.message_thread_id.is_(None)
+)
+async def set_default_manager(message: types.Message, command: CommandObject) -> None:
+    args = command.args
+    if not args or not args.strip().startswith("@"):
+        return
+    manager_link = args.strip()
+    manager = await Manager.first()
+    if manager:
+        manager.manager_link = manager_link
+        await manager.save()
+        reply = f"Default manager updated to {manager_link}"
+    else:
+        await Manager.create(manager_link=manager_link)
+        reply = f"Default manager set to {manager_link}"
+    await message.reply(reply)
+
+
+@router.message(
+    Command("set_manager"),
+    F.chat.type == "supergroup",
+    F.text.is_not(None),
+    F.message_thread_id.is_not(None),
+)
+async def set_manager_for_user(message: types.Message, command: CommandObject) -> None:
+    args = command.args
+    if not args or not args.strip().startswith("@"):
+        return
+
+    topic = await TopicGroup.filter(topic_group_id=message.message_thread_id).first()
+    if not topic:
+        return
+
+    user_id = topic.user_id
+    if not user_id:
+        return
+
+    user_manager = await UserManager.filter(user_id=user_id).first()
+    manager_link = args.strip()
+    if user_manager:
+        user_manager.manager_link = manager_link
+        await user_manager.save()
+        reply = f"Manager for this user updated to {manager_link}"
+    else:
+        await UserManager.create(user_id=user_id, manager_link=manager_link)
+        reply = f"Manager for this user set to {manager_link}"
     await message.reply(reply)
 
 
