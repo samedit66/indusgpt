@@ -1,10 +1,10 @@
 from tortoise import Tortoise
 
 from src.persistence.models import User, PartialAnswer, QAEntry
-from src.chat import UserAnswerStorage, QuestionList, Question, QaPair
+from src import types
 
 
-class TortoiseUserAnswerStorage(UserAnswerStorage):
+class TortoiseUserAnswerStorage(types.UserAnswerStorage):
     async def append(self, user_id: int, partial_answer: str) -> None:
         # We do not check if the user exists, because
         # it must exist by the time we call this method
@@ -27,14 +27,14 @@ class TortoiseUserAnswerStorage(UserAnswerStorage):
         await PartialAnswer.filter(user_id=user_id).delete()
 
 
-class TortoiseQuestionList(QuestionList):
-    def __init__(self, questions: list[Question]):
+class TortoiseQuestionList(types.QuestionList):
+    def __init__(self, questions: list[types.Question]):
         self.questions = questions
 
     async def has_user_started(self, user_id: int) -> bool:
         return await QAEntry.filter(user_id=user_id).exists()
 
-    async def current_question(self, user_id: int) -> Question | None:
+    async def current_question(self, user_id: int) -> types.Question | None:
         if not await User.filter(id=user_id).exists():
             return self.questions[0] if self.questions else None
 
@@ -61,17 +61,17 @@ class TortoiseQuestionList(QuestionList):
         count = await QAEntry.filter(user_id=user_id).count()
         return count >= len(self.questions)
 
-    async def qa_pairs(self, user_id: int) -> list[QaPair]:
+    async def qa_pairs(self, user_id: int) -> list[types.QaPair]:
         # We do not check if the user exists, because
         # it must exist by the time we call this method
         entries = await QAEntry.filter(user_id=user_id).order_by("question_index").all()
-        pairs: list[QaPair] = []
+        pairs: list[types.QaPair] = []
         for entry in entries:
             idx = entry.question_index
             original_q = self.questions[idx]
             pairs.append(
-                QaPair(
-                    question=Question(
+                types.QaPair(
+                    question=types.Question(
                         text=entry.question_text,
                         answer_requirement=original_q.answer_requirement,
                     ),
