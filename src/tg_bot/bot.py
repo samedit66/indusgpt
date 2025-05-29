@@ -44,7 +44,7 @@ async def run_bot():
     dp.message.middleware(middlewares.ChatManagerMiddleware(chat_manager))
     dp.include_routers(supergroup.router, chat_flow.router)
 
-    await persistence.init_db("sqlite://db.sqlite3", ["src.persistence.models"])
+    await persistence.init_db(config.db_url, ["src.persistence.models"])
 
     await bot.set_my_description("Hi! To start the conversation, use /start command.")
     await bot.delete_webhook(drop_pending_updates=True)
