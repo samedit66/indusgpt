@@ -96,6 +96,21 @@ QUESTIONS = [
         ),
     ),
     types.Question(
+        text="Please describe your company's business activities and what products/services you plan to sell:",
+        answer_requirement=(
+            "User response **must** describe their company's business activities and what products/services they plan to sell.\n\n"
+            "Examples of valid responses:\n"
+            "- We sell electronics like smartphones and laptops\n"
+            "- Our company provides IT consulting services\n"
+            "- We're an online clothing store selling fashion accessories\n"
+            "- We sell digital products like software licenses\n\n"
+            "Examples of invalid responses:\n"
+            "- We're a company\n"
+            "- Not sure yet\n"
+            "- Will decide later\n"
+        ),
+    ),
+    types.Question(
         text=(
             "Do you already have a website approved by the PSP?\n"
             "If yes — please give us hosting access (we may need to adjust code or API)\n"

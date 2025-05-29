@@ -14,6 +14,9 @@ class UserInformation(BaseModel):
     )
     psps: list[PSPAccount] = Field(..., description="List of connected PSPs.")
     company_details: CompanyDetails = Field(..., description="Company details.")
+    business_activities: BusinessActivities = Field(
+        ..., description="Business activities of the company."
+    )
     hosting: HostingInfo = Field(..., description="Hosting information.")
     profit_sharing: ProfitSharingAgreement = Field(
         ..., description="Profit-sharing agreement."
@@ -73,6 +76,12 @@ class ProfitSharingAgreement(BaseModel):
     agreement: Literal["Yes."] = Field(
         ...,
         description="User agreement to work under a profit-sharing model instead of a one-time deal.",
+    )
+
+
+class BusinessActivities(BaseModel):
+    activities: str = Field(
+        ..., description="Description of the company's business activities."
     )
 
 

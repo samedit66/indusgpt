@@ -55,6 +55,8 @@ def flatten_user_info(user_name: str, user_info: UserInformation) -> dict:
         "company_address": user_info.company_details.address,
         "company_phone": user_info.company_details.phone,
         "company_email": user_info.company_details.email,
+        # Business activities
+        "business_activities": user_info.business_activities.activities,
         # Hosting info
         "has_website": str(user_info.hosting.has_website),
         "hosting_access_details": user_info.hosting.access_details or "",
