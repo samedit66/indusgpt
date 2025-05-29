@@ -146,6 +146,7 @@ QUESTIONS = [
             "- I accept those terms\n"
             "- Absolutely, let's do profit sharing\n\n"
             "- I agree.\n"
+            "- Okay sir\n"
             "Examples of invalid responses:\n"
             "- Maybe later\n"
             "- Need to think about it\n"
