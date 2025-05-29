@@ -1,7 +1,4 @@
 from src import chat
-from src.persistence.models import User
-from src.tg_bot.google_sheets_helper import write_user_info_to_sheet
-from src.utils.config import load_config
 
 
 INTRODUCTION = """
@@ -143,12 +140,3 @@ QUESTIONS = [
         ),
     ),
 ]
-
-
-async def write_to_google_sheet(user_id: int, qa_pairs: list[chat.QaPair]) -> None:
-    user_name = (await User.filter(id=user_id).first()).name
-    user_info = await chat.extract_info(qa_pairs)
-    # TODO: переписать с заданием конфига извне
-    config = load_config()
-    credentials_path = config.google_credentials_path
-    write_user_info_to_sheet(user_name, user_info, credentials_path)

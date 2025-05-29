@@ -13,6 +13,8 @@ class Config:
     db_path: str
     log_file: str
     google_credentials_path: str
+    google_sheet_url: str
+    google_sheet_worksheet_name: str
 
 
 def load_config() -> Config:
@@ -26,4 +28,6 @@ def load_config() -> Config:
         db_path=os.environ["DATABASE"],
         log_file=os.environ["LOG_FILE"],
         google_credentials_path=os.environ["GOOGLE_CREDENTIALS_PATH"],
+        google_sheet_url=os.environ["GOOGLE_SHEET_URL"],
+        google_sheet_worksheet_name=os.environ["GOOGLE_SHEET_WORKSHEET_NAME"],
     )

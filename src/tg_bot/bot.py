@@ -5,6 +5,8 @@ from aiogram import Bot, Dispatcher
 from src import persistence
 from src.utils.config import load_config
 
+from src import processors
+
 from src import chat
 from src.tg_bot.handlers import supergroup, chat_flow
 from src.tg_bot import middlewares
@@ -29,7 +31,11 @@ async def run_bot():
         generate_response=chat.generate_response,
         generate_reply=chat.generate_reply,
         on_all_finished=[
-            chat_settings.write_to_google_sheet,
+            processors.GoogleSheetsProcessor(
+                config.google_credentials_path,
+                config.google_sheet_url,
+                config.google_sheet_worksheet_name,
+            ),
         ],
     )
 
