@@ -3,7 +3,7 @@ from typing import Any, Awaitable, Callable
 from aiogram import BaseMiddleware
 from aiogram.types import Message
 
-from src.tg_bot import chat
+from src import chat
 
 
 class FinishedUsersMiddleware(BaseMiddleware):
@@ -25,7 +25,8 @@ class FinishedUsersMiddleware(BaseMiddleware):
             message_thread_id=data["topic_group_id"],
         )
 
-        if await chat.has_user_finished(event.from_user.id):
+        chat_manager: chat.ChatManager = data["chat_manager"]
+        if await chat_manager.has_user_finished(event.from_user.id):
             return
 
         return await handler(event, data)

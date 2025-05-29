@@ -4,8 +4,9 @@ from aiogram import Router, F, types
 from aiogram.filters import Command
 from aiogram.types import ContentType
 
-from src.tg_bot import chat
+from src import chat
 from src.tg_bot import middlewares
+from src.tg_bot import chat_settings
 
 router = Router()
 router.message.middleware(middlewares.ExpectSuperGroupSetMiddleware())
@@ -16,12 +17,9 @@ logger = logging.getLogger(__name__)
 
 
 @router.message(Command("start"), F.chat.type == "private")
-async def start(message: types.Message) -> None:
-    # В самый первый раз, когда пользователь введет /start,
-    # ему отправится вся информация (`chat.INTRODUCTION`) и первый вопрос.
-    # Во всех остальные разы, когда пользователь введет /start,
-    # ему отправится только текущий вопрос
-    await message.answer(await chat.current_question(message.from_user.id))
+async def start(message: types.Message, chat_manager: chat.ChatManager) -> None:
+    await message.answer(chat_settings.INTRODUCTION)
+    await message.answer(await chat_manager.current_question(message.from_user.id))
 
 
 @router.message(F.content_type == ContentType.VOICE, F.chat.type == "private")
@@ -41,9 +39,10 @@ async def handle_message_from_user(
     message: types.Message,
     supergroup_id: int,
     topic_group_id: int,
+    chat_manager: chat.ChatManager,
 ) -> None:
     # Генерируем ответ для пользователя
-    reply = await chat.reply(message.from_user.id, message.text)
+    reply = await chat_manager.reply(message.from_user.id, message.text)
     bot_message = await message.answer(reply)
 
     # Копируем ответ бота в топик-группу
