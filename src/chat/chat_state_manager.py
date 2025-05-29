@@ -1,11 +1,6 @@
-from typing import Any, Callable, Iterable
+from typing import Iterable
 
-from .question_list import QuestionList, QaPair
-from .user_answer_storage import UserAnswerStorage
-
-from .chat_state import State, StateType
-
-type OnAllFinishedCallback = Callable[[int, list[QaPair]], Any]
+from src import types
 
 
 class ChatStateManager:
@@ -15,9 +10,9 @@ class ChatStateManager:
 
     def __init__(
         self,
-        question_list: QuestionList,
-        user_answer_storage: UserAnswerStorage,
-        on_all_finished: Iterable[OnAllFinishedCallback] = None,
+        question_list: types.QuestionList,
+        user_answer_storage: types.UserAnswerStorage,
+        on_all_finished: Iterable[types.QaProcessor] | None = None,
     ) -> None:
         """
         :param question_list: Source of questions and navigation controls
@@ -37,7 +32,7 @@ class ChatStateManager:
         """
         return await self.question_list.has_user_started(user_id)
 
-    async def current_state(self, user_id: int) -> State:
+    async def current_state(self, user_id: int) -> types.State:
         """
         Fetches the active question and any saved partial answer for a given user.
 
@@ -46,10 +41,10 @@ class ChatStateManager:
         """
         question = await self.question_list.current_question(user_id)
         if question is None:
-            return State(StateType.FINISHED, None, None)
+            return types.State(types.StateType.FINISHED, None, None)
 
         partial_answer = await self.user_answer_storage.get(user_id)
-        return State(StateType.IN_PROGRESS, question, partial_answer)
+        return types.State(types.StateType.IN_PROGRESS, question, partial_answer)
 
     async def update_answer(self, user_id: int, partial_answer: str) -> None:
         """

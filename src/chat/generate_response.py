@@ -4,7 +4,7 @@ from pydantic import BaseModel, Field
 
 from .simple_agent import SimpleAgent
 
-from .question_list import Question
+from src import types
 
 from .router import router, Intent
 from .faq_agent import faq_agent
@@ -34,7 +34,7 @@ class ResponseToUser(BaseModel):
 
 async def generate_response(
     user_input: str,
-    question: Question,
+    question: types.Question,
     context: str | None = None,
 ) -> ResponseToUser:
     requests = await atomic_separator(user_input)
@@ -44,7 +44,7 @@ async def generate_response(
 
 async def get_responses_for_requests(
     requests: list[str],
-    question: Question,
+    question: types.Question,
     context: str | None,
 ) -> list[ResponseToUser]:
     responses = []
@@ -78,7 +78,7 @@ def combine_responses(
 
 async def generate_single_response(
     user_input: str,
-    question: Question,
+    question: types.Question,
     context: str | None = None,
 ) -> ResponseToUser:
     intent = await router(user_input, context=context)
@@ -174,7 +174,7 @@ You’re a simple, bro-style assistant whose job is to check whether the user’
 
 async def evaluate_user_information(
     user_information: str,
-    question: Question,
+    question: types.Question,
     context: str | None = None,
 ) -> ResponseToUser:
     status = await validator(

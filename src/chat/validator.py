@@ -3,7 +3,7 @@ from typing import Literal, Union
 
 from pydantic import BaseModel, Field
 
-from .question_list import Question
+from src import types
 
 from .simple_agent import SimpleAgent
 
@@ -70,7 +70,7 @@ class InvalidAnswer(BaseModel):
     )
 
 
-def expand_query(user_input: str, question: Question, context: str) -> str:
+def expand_query(user_input: str, question: types.Question, context: str) -> str:
     return f"""
 User was asked: {question.text}.
 Requirement: {question.answer_requirement}

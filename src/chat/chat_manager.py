@@ -1,20 +1,18 @@
 from typing import Callable, Iterable
 
-from .question_list import QuestionList
-from .user_answer_storage import UserAnswerStorage
-from .chat_state import State
-from .chat_state_manager import ChatStateManager, OnAllFinishedCallback
+from src import types
 
+from .chat_state_manager import ChatStateManager
 from .generate_response import ResponseToUser
 
-type ResponseGenerator = Callable[[str, State], ResponseToUser]
+type ResponseGenerator = Callable[[str, types.State], ResponseToUser]
 """
 Callable which can generate a response to user.
 Takes user input and current chat state.
 Returns a `ResponseToUser`.
 """
 
-type ReplyGenerator = Callable[[ResponseToUser, State], str]
+type ReplyGenerator = Callable[[ResponseToUser, types.State], str]
 """
 Callable which can produce a pretty reply to user.
 Usually to get a pretty-looking reply you might want to add a next question,
@@ -31,11 +29,11 @@ class ChatManager:
 
     def __init__(
         self,
-        question_list: QuestionList,
-        user_answer_storage: UserAnswerStorage,
+        question_list: types.QuestionList,
+        user_answer_storage: types.UserAnswerStorage,
         generate_response: ResponseGenerator,
         generate_reply: ReplyGenerator,
-        on_all_finished: Iterable[OnAllFinishedCallback] = None,
+        on_all_finished: Iterable[types.QaProcessor] | None = None,
     ) -> None:
         """
         Initialize ChatManager with question sequence, persistence layer, and response generators.

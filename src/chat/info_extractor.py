@@ -3,8 +3,9 @@ from typing import Optional, Literal
 
 from pydantic import BaseModel, Field
 
+from src import types
+
 from .simple_agent import SimpleAgent
-from .question_list import QaPair
 
 
 class UserInformation(BaseModel):
@@ -97,6 +98,6 @@ info_extractor = SimpleAgent(
 )
 
 
-async def extract_info(qa_pairs: list[QaPair]) -> UserInformation:
+async def extract_info(qa_pairs: list[types.QaPair]) -> UserInformation:
     qa = "\n".join(f"Q: {q.question}\nA: {q.answer}\n" for q in qa_pairs)
     return await info_extractor(qa)

@@ -1,7 +1,8 @@
 from .simple_agent import SimpleAgent
 
+from src import types
+
 from .generate_response import ResponseToUser
-from .chat_state import State, StateType
 
 
 INSTRUCTIONS = """
@@ -28,15 +29,16 @@ FORMAT RULES:
 """
 
 
-async def generate_reply(response: ResponseToUser, state: State) -> str:
-    prompt = f"Tell user the following: {response.response_text}"
+async def generate_reply(response: ResponseToUser, state: types.State) -> str:
+    prompt = f"Tell user the following: {response.response_text} "
     match state.type:
-        case StateType.IN_PROGRESS:
-            prompt += f"Include a follow-up question in the reply. Question: '{state.question}'"
-        case StateType.FINISHED:
+        case types.StateType.IN_PROGRESS:
+            prompt += f"Include a follow-up question in the reply. Question: '{state.question.text}'"
+        case types.StateType.FINISHED:
             prompt += "Add a polite message that you need to check the information and get back to the user."
 
-    return await reply_generator(prompt)
+    human_reply = await reply_generator(prompt)
+    return human_reply
 
 
 reply_generator = SimpleAgent(instructions=INSTRUCTIONS)
