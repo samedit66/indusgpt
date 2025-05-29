@@ -65,3 +65,15 @@ class Manager(Model):
 
     class Meta:
         table = "managers"
+
+
+class UserManager(Model):
+    id = fields.IntField(pk=True)
+    user = fields.ForeignKeyField(
+        "models.User", related_name="user_managers", on_delete=fields.CASCADE
+    )
+    manager_link = fields.TextField()
+
+    class Meta:
+        table = "user_managers"
+        indexes = [("user",)]
