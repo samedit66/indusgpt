@@ -57,3 +57,11 @@ class TopicGroup(Model):
     class Meta:
         table = "topic_groups"
         indexes = [("user",), ("topic_group_id",)]
+
+
+class Manager(Model):
+    id = fields.IntField(pk=True)
+    manager_link = fields.TextField()
+
+    class Meta:
+        table = "managers"

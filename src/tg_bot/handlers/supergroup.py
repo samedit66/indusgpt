@@ -1,7 +1,7 @@
 from aiogram import Router, F, types
-from aiogram.filters import Command
+from aiogram.filters import Command, CommandObject
 
-from src.persistence.models import SuperGroup, TopicGroup
+from src.persistence.models import SuperGroup, TopicGroup, Manager
 
 
 router = Router()
@@ -54,3 +54,24 @@ async def handle_message_from_topic(message: types.Message) -> None:
         from_chat_id=message.chat.id,
         message_id=message.message_id,
     )
+
+
+@router.message(Command("set_manager"), F.chat.type == "supergroup")
+async def set_manager(message: types.Message, command: CommandObject) -> None:
+    """
+    Set the manager link for this bot. Usage: /set_manager @manager
+    """
+    args = command.args
+    if not args or not args.strip().startswith("@"):
+        await message.reply("Usage: /set_manager @manager")
+        return
+    manager_link = args.strip()
+    manager = await Manager.first()
+    if manager:
+        manager.manager_link = manager_link
+        await manager.save()
+        reply = f"Manager updated to {manager_link}"
+    else:
+        await Manager.create(manager_link=manager_link)
+        reply = f"Manager set to {manager_link}"
+    await message.reply(reply)
