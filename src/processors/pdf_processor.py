@@ -1,6 +1,7 @@
 from fpdf import FPDF
-
 from src import types
+from src.persistence.models import User
+import unicodedata
 
 
 class PdfProcessor:
@@ -14,6 +15,45 @@ class PdfProcessor:
                         the processor will return the PDF object instead of saving.
         """
         self.output_path = output_path
+        # Map of special Unicode characters to their ASCII equivalents
+        self.char_map = {
+            "—": "-",  # em dash
+            "–": "-",  # en dash
+            '"': '"',  # smart quote
+            """: "'",  # smart quote
+            """: "'",  # smart quote
+            "…": "...",  # ellipsis
+            "•": "*",  # bullet
+            "→": "->",  # right arrow
+            "←": "<-",  # left arrow
+            "≤": "<=",  # less than or equal
+            "≥": ">=",  # greater than or equal
+            "≠": "!=",  # not equal
+            "×": "x",  # multiplication
+            "÷": "/",  # division
+        }
+
+    def _sanitize_text(self, text: str) -> str:
+        """Convert Unicode text to ASCII-safe version.
+
+        Args:
+            text: Text to sanitize
+
+        Returns:
+            ASCII-safe version of the text
+        """
+        # First replace known special characters
+        for unicode_char, ascii_char in self.char_map.items():
+            text = text.replace(unicode_char, ascii_char)
+
+        # Then normalize remaining Unicode characters to closest ASCII equivalent
+        # NFKD decomposition followed by ASCII encoding/decoding removes diacritics
+        text = (
+            unicodedata.normalize("NFKD", text)
+            .encode("ascii", "ignore")
+            .decode("ascii")
+        )
+        return text
 
     def _create_pdf(self) -> FPDF:
         """Create and configure a new PDF document."""
@@ -34,7 +74,9 @@ class PdfProcessor:
         Returns:
             Normalized text
         """
-        # Replace multiple spaces and newlines with single space
+        # First sanitize the text to handle Unicode characters
+        text = self._sanitize_text(text)
+        # Then normalize whitespace
         return " ".join(text.split())
 
     def _write_text_block(
@@ -76,7 +118,7 @@ class PdfProcessor:
         if current_line:
             pdf.cell(effective_width, line_height, " ".join(current_line), ln=True)
 
-    def _add_user_qa_section(
+    async def _add_user_qa_section(
         self, pdf: FPDF, user_id: int, qa_pairs: list[types.QaPair]
     ) -> None:
         """Add a user's Q&A section to the PDF.
@@ -86,17 +128,21 @@ class PdfProcessor:
             user_id: The ID of the user whose Q&A pairs are being added
             qa_pairs: List of question-answer pairs to add
         """
-        # Add user header
-        pdf.set_font("helvetica", "B", 14)
-        pdf.cell(0, 10, f"User ID: {user_id}", ln=True)
+        # Get user URL
+        user = await User.filter(id=user_id).first()
+        user_identifier = f"User: {user.url}"
+
+        # Add user header with helvetica
+        pdf.set_font("helvetica", size=14, style="B")
+        pdf.cell(0, 10, self._sanitize_text(user_identifier), ln=True)
         pdf.ln(5)
 
         effective_width = pdf.w - pdf.l_margin - pdf.r_margin
         line_height = 7  # Reduced from 10 for better spacing
 
         for qa in qa_pairs:
-            # Question
-            pdf.set_font("helvetica", "B", 12)
+            # Question with helvetica Bold
+            pdf.set_font("helvetica", size=12, style="B")
             pdf.set_text_color(0, 0, 255)  # Blue for questions
             self._write_text_block(
                 pdf, f"Q: {qa.question.text}", effective_width, line_height
@@ -105,9 +151,9 @@ class PdfProcessor:
             # Small spacing between Q and A
             pdf.ln(2)
 
-            # Answer
+            # Answer with helvetica Regular
             pdf.set_text_color(0, 0, 0)  # Black for answers
-            pdf.set_font("helvetica", "", 12)
+            pdf.set_font("helvetica", size=12)
             self._write_text_block(pdf, f"A: {qa.answer}", effective_width, line_height)
 
             # Space between Q&A pairs
@@ -128,7 +174,7 @@ class PdfProcessor:
             FPDF object if output_path is None, otherwise None after saving the PDF
         """
         pdf = self._create_pdf()
-        self._add_user_qa_section(pdf, user_id, qa_pairs)
+        await self._add_user_qa_section(pdf, user_id, qa_pairs)
 
         if self.output_path:
             pdf.output(self.output_path)
@@ -149,13 +195,13 @@ class PdfProcessor:
         pdf = self._create_pdf()
 
         # Add title
-        pdf.set_font("helvetica", "B", 16)
+        pdf.set_font("helvetica", size=16, style="B")
         pdf.cell(0, 10, "User Q&A Report", ln=True, align="C")
         pdf.ln(10)
 
         # Add each user's section
         for user_id, qa_pairs in qa_data.items():
-            self._add_user_qa_section(pdf, user_id, qa_pairs)
+            await self._add_user_qa_section(pdf, user_id, qa_pairs)
             # Don't add a page after the last user
             if user_id != list(qa_data.keys())[-1]:
                 pdf.add_page()
