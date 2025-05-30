@@ -79,3 +79,12 @@ class ChatStateManager:
         :return: True if no further questions remain, False otherwise
         """
         return await self.question_list.all_finished(user_id)
+
+    async def qa_pairs(self, user_id: int) -> list[types.QaPair]:
+        """
+        Returns all Q&A pairs for a given user.
+
+        :param user_id: identifier for the conversation participant
+        :return: list of Q&A pairs
+        """
+        return await self.question_list.qa_pairs(user_id)

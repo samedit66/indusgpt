@@ -69,6 +69,15 @@ class ChatManager:
     async def has_user_finished(self, user_id: int) -> bool:
         return await self.chat_state_manager.all_finished(user_id)
 
+    async def qa_pairs(self, user_id: int) -> list[types.QaPair]:
+        """
+        Returns all Q&A pairs for a given user.
+
+        :param user_id: identifier for the conversation participant
+        :return: list of Q&A pairs
+        """
+        return await self.chat_state_manager.qa_pairs(user_id)
+
     async def current_question(self, user_id: int) -> str | None:
         """
         Retrieve the current question for a user without advancing the state.

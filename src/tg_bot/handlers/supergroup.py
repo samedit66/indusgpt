@@ -1,12 +1,18 @@
 from aiogram import Router, F, types
 from aiogram.filters import Command, CommandObject
+import os
+from datetime import datetime
 
 from src.persistence.models import (
     SuperGroup,
     TopicGroup,
     Manager,
     UserManager,
+    User,
 )
+
+from src.chat import ChatManager
+from src import processors
 
 
 router = Router()
@@ -118,3 +124,53 @@ async def handle_message_from_topic(message: types.Message) -> None:
         from_chat_id=message.chat.id,
         message_id=message.message_id,
     )
+
+
+@router.message(Command("export"), F.chat.type == "supergroup")
+async def export_unfinished_users(
+    message: types.Message, chat_manager: ChatManager
+) -> None:
+    """
+    Export all users who have not finished the onboarding process along with their answers.
+    Command `/export` needs to be called in the General chat to export the users.
+    The function generates a PDF report containing all unfinished users' Q&A pairs.
+    """
+    users = await User.all()
+    if not users:
+        await message.reply("No users found")
+        return
+
+    unfinished_users = []
+    for user in users:
+        if not await chat_manager.has_user_finished(user.id):
+            unfinished_users.append(user)
+
+    if not unfinished_users:
+        await message.reply("No unfinished users found")
+        return
+
+    await message.reply(
+        f"Found {len(unfinished_users)} unfinished users. Generating PDF report..."
+    )
+
+    # Collect Q&A pairs for all unfinished users
+    qa_data = {}
+    for user in unfinished_users:
+        qa_pairs = await chat_manager.qa_pairs(user.id)
+        if qa_pairs:  # Only include users who have at least started answering
+            qa_data[user.id] = qa_pairs
+
+    # Generate PDF report
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    pdf_filename = f"unfinished_users_{timestamp}.pdf"
+    processor = processors.PdfProcessor(output_path=pdf_filename)
+    await processor.process_multiple(qa_data)
+
+    # Send the PDF file
+    await message.reply_document(
+        types.FSInputFile(pdf_filename),
+        caption=f"Q&A report for {len(qa_data)} unfinished users",
+    )
+
+    # Clean up the file
+    os.remove(pdf_filename)
