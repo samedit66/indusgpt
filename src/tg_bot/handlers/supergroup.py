@@ -45,12 +45,21 @@ async def detach(message: types.Message) -> None:
 
 
 @router.message(
-    Command("set_manager"), F.chat.type == "supergroup", F.message_thread_id.is_(None)
+    Command("set_manager"),
+    F.chat.type == "supergroup",
+    F.message_thread_id.is_(None),
 )
 async def set_default_manager(message: types.Message, command: CommandObject) -> None:
+    """
+    Set the default manager for every new user.
+    Command `/set_manager` needs to be called in the General chat to set the default manager.
+    Usage: /set_manager @manager
+    """
     args = command.args
     if not args or not args.strip().startswith("@"):
+        await message.reply("Usage: /set_manager @manager")
         return
+
     manager_link = args.strip()
     manager = await Manager.first()
     if manager:
@@ -70,18 +79,18 @@ async def set_default_manager(message: types.Message, command: CommandObject) ->
     F.message_thread_id.is_not(None),
 )
 async def set_manager_for_user(message: types.Message, command: CommandObject) -> None:
+    """
+    Set the manager for a specific user.
+    Command `/set_manager` needs to be called in the topic chat to set the manager for the user.
+    Usage: /set_manager @manager
+    """
     args = command.args
     if not args or not args.strip().startswith("@"):
+        await message.reply("Usage: /set_manager @manager")
         return
 
     topic = await TopicGroup.filter(topic_group_id=message.message_thread_id).first()
-    if not topic:
-        return
-
     user_id = topic.user_id
-    if not user_id:
-        return
-
     user_manager = await UserManager.filter(user_id=user_id).first()
     manager_link = args.strip()
     if user_manager:
@@ -109,24 +118,3 @@ async def handle_message_from_topic(message: types.Message) -> None:
         from_chat_id=message.chat.id,
         message_id=message.message_id,
     )
-
-
-@router.message(Command("set_manager"), F.chat.type == "supergroup")
-async def set_manager(message: types.Message, command: CommandObject) -> None:
-    """
-    Set the manager link for this bot. Usage: /set_manager @manager
-    """
-    args = command.args
-    if not args or not args.strip().startswith("@"):
-        await message.reply("Usage: /set_manager @manager")
-        return
-    manager_link = args.strip()
-    manager = await Manager.first()
-    if manager:
-        manager.manager_link = manager_link
-        await manager.save()
-        reply = f"Manager updated to {manager_link}"
-    else:
-        await Manager.create(manager_link=manager_link)
-        reply = f"Manager set to {manager_link}"
-    await message.reply(reply)
