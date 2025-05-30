@@ -121,6 +121,7 @@ QUESTIONS = [
             "provide hosting access details (credentials, URL, etc). If they don't have a website or are unsure, "
             "that's perfectly fine.\n\n"
             "Examples of valid responses:\n"
+            "- No...\n"
             "- No, I don't have a website yet\n"
             "- Not sure, we're still working on it\n"
             "- Yes, here's the hosting access - username: admin, password: secure123\n"

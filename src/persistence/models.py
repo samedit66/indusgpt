@@ -5,6 +5,7 @@ from tortoise import fields
 class User(Model):
     id = fields.IntField(pk=True)
     name = fields.TextField()
+    url = fields.TextField()
 
     class Meta:
         table = "user"

@@ -142,7 +142,7 @@ async def export_unfinished_users(
 
     unfinished_users = []
     for user in users:
-        if not await chat_manager.has_user_finished(user.id):
+        if await chat_manager.is_user_talking(user.id):
             unfinished_users.append(user)
 
     if not unfinished_users:

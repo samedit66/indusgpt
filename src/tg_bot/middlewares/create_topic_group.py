@@ -19,7 +19,10 @@ class CreateUserAndTopicGroupMiddleware(BaseMiddleware):
     ) -> Any:
         user, _ = await User.get_or_create(
             id=event.from_user.id,
-            defaults={"name": event.from_user.full_name},
+            defaults={
+                "name": event.from_user.full_name,
+                "url": event.from_user.url,
+            },
         )
 
         supergroup_id = data["supergroup_id"]
