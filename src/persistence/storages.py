@@ -80,6 +80,9 @@ class TortoiseQuestionList(types.QuestionList):
             )
         return pairs
 
+    async def stop_talking_with(self, user_id: int) -> None:
+        await QAEntry.filter(user_id=user_id).delete()
+
 
 async def init_db(
     db_url: str,

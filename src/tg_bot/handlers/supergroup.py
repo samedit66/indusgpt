@@ -174,3 +174,55 @@ async def export_unfinished_users(
 
     # Clean up the file
     os.remove(pdf_filename)
+
+
+@router.message(
+    Command("stop"),
+    F.chat.type == "supergroup",
+    F.text.is_not(None),
+    F.message_thread_id.is_not(None),
+)
+async def stop_talking_with(message: types.Message, chat_manager: ChatManager) -> None:
+    """
+    Stop talking with a user.
+    Command `/stop` needs to be called in the topic chat to stop talking with the user.
+    """
+    user = await User.filter(id=message.from_user.id).first()
+    if not user:
+        return
+
+    topic = await TopicGroup.filter(topic_group_id=message.message_thread_id).first()
+    if topic is None:
+        return
+
+    qa_data = await chat_manager.qa_pairs(user.id)
+    if qa_data:
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        pdf_filename = f"user_{user.id}_qa_{timestamp}.pdf"
+        processor = processors.PdfProcessor(output_path=pdf_filename)
+        await processor(user.id, qa_data)
+
+        await message.reply_document(
+            types.FSInputFile(pdf_filename),
+            caption=f"Q&A report for user {user.id}",
+        )
+        os.remove(pdf_filename)
+
+    await chat_manager.stop_talking_with(user.id)
+
+    user_manager = (
+        await UserManager.filter(user_id=user.id).first() or await Manager.first()
+    )
+    if user_manager:
+        reply = (
+            f"Your personal manager {user_manager.manager_link} will contact you soon."
+        )
+    else:
+        reply = "A personal manager will contact you soon."
+
+    await message.bot.send_message(
+        chat_id=topic.user_id,
+        from_chat_id=message.chat.id,
+        message_id=message.message_id,
+        text=reply,
+    )

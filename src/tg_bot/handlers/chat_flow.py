@@ -59,7 +59,7 @@ async def handle_message_from_user(
         )
         if user_manager:
             await message.answer(
-                f"This is your personal manager {user_manager.manager_link}, he'll contact you soon."
+                f"Your personal manager {user_manager.manager_link} will contact you soon."
             )
         else:
             await message.answer("A personal manager will contact you soon.")

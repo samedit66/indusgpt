@@ -128,6 +128,9 @@ class ChatManager:
         current_state = await self.chat_state_manager.current_state(user_id)
         return await self.generate_reply(agent_response, current_state)
 
+    async def stop_talking_with(self, user_id: int) -> None:
+        await self.chat_state_manager.stop_talking_with(user_id)
+
     async def _talk(self, user_id: int, user_input: str) -> ResponseToUser:
         """
         Retrieve the current question and partial answer, compose a prompt,

@@ -48,6 +48,10 @@ class InMemoryQuestionList(types.QuestionList):
             if i < idx
         ]
 
+    async def stop_talking_with(self, user_id: int) -> None:
+        self._indices.pop(user_id, None)
+        self._answers.pop(user_id, None)
+
 
 class InMemoryUserAnswerStorage(types.UserAnswerStorage):
     """

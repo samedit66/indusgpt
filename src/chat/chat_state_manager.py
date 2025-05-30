@@ -88,3 +88,12 @@ class ChatStateManager:
         :return: list of Q&A pairs
         """
         return await self.question_list.qa_pairs(user_id)
+
+    async def stop_talking_with(self, user_id: int) -> None:
+        """
+        Stops the conversation with the specified user.
+
+        :param user_id: identifier for the conversation participant
+        """
+        await self.user_answer_storage.clear(user_id)
+        await self.question_list.stop_talking_with(user_id)
