@@ -20,6 +20,7 @@ RESPONSE STRUCTURE:
 4. Never repeat questions about information already provided
 5. Response should not be long, 4-5 sentences max
 6. Exclude any carriage returns or other formatting
+7. DO NOT EXCLUDE ANY INFORMATION FROM THE RESPONSE - JUST REPHRASE IT IN A NATURAL WAY
 
 FORMAT RULES:
 - No Markdown formatting
