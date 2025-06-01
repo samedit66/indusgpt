@@ -57,9 +57,13 @@ class TortoiseQuestionList(types.QuestionList):
                 answer=answer,
             )
 
+        if await self.all_finished(user_id):
+            return
+        await self.stop_talking_with(user_id)
+
     async def all_finished(self, user_id: int) -> bool:
-        count = await QAEntry.filter(user_id=user_id).count()
-        return count >= len(self.questions)
+        user = await User.filter(id=user_id).first()
+        return user.is_onboarding_completed
 
     async def qa_pairs(self, user_id: int) -> list[types.QaPair]:
         # We do not check if the user exists, because
@@ -81,7 +85,9 @@ class TortoiseQuestionList(types.QuestionList):
         return pairs
 
     async def stop_talking_with(self, user_id: int) -> None:
-        await QAEntry.filter(user_id=user_id).delete()
+        user = await User.filter(id=user_id).first()
+        user.is_onboarding_completed = True
+        await user.save()
 
 
 async def init_db(

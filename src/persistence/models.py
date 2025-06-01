@@ -6,9 +6,10 @@ class User(Model):
     id = fields.IntField(pk=True)
     name = fields.TextField()
     url = fields.TextField()
+    is_onboarding_completed = fields.BooleanField(default=False)
 
     class Meta:
-        table = "user"
+        table = "users"
 
 
 class PartialAnswer(Model):
@@ -19,7 +20,7 @@ class PartialAnswer(Model):
     content = fields.TextField()
 
     class Meta:
-        table = "partial_answer"
+        table = "partial_answers"
         indexes = [("user",)]
 
 
@@ -34,7 +35,7 @@ class QAEntry(Model):
     created_at = fields.DatetimeField(auto_now_add=True)
 
     class Meta:
-        table = "qa_entry"
+        table = "qa_entries"
         indexes = [("user", "question_index")]
 
 
