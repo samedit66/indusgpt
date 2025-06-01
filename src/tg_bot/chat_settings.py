@@ -152,6 +152,8 @@ QUESTIONS = [
             "- Yes, I agree to 5% profit sharing\n"
             "- Of course.\n"
             "- Sure.\n"
+            "- Sure, I agree to 5% profit sharing\n"
+            "- Sure!\n"
             "- Sure, that works for me\n"
             "- I accept those terms\n"
             "- Absolutely, let's do profit sharing\n\n"
@@ -163,6 +165,7 @@ QUESTIONS = [
             "- What about 3%?\n"
             "- Let me check with my team\n"
             "- I prefer fixed price\n"
+            "- I'm not sure about that\n"
         ),
     ),
 ]
