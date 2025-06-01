@@ -70,6 +70,7 @@ class ChatStateManager:
         if await self.all_finished(user_id):
             for callback in self.on_all_finished_callbacks:
                 await callback(user_id, await self.question_list.qa_pairs(user_id))
+            await self.stop_talking_with(user_id)
 
     async def all_finished(self, user_id: int) -> bool:
         """

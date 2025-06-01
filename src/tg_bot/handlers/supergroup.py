@@ -109,23 +109,6 @@ async def set_manager_for_user(message: types.Message, command: CommandObject) -
     await message.reply(reply)
 
 
-@router.message(
-    F.chat.type == "supergroup",
-    F.text.is_not(None),
-    F.message_thread_id.is_not(None),
-)
-async def handle_message_from_topic(message: types.Message) -> None:
-    topic = await TopicGroup.filter(topic_group_id=message.message_thread_id).first()
-    if topic is None:
-        return
-
-    await message.bot.copy_message(
-        chat_id=topic.user_id,
-        from_chat_id=message.chat.id,
-        message_id=message.message_id,
-    )
-
-
 @router.message(Command("export"), F.chat.type == "supergroup")
 async def export_unfinished_users(
     message: types.Message, chat_manager: ChatManager
@@ -222,7 +205,22 @@ async def stop_talking_with(message: types.Message, chat_manager: ChatManager) -
 
     await message.bot.send_message(
         chat_id=topic.user_id,
+        text=reply,
+    )
+
+
+@router.message(
+    F.chat.type == "supergroup",
+    F.text.is_not(None),
+    F.message_thread_id.is_not(None),
+)
+async def handle_message_from_topic(message: types.Message) -> None:
+    topic = await TopicGroup.filter(topic_group_id=message.message_thread_id).first()
+    if topic is None:
+        return
+
+    await message.bot.copy_message(
+        chat_id=topic.user_id,
         from_chat_id=message.chat.id,
         message_id=message.message_id,
-        text=reply,
     )

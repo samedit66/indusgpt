@@ -57,13 +57,9 @@ class TortoiseQuestionList(types.QuestionList):
                 answer=answer,
             )
 
-        if await self.all_finished(user_id):
-            return
-        await self.stop_talking_with(user_id)
-
     async def all_finished(self, user_id: int) -> bool:
-        user = await User.filter(id=user_id).first()
-        return user.is_onboarding_completed
+        count = await QAEntry.filter(user_id=user_id).count()
+        return count >= len(self.questions)
 
     async def qa_pairs(self, user_id: int) -> list[types.QaPair]:
         # We do not check if the user exists, because
