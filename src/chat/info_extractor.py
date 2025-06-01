@@ -3,8 +3,9 @@ from typing import Optional, Literal
 
 from pydantic import BaseModel, Field
 
+from src import types
+
 from .simple_agent import SimpleAgent
-from .question_list import QaPair
 
 
 class UserInformation(BaseModel):
@@ -13,6 +14,9 @@ class UserInformation(BaseModel):
     )
     psps: list[PSPAccount] = Field(..., description="List of connected PSPs.")
     company_details: CompanyDetails = Field(..., description="Company details.")
+    business_activities: BusinessActivities = Field(
+        ..., description="Business activities of the company."
+    )
     hosting: HostingInfo = Field(..., description="Hosting information.")
     profit_sharing: ProfitSharingAgreement = Field(
         ..., description="Profit-sharing agreement."
@@ -75,6 +79,12 @@ class ProfitSharingAgreement(BaseModel):
     )
 
 
+class BusinessActivities(BaseModel):
+    activities: str = Field(
+        ..., description="Description of the company's business activities."
+    )
+
+
 INSTRUCTIONS = """
 You are a data extraction assistant.
 Your job is to collect the following information from users' answers:
@@ -97,6 +107,6 @@ info_extractor = SimpleAgent(
 )
 
 
-async def extract_info(qa_pairs: list[QaPair]) -> UserInformation:
+async def extract_info(qa_pairs: list[types.QaPair]) -> UserInformation:
     qa = "\n".join(f"Q: {q.question}\nA: {q.answer}\n" for q in qa_pairs)
     return await info_extractor(qa)

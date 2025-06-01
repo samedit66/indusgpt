@@ -1,17 +1,4 @@
-from functools import lru_cache
-
-from src.chat import (
-    ChatManager,
-    Question,
-    QaPair,
-    generate_response,
-    generate_reply,
-    extract_info,
-)
-from src.persistence.models import User
-from src.persistence import TortoiseQuestionList, TortoiseUserAnswerStorage
-from src.tg_bot.google_sheets_helper import write_user_info_to_sheet
-from src.utils.config import load_config
+from src import types
 
 
 INTRODUCTION = """
@@ -52,7 +39,7 @@ Let's build a **strong** and **profitable** partnership 💪
 """
 
 QUESTIONS = [
-    Question(
+    types.Question(
         text="Do you have corporate (business) accounts? In which banks?",
         answer_requirement=(
             "User response **must** confirm that they have a corporate/business bank account "
@@ -62,22 +49,32 @@ QUESTIONS = [
             "- I got a business account in Bank of Baroda."
         ),
     ),
-    Question(
+    types.Question(
         text="Are your corporate accounts connected to any PSP (e.g., Razorpay, Cashfree, PayU, Getepay)?",
         answer_requirement=(
-            "User response **must** confirm they have a connected PSP and include the PSP name. If user says they don't have a PSP or it's not connected, the answer is invalid.\nExamples:\n"
+            "User response **must** confirm they have a connected PSP and include the PSP name.\n"
+            "Known PSP names: Razorpay, Cashfree, PayU, Getepay.\n"
+            "If user mentions other PSP names, their answer must confirm they really have that PSP.\n"
+            "If user says they don't have a PSP or it's not connected, the answer is invalid.\n"
+            "Valid examples:\n"
             "- Yes, I have Razorpay connected.\n"
             "- My account is integrated with PayU.\n"
-            "- We use Cashfree for payments."
+            "- We use Cashfree for payments.\n"
             "- Razorpay is connected.\n",
-            "- PayU.",
+            "- PayU.\n",
+            "- Yes, I have a Amazon PSP (This PSP is not listed above, but user confirms they really have it).\n",
+            "Invalid examples:\n"
+            "- I don't have a PSP.\n"
+            "- No, I don't have a PSP.\n"
+            "- No.",
         ),
     ),
-    Question(
+    types.Question(
         text="Can you provide login and password access to the PSP account?",
         answer_requirement=(
             "User response **must** provide actual login credentials (login and password) or confirm and commit to "
             "providing them. Any response indicating inability or unwillingness to share credentials is invalid.\n"
+            "User MUST provide LOGIN and PASSWORD to have a valid answer.\n"
             "Examples of valid responses:\n"
             "- Login admin123, password test456\n"
             "- Username is merchant_1, pass is secure123, API key is abcd1234\n"
@@ -89,9 +86,12 @@ QUESTIONS = [
             "- I don't have access right now\n"
             "- Let me get back to you on this\n"
             "- I can't share these details"
+            "- Yeah.\n"
+            "- Yes.\n"
+            "- Yes, I'll share them right now.\n"
         ),
     ),
-    Question(
+    types.Question(
         text="Please provide the details of the company linked to your payment-gateway account:\n"
         "- Company Name\n"
         "- Registered Address\n"
@@ -108,7 +108,22 @@ QUESTIONS = [
             "- Only phone number provided\n"
         ),
     ),
-    Question(
+    types.Question(
+        text="Please describe your company's business activities and what products/services you plan to sell:",
+        answer_requirement=(
+            "User response **must** describe their company's business activities and what products/services they plan to sell.\n\n"
+            "Examples of valid responses:\n"
+            "- We sell electronics like smartphones and laptops\n"
+            "- Our company provides IT consulting services\n"
+            "- We're an online clothing store selling fashion accessories\n"
+            "- We sell digital products like software licenses\n\n"
+            "Examples of invalid responses:\n"
+            "- We're a company\n"
+            "- Not sure yet\n"
+            "- Will decide later\n"
+        ),
+    ),
+    types.Question(
         text=(
             "Do you already have a website approved by the PSP?\n"
             "If yes — please give us hosting access (we may need to adjust code or API)\n"
@@ -119,6 +134,7 @@ QUESTIONS = [
             "provide hosting access details (credentials, URL, etc). If they don't have a website or are unsure, "
             "that's perfectly fine.\n\n"
             "Examples of valid responses:\n"
+            "- No...\n"
             "- No, I don't have a website yet\n"
             "- Not sure, we're still working on it\n"
             "- Yes, here's the hosting access - username: admin, password: secure123\n"
@@ -132,7 +148,7 @@ QUESTIONS = [
             "- The website is www.mysite.com (but no access details)"
         ),
     ),
-    Question(
+    types.Question(
         text="Are you open to working under a profit-sharing model (5% of transaction volume) instead of a one-time deal?",
         answer_requirement=(
             "User response **must** clearly indicate agreement or disagreement to the profit-sharing model.\n\n"
@@ -140,80 +156,20 @@ QUESTIONS = [
             "- Yes, I agree to 5% profit sharing\n"
             "- Of course.\n"
             "- Sure.\n"
+            "- Sure, I agree to 5% profit sharing\n"
+            "- Sure!\n"
             "- Sure, that works for me\n"
             "- I accept those terms\n"
             "- Absolutely, let's do profit sharing\n\n"
             "- I agree.\n"
+            "- Okay sir\n"
             "Examples of invalid responses:\n"
             "- Maybe later\n"
             "- Need to think about it\n"
             "- What about 3%?\n"
             "- Let me check with my team\n"
             "- I prefer fixed price\n"
+            "- I'm not sure about that\n"
         ),
     ),
 ]
-
-
-@lru_cache
-def chat_manager() -> ChatManager:
-    """
-    Create a chat manager instance.
-    It is cached to avoid creating a new instance every time, so
-    this is a singleton.
-    """
-    return ChatManager(
-        question_list=TortoiseQuestionList(QUESTIONS),
-        user_answer_storage=TortoiseUserAnswerStorage(),
-        generate_response=generate_response,
-        generate_reply=generate_reply,
-        on_all_finished=[
-            write_to_google_sheet,
-        ],
-    )
-
-
-async def has_user_started(user_id: int) -> bool:
-    """
-    Check if the user has started the conversation.
-    This is a shortcut for chat_manager().has_user_started(user_id).
-    """
-    return await chat_manager().has_user_started(user_id)
-
-
-async def is_user_talking(user_id: int) -> bool:
-    """
-    Check if the user is talking.
-    This is a shortcut for chat_manager().is_user_talking(user_id).
-    """
-    return await chat_manager().is_user_talking(user_id)
-
-
-async def has_user_finished(user_id: int) -> bool:
-    """
-    Check if the user has finished the conversation.
-    This is a shortcut for chat_manager().has_user_finished(user_id).
-    """
-    return await chat_manager().has_user_finished(user_id)
-
-
-async def current_question(user_id: int) -> str | None:
-    current_question = await chat_manager().current_question(user_id)
-
-    if not await has_user_started(user_id):
-        return INTRODUCTION + "\n" + current_question
-
-    return current_question
-
-
-async def reply(user_id: int, user_input: str) -> str | None:
-    return await chat_manager().reply(user_id, user_input)
-
-
-async def write_to_google_sheet(user_id: int, qa_pairs: list[QaPair]) -> None:
-    user_name = (await User.filter(id=user_id).first()).name
-    user_info = await extract_info(qa_pairs)
-    # TODO: переписать с заданием конфига извне
-    config = load_config()
-    credentials_path = config.google_credentials_path
-    write_user_info_to_sheet(user_name, user_info, credentials_path)

@@ -81,8 +81,13 @@ class Intent(BaseModel):
     )
 
 
-def expand_query(user_input: str, context: str | None = None) -> str:
-    return f"Take into account the context: {context}.\nClassify the following user request: {user_input}"
+def expand_query(
+    user_input: str, context: str | None = None, instructions: str | None = None
+) -> str:
+    query = f"Take into account the context: {context}.\nClassify the following user request: {user_input}"
+    if instructions:
+        query = f"Strictly follow these instructions before classifying: {instructions}\n\n{query}"
+    return query
 
 
 router = SimpleAgent(

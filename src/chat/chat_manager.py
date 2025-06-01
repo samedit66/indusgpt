@@ -1,20 +1,18 @@
 from typing import Callable, Iterable
 
-from .question_list import QuestionList
-from .user_answer_storage import UserAnswerStorage
-from .chat_state import State
-from .chat_state_manager import ChatStateManager, OnAllFinishedCallback
+from src import types
 
+from .chat_state_manager import ChatStateManager
 from .generate_response import ResponseToUser
 
-type ResponseGenerator = Callable[[str, State], ResponseToUser]
+type ResponseGenerator = Callable[[str, types.State], ResponseToUser]
 """
 Callable which can generate a response to user.
 Takes user input and current chat state.
 Returns a `ResponseToUser`.
 """
 
-type ReplyGenerator = Callable[[ResponseToUser, State], str]
+type ReplyGenerator = Callable[[ResponseToUser, types.State], str]
 """
 Callable which can produce a pretty reply to user.
 Usually to get a pretty-looking reply you might want to add a next question,
@@ -31,11 +29,12 @@ class ChatManager:
 
     def __init__(
         self,
-        question_list: QuestionList,
-        user_answer_storage: UserAnswerStorage,
+        question_list: types.QuestionList,
+        user_answer_storage: types.UserAnswerStorage,
+        context: types.Context,
         generate_response: ResponseGenerator,
         generate_reply: ReplyGenerator,
-        on_all_finished: Iterable[OnAllFinishedCallback] = None,
+        on_all_finished: Iterable[types.QaProcessor] | None = None,
     ) -> None:
         """
         Initialize ChatManager with question sequence, persistence layer, and response generators.
@@ -45,6 +44,8 @@ class ChatManager:
                 defining the conversation flow.
             user_answer_storage (UserAnswerStorage): A storage interface for saving or retrieving
                 user-provided answers between sessions.
+            context (Context): A storage interface for saving or retrieving
+                context between sessions.
             generate_response (ResponseGenerator): A callable that generates responses to user input
                 based on the current chat state.
             generate_reply (ReplyGenerator): A callable that produces natural language replies
@@ -54,6 +55,7 @@ class ChatManager:
         """
         self.generate_response = generate_response
         self.generate_reply = generate_reply
+        self.context = context
         self.chat_state_manager = ChatStateManager(
             question_list=question_list,
             user_answer_storage=user_answer_storage,
@@ -70,6 +72,15 @@ class ChatManager:
 
     async def has_user_finished(self, user_id: int) -> bool:
         return await self.chat_state_manager.all_finished(user_id)
+
+    async def qa_pairs(self, user_id: int) -> list[types.QaPair]:
+        """
+        Returns all Q&A pairs for a given user.
+
+        :param user_id: identifier for the conversation participant
+        :return: list of Q&A pairs
+        """
+        return await self.chat_state_manager.qa_pairs(user_id)
 
     async def current_question(self, user_id: int) -> str | None:
         """
@@ -121,6 +132,9 @@ class ChatManager:
         current_state = await self.chat_state_manager.current_state(user_id)
         return await self.generate_reply(agent_response, current_state)
 
+    async def stop_talking_with(self, user_id: int) -> None:
+        await self.chat_state_manager.stop_talking_with(user_id)
+
     async def _talk(self, user_id: int, user_input: str) -> ResponseToUser:
         """
         Retrieve the current question and partial answer, compose a prompt,
@@ -137,10 +151,12 @@ class ChatManager:
         _, question, partial_answer = await self.chat_state_manager.current_state(
             user_id
         )
+        instructions = await self.context.get()
         answer = await self.generate_response(
             user_input=user_input,
             question=question,
             context=partial_answer,
+            instructions=instructions,
         )
         return answer
 
@@ -162,3 +178,22 @@ class ChatManager:
 
         if agent_responce.ready_for_next_question:
             await self.chat_state_manager.finish_question(user_id)
+
+    async def learn(
+        self,
+        instructions: str,
+        incorrect_example: str | None = None,
+    ) -> None:
+        """
+        Learn new information about how to answer questions.
+        """
+        instructions_text = f"""
+Your answers needs to be modified to fit the following instructions:
+'{instructions}'
+"""
+        if incorrect_example:
+            instructions_text += f"""
+You last answer did not follow them, do not repeat the same mistakes:
+'{incorrect_example}'
+"""
+        await self.context.append(instructions_text)

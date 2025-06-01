@@ -1,14 +1,13 @@
-from .question_list import QuestionList, Question, QaPair
-from .user_answer_storage import UserAnswerStorage
+from src import types
 
 
-class InMemoryQuestionList(QuestionList):
+class InMemoryQuestionList(types.QuestionList):
     """
     In-memory sequencing of a fixed list of questions per user.
     """
 
-    def __init__(self, questions: list[Question]) -> None:
-        self._questions: list[Question] = questions
+    def __init__(self, questions: list[types.Question]) -> None:
+        self._questions: list[types.Question] = questions
         # user_id → current question index
         self._indices: dict[int, int] = {}
         # user_id → list of answers provided so far
@@ -17,7 +16,7 @@ class InMemoryQuestionList(QuestionList):
     async def has_user_started(self, user_id: int) -> bool:
         return user_id in self._indices
 
-    async def current_question(self, user_id: int) -> Question | None:
+    async def current_question(self, user_id: int) -> types.Question | None:
         idx = self._indices.get(user_id, 0)
         if idx < len(self._questions):
             return self._questions[idx]
@@ -39,18 +38,22 @@ class InMemoryQuestionList(QuestionList):
         idx = self._indices.get(user_id, 0)
         return idx >= len(self._questions)
 
-    async def qa_pairs(self, user_id: int) -> list[QaPair]:
+    async def qa_pairs(self, user_id: int) -> list[types.QaPair]:
         if not await self.has_user_started(user_id):
             return []
         idx = self._indices[user_id]
         return [
-            QaPair(question=self._questions[i], answer=answer)
+            types.QaPair(question=self._questions[i], answer=answer)
             for i, answer in enumerate(self._answers[user_id])
             if i < idx
         ]
 
+    async def stop_talking_with(self, user_id: int) -> None:
+        self._indices.pop(user_id, None)
+        self._answers.pop(user_id, None)
 
-class InMemoryUserAnswerStorage(UserAnswerStorage):
+
+class InMemoryUserAnswerStorage(types.UserAnswerStorage):
     """
     In-memory storage of in-progress answers per user.
     """

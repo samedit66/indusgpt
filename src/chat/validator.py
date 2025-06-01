@@ -3,7 +3,7 @@ from typing import Literal, Union
 
 from pydantic import BaseModel, Field
 
-from .question_list import Question
+from src import types
 
 from .simple_agent import SimpleAgent
 
@@ -70,17 +70,25 @@ class InvalidAnswer(BaseModel):
     )
 
 
-def expand_query(user_input: str, question: Question, context: str) -> str:
-    return f"""
+def expand_query(
+    user_input: str,
+    question: types.Question,
+    context: str,
+    instructions: str | None = None,
+) -> str:
+    query = f"""
 User was asked: {question.text}.
 Requirement: {question.answer_requirement}
 Earlier we found out that: {context}.
-Using that information and the current user's answer {user_input}, validate it.
-Do not validate only user answer, validate
-both combined what we found out about user earlier and the current user's answer.
+Using that information and the current user's answer '{user_input}', validate it.
+Do not validate only user answer, validate both combined what we found out about user earlier and the current user's answer.
 Do not be too strict, infer required information.
 If user is unsure about his answer, do not infer information - make user confirm.
 """
+    if instructions:
+        prompt = f"Strictly follow these instructions before validating: {instructions}"
+        query = prompt + "\n\n" + query
+    return query
 
 
 validator = SimpleAgent(

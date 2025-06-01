@@ -5,9 +5,11 @@ from tortoise import fields
 class User(Model):
     id = fields.IntField(pk=True)
     name = fields.TextField()
+    url = fields.TextField()
+    is_onboarding_completed = fields.BooleanField(default=False)
 
     class Meta:
-        table = "user"
+        table = "users"
 
 
 class PartialAnswer(Model):
@@ -18,7 +20,7 @@ class PartialAnswer(Model):
     content = fields.TextField()
 
     class Meta:
-        table = "partial_answer"
+        table = "partial_answers"
         indexes = [("user",)]
 
 
@@ -33,7 +35,7 @@ class QAEntry(Model):
     created_at = fields.DatetimeField(auto_now_add=True)
 
     class Meta:
-        table = "qa_entry"
+        table = "qa_entries"
         indexes = [("user", "question_index")]
 
 
@@ -57,3 +59,31 @@ class TopicGroup(Model):
     class Meta:
         table = "topic_groups"
         indexes = [("user",), ("topic_group_id",)]
+
+
+class Manager(Model):
+    id = fields.IntField(pk=True)
+    manager_link = fields.TextField()
+
+    class Meta:
+        table = "managers"
+
+
+class UserManager(Model):
+    id = fields.IntField(pk=True)
+    user = fields.ForeignKeyField(
+        "models.User", related_name="user_managers", on_delete=fields.CASCADE
+    )
+    manager_link = fields.TextField()
+
+    class Meta:
+        table = "user_managers"
+        indexes = [("user",)]
+
+
+class Context(Model):
+    id = fields.IntField(pk=True)
+    context = fields.TextField()
+
+    class Meta:
+        table = "context"

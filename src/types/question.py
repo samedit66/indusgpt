@@ -58,3 +58,11 @@ class QuestionList(ABC):
         :param user_id: identifier for the conversation participant
         :return: a list of tuples containing the question and its answer
         """
+
+    @abstractmethod
+    async def stop_talking_with(self, user_id: int) -> None:
+        """
+        Clears the conversation history and stops the conversation.
+
+        :param user_id: identifier for the conversation participant
+        """
