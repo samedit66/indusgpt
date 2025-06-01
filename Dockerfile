@@ -28,7 +28,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --locked
 
 # Default environment variables
-ENV MODEL="gpt-4o"
+ENV MODEL="gpt-4.1-2025-04-14"
 ENV DATABASE_URL="sqlite://db.sqlite3"
 ENV OPENAI_API_BASE_URL="https://api.openai.com/v1"
 ENV LOG_FILE="bot.log"
