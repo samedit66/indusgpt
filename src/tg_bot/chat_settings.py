@@ -52,12 +52,21 @@ QUESTIONS = [
     types.Question(
         text="Are your corporate accounts connected to any PSP (e.g., Razorpay, Cashfree, PayU, Getepay)?",
         answer_requirement=(
-            "User response **must** confirm they have a connected PSP and include the PSP name. If user says they don't have a PSP or it's not connected, the answer is invalid.\nExamples:\n"
+            "User response **must** confirm they have a connected PSP and include the PSP name.\n"
+            "Known PSP names: Razorpay, Cashfree, PayU, Getepay.\n"
+            "If user mentions other PSP names, their answer must confirm they really have that PSP.\n"
+            "If user says they don't have a PSP or it's not connected, the answer is invalid.\n"
+            "Valid examples:\n"
             "- Yes, I have Razorpay connected.\n"
             "- My account is integrated with PayU.\n"
-            "- We use Cashfree for payments."
+            "- We use Cashfree for payments.\n"
             "- Razorpay is connected.\n",
-            "- PayU.",
+            "- PayU.\n",
+            "- Yes, I have a Amazon PSP (This PSP is not listed above, but user confirms they really have it).\n",
+            "Invalid examples:\n"
+            "- I don't have a PSP.\n"
+            "- No, I don't have a PSP.\n"
+            "- No.",
         ),
     ),
     types.Question(
