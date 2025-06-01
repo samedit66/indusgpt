@@ -28,6 +28,7 @@ async def run_bot():
     chat_manager = chat.ChatManager(
         question_list=persistence.TortoiseQuestionList(chat_settings.QUESTIONS),
         user_answer_storage=persistence.TortoiseUserAnswerStorage(),
+        context=persistence.TortoiseContext(),
         generate_response=chat.generate_response,
         generate_reply=chat.generate_reply,
         on_all_finished=[

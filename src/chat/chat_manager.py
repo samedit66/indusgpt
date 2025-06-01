@@ -31,6 +31,7 @@ class ChatManager:
         self,
         question_list: types.QuestionList,
         user_answer_storage: types.UserAnswerStorage,
+        context: types.Context,
         generate_response: ResponseGenerator,
         generate_reply: ReplyGenerator,
         on_all_finished: Iterable[types.QaProcessor] | None = None,
@@ -43,6 +44,8 @@ class ChatManager:
                 defining the conversation flow.
             user_answer_storage (UserAnswerStorage): A storage interface for saving or retrieving
                 user-provided answers between sessions.
+            context (Context): A storage interface for saving or retrieving
+                context between sessions.
             generate_response (ResponseGenerator): A callable that generates responses to user input
                 based on the current chat state.
             generate_reply (ReplyGenerator): A callable that produces natural language replies
@@ -52,6 +55,7 @@ class ChatManager:
         """
         self.generate_response = generate_response
         self.generate_reply = generate_reply
+        self.context = context
         self.chat_state_manager = ChatStateManager(
             question_list=question_list,
             user_answer_storage=user_answer_storage,
@@ -147,10 +151,12 @@ class ChatManager:
         _, question, partial_answer = await self.chat_state_manager.current_state(
             user_id
         )
+        instructions = await self.context.get()
         answer = await self.generate_response(
             user_input=user_input,
             question=question,
             context=partial_answer,
+            instructions=instructions,
         )
         return answer
 
@@ -172,3 +178,22 @@ class ChatManager:
 
         if agent_responce.ready_for_next_question:
             await self.chat_state_manager.finish_question(user_id)
+
+    async def learn(
+        self,
+        instructions: str,
+        incorrect_example: str | None = None,
+    ) -> None:
+        """
+        Learn new information about how to answer questions.
+        """
+        instructions_text = f"""
+Your answers needs to be modified to fit the following instructions:
+'{instructions}'
+"""
+        if incorrect_example:
+            instructions_text += f"""
+You last answer did not follow them, do not repeat the same mistakes:
+'{incorrect_example}'
+"""
+        await self.context.append(instructions_text)

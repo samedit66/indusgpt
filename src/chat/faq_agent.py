@@ -121,11 +121,17 @@ Do not shorten or modify answers from FAQ - the user must get a fully response.
 """
 
 
-def expand_query(user_input: str, question_text: str) -> str:
-    return (
-        f"User was asked the following question: '{question_text}'\n"
-        f"Reply to the following user request: '{user_input}'"
-    )
+def expand_query(
+    user_input: str, question_text: str, instructions: str | None = None
+) -> str:
+    query = f"""
+User was asked the following question: '{question_text}'\n"
+Reply to the following user request: '{user_input}'"
+"""
+    if instructions:
+        prompt = f"Strictly follow these instructions before answering: {instructions}"
+        query = prompt + "\n\n" + query
+    return query
 
 
 faq_agent = SimpleAgent(

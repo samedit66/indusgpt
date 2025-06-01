@@ -36,9 +36,12 @@ async def generate_response(
     user_input: str,
     question: types.Question,
     context: str | None = None,
+    instructions: str | None = None,
 ) -> ResponseToUser:
     requests = await atomic_separator(user_input)
-    responses = await get_responses_for_requests(requests.requests, question, context)
+    responses = await get_responses_for_requests(
+        requests.requests, question, context, instructions
+    )
     return combine_responses(user_input, responses)
 
 
@@ -46,6 +49,7 @@ async def get_responses_for_requests(
     requests: list[str],
     question: types.Question,
     context: str | None,
+    instructions: str | None,
 ) -> list[ResponseToUser]:
     responses = []
     for request in requests:
@@ -53,6 +57,7 @@ async def get_responses_for_requests(
             user_input=request,
             question=question,
             context=context,
+            instructions=instructions,
         )
         responses.append(response)
     return responses
@@ -80,13 +85,16 @@ async def generate_single_response(
     user_input: str,
     question: types.Question,
     context: str | None = None,
+    instructions: str | None = None,
 ) -> ResponseToUser:
-    intent = await router(user_input, context=context)
+    intent = await router(user_input, context=context, instructions=instructions)
 
     match intent:
         case Intent(category="faq"):
             # TODO: Возможно, стоит вынести в отдельную функцию
-            agent_response = await faq_agent(user_input, question_text=question.text)
+            agent_response = await faq_agent(
+                user_input, question_text=question.text, instructions=instructions
+            )
             return ResponseToUser(
                 user_input=user_input,
                 response_text=agent_response,
@@ -94,7 +102,17 @@ async def generate_single_response(
                 ready_for_next_question=False,
             )
         case _:
-            return await evaluate_user_information(user_input, question, context)
+            return await evaluate_user_information(
+                user_input, question, context, instructions
+            )
+
+
+def expand_query(prompt: str, instructions: str | None = None) -> str:
+    if instructions:
+        query = f"Strictly follow these instructions before answering: {instructions}\n\n{prompt}"
+    else:
+        query = prompt
+    return query
 
 
 response_maker = SimpleAgent(
@@ -169,6 +187,7 @@ You’re a simple, bro-style assistant whose job is to check whether the user’
 - **Mention limit out of context (e.g. 25 lakh)**  
   “Bro, limits aren’t the point right now—answer my main questions so we know if we can work.”
 """,
+    expand_query=expand_query,
 )
 
 
@@ -176,11 +195,13 @@ async def evaluate_user_information(
     user_information: str,
     question: types.Question,
     context: str | None = None,
+    instructions: str | None = None,
 ) -> ResponseToUser:
     status = await validator(
         user_information,
         question=question,
         context=context,
+        instructions=instructions,
     )
 
     match status.is_valid:
@@ -203,7 +224,7 @@ async def evaluate_user_information(
                 f"Tell them that this is not enough and explain why: '{reason_why_incomplete}'."
             )
 
-    agent_response = await response_maker(prompt)
+    agent_response = await response_maker(prompt, instructions=instructions)
     return ResponseToUser(
         user_input=user_information,
         response_text=agent_response,

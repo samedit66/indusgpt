@@ -79,3 +79,11 @@ class UserManager(Model):
     class Meta:
         table = "user_managers"
         indexes = [("user",)]
+
+
+class Context(Model):
+    id = fields.IntField(pk=True)
+    context = fields.TextField()
+
+    class Meta:
+        table = "context"

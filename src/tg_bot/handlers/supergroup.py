@@ -110,6 +110,39 @@ async def set_manager_for_user(message: types.Message, command: CommandObject) -
     await message.reply(reply)
 
 
+@router.message(
+    Command("learn"),
+    F.chat.type == "supergroup",
+    F.text.is_not(None),
+    F.message_thread_id.is_not(None),
+)
+async def learn(
+    message: types.Message,
+    command: CommandObject,
+    chat_manager: ChatManager,
+) -> None:
+    """
+    Make bot learn new information about how to answer questions.
+    Command must include instructions and can optionally reference a message:
+    `/learn <instructions>` - learn using provided instructions
+    Reply to a message with `/learn <instructions>` - learn using both the instructions and message content
+    Must be called in the topic chat.
+    """
+    if not command.args:
+        await message.reply("Instructions are required. Usage: `/learn <instructions>`")
+        return
+
+    instructions = command.args
+
+    if message.reply_to_message and message.reply_to_message.text:
+        await chat_manager.learn(
+            instructions=instructions,
+            incorrect_example=message.reply_to_message.text,
+        )
+    else:
+        await chat_manager.learn(instructions=instructions)
+
+
 @router.message(Command("export"), F.chat.type == "supergroup")
 async def export_unfinished_users(
     message: types.Message, chat_manager: ChatManager

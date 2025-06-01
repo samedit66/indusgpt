@@ -2,6 +2,7 @@ from .qa import QaPair, QaProcessor
 from .question import Question, QuestionList
 from .state import State, StateType
 from .storage import UserAnswerStorage
+from .context import Context
 
 __all__ = [
     "QaPair",
@@ -11,4 +12,5 @@ __all__ = [
     "State",
     "StateType",
     "UserAnswerStorage",
+    "Context",
 ]
