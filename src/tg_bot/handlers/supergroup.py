@@ -143,6 +143,45 @@ async def learn(
         await chat_manager.learn(instructions=instructions)
 
 
+@router.message(
+    Command("instructions"),
+    F.chat.type == "supergroup",
+    F.message_thread_id.is_not(None),
+)
+async def instructions(
+    message: types.Message,
+    chat_manager: ChatManager,
+) -> None:
+    """
+    Get the instructions of the bot.
+    Command `/instructions` - get the instructions of the bot.
+    Must be called in the topic chat.
+    """
+    instructions = await chat_manager.context.get()
+    if instructions:
+        await message.reply(instructions)
+    else:
+        await message.reply("No instructions found")
+
+
+@router.message(
+    Command("forget"),
+    F.chat.type == "supergroup",
+    F.message_thread_id.is_not(None),
+)
+async def forget(
+    message: types.Message,
+    chat_manager: ChatManager,
+) -> None:
+    """
+    Forget the instructions of the bot.
+    Command `/forget` - forget the instructions of the bot.
+    Must be called in the topic chat.
+    """
+    await chat_manager.context.clear()
+    await message.reply("Instructions forgotten")
+
+
 @router.message(Command("export"), F.chat.type == "supergroup")
 async def export_unfinished_users(
     message: types.Message, chat_manager: ChatManager
