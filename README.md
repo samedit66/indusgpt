@@ -1,22 +1,37 @@
 # IndusGPT Bot
 
-A Telegram bot designed to handle automated conversations and Q&A sessions with users in a structured way. The bot manages user interactions through topic groups, tracks progress, and provides manager assignment capabilities.
+A Telegram bot designed to facilitate user onboarding through interactive conversations.
 
 ## Features
 
-- Automated Q&A sessions with users
-- Topic-based conversation management in supergroups
-- Manager assignment system (default and per-user)
-- PDF export functionality for unfinished user conversations
-- Voice message handling with appropriate responses
-- Progress tracking for user conversations
+- Interactive conversations with users
+- Dynamic learning capabilities
+- User management system
+- Export functionality for conversation data
+- Topic-based chat organization
 
-## Prerequisites
+## Bot Commands
 
-- Python 3.12 or higher
-- uv package manager ([installation guide](https://github.com/astral-sh/uv))
+### General Chat Commands
+Commands that should be used in the main/general chat:
 
-## Installation
+- `/attach` - Set up the bot for this supergroup if not already configured
+- `/detach` - Remove the bot from this supergroup
+- `/set_manager @manager` - Set the default manager for all new users
+- `/export` - Generate a PDF report of all unfinished users' conversations
+
+### Topic Chat Commands
+Commands that should be used within topic chats:
+
+- `/set_manager @manager` - Assign a specific manager to the user in this topic
+- `/learn <instructions>` - Teach the bot new information
+  - Use directly: `/learn <instructions>` to add new instructions
+  - Reply to a message: `/learn <instructions>` to learn from both the instructions and the message
+- `/instructions` - View current bot instructions
+- `/forget` - Clear all learned instructions
+- `/stop` - End the conversation with the current user
+
+## Setup
 
 ### Option 1: Local Installation
 
@@ -50,7 +65,7 @@ docker run -d --name indusgpt \
   -e TELEGRAM_BOT_TOKEN="your_telegram_bot_token" \
   -e OPENAI_API_KEY="your_openai_api_key" \
   -e DATABASE_URL="sqlite://db.sqlite3" \
-  -e MODEL="gpt-4o" \
+  -e MODEL="gpt-4.1-2025-04-14" \
   -e OPENAI_API_BASE_URL="https://api.openai.com/v1" \
   -e LOG_FILE="bot.log" \
   -e GOOGLE_CREDENTIALS_PATH="path_to_credentials" \
@@ -76,13 +91,13 @@ The bot can be configured using the following environment variables:
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `TELEGRAM_BOT_TOKEN` | Telegram Bot API token (required) | - |
-| `DATABASE_URL` | Database connection URL | `sqlite://db.sqlite3` |
-| `MODEL` | OpenAI model to use | `gpt-4o` |
 | `OPENAI_API_KEY` | OpenAI API key (required) | - |
+| `MODEL` | OpenAI model to use | `gpt-4.1-2025-04-14` |
+| `DATABASE_URL` | Database connection URL | `sqlite://db.sqlite3` |
 | `OPENAI_API_BASE_URL` | OpenAI API base URL | `https://api.openai.com/v1` |
 | `LOG_FILE` | Log file path | `bot.log` |
-| `GOOGLE_CREDENTIALS_PATH` | Path to Google service account credentials | - |
-| `GOOGLE_SHEET_URL` | Google Sheet URL for user information | - |
+| `GOOGLE_CREDENTIALS_PATH` | Path to Google service account credentials (required) | - |
+| `GOOGLE_SHEET_URL` | Google Sheet URL for user information (required) | - |
 | `GOOGLE_SHEET_WORKSHEET_NAME` | Name of the worksheet in Google Sheet | `UserInfo` |
 
 ## Running the Bot
@@ -92,6 +107,8 @@ The bot can be configured using the following environment variables:
 # Set required environment variables
 export TELEGRAM_BOT_TOKEN="your_telegram_bot_token"
 export OPENAI_API_KEY="your_openai_api_key"
+export GOOGLE_CREDENTIALS_PATH="path_to_credentials"
+export GOOGLE_SHEET_URL="your_sheet_url"
 # Optional: configure other variables as needed
 
 uv run main.py
@@ -101,36 +118,6 @@ uv run main.py
 ```bash
 docker start indusgpt
 ```
-
-## Available Commands
-
-### Supergroup Management
-- `/attach` - Set the current supergroup as the default for the bot (must be called in General chat)
-- `/detach` - Remove the current supergroup as the default for the bot
-
-### Manager Assignment
-- `/set_manager @username` - Set the default manager for all new users (in General chat)
-- `/set_manager @username` - Set a specific manager for a user (in topic chat)
-
-### Export Functionality
-- `/export` - Generate a PDF report of all unfinished users' Q&A sessions
-  - Creates a timestamped PDF file
-  - Includes all Q&A pairs for users who haven't completed the process
-  - Automatically sends the report in the chat
-  - Cleans up the file after sending
-
-### User Interaction
-- `/start` - Initiates the conversation with the bot (in private chat)
-  - Sends introduction message
-  - Begins the Q&A session
-  - Manages user progress through questions
-
-## Notes
-
-- Voice messages are not supported - users will be prompted to write text responses
-- Non-text messages are not accepted - users will be asked to provide text
-- When a user completes all questions, they will be connected with their assigned manager
-- If no specific manager is assigned, the default manager will be used
 
 ## Technical Details
 
