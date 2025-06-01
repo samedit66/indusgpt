@@ -74,6 +74,7 @@ QUESTIONS = [
         answer_requirement=(
             "User response **must** provide actual login credentials (login and password) or confirm and commit to "
             "providing them. Any response indicating inability or unwillingness to share credentials is invalid.\n"
+            "User MUST provide LOGIN and PASSWORD to have a valid answer.\n"
             "Examples of valid responses:\n"
             "- Login admin123, password test456\n"
             "- Username is merchant_1, pass is secure123, API key is abcd1234\n"
@@ -85,6 +86,9 @@ QUESTIONS = [
             "- I don't have access right now\n"
             "- Let me get back to you on this\n"
             "- I can't share these details"
+            "- Yeah.\n"
+            "- Yes.\n"
+            "- Yes, I'll share them right now.\n"
         ),
     ),
     types.Question(
