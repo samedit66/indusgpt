@@ -1,5 +1,6 @@
 from aiogram import Router, F, types
 from aiogram.filters import Command, CommandObject
+from aiogram import enums as aiogram_enums
 import os
 from datetime import datetime
 
@@ -185,9 +186,11 @@ async def stop_talking_with(message: types.Message, chat_manager: ChatManager) -
         processor = processors.PdfProcessor(output_path=pdf_filename)
         await processor(user.id, qa_data)
 
+        link = f'<a href="{user.url}">user</a>'
         await message.reply_document(
             types.FSInputFile(pdf_filename),
-            caption=f"Q&A report for user {user.id}",
+            caption=f"Q&A report for {link}",
+            parse_mode=aiogram_enums.ParseMode.HTML,
         )
         os.remove(pdf_filename)
 
