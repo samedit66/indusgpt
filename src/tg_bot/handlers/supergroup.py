@@ -142,6 +142,8 @@ async def learn(
     else:
         await chat_manager.learn(instructions=instructions)
 
+    await message.reply("Instructions learned")
+
 
 @router.message(
     Command("instructions"),
