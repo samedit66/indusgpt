@@ -28,11 +28,12 @@ def get_client(credentials_path: str) -> gspread.Client:
     return gspread.authorize(creds)
 
 
-def flatten_user_info(user_name: str, user_info: UserInformation) -> dict:
+def flatten_user_info(user_name: str, tg: str, user_info: UserInformation) -> dict:
     """Flatten UserInformation for Google Sheets row.
 
     Args:
         user_name: Name of the user
+        tg: Telegram URL of the user
         user_info: UserInformation object containing all user data
 
     Returns:
@@ -40,6 +41,7 @@ def flatten_user_info(user_name: str, user_info: UserInformation) -> dict:
     """
     return {
         "user_name": user_name,
+        "tg": tg,
         # Corporate accounts (comma-separated bank names)
         "accounts": ", ".join([acc.bank_name for acc in user_info.accounts]),
         # PSPs (comma-separated psp_name)
@@ -93,6 +95,7 @@ class GoogleSheetsProcessor:
             qa_pairs: List of question-answer pairs to process
         """
         user_name = (await User.filter(id=user_id).first()).name
+        tg = (await User.filter(id=user_id).first()).url
         user_info = await extract_info(qa_pairs)
 
         # Open the sheet by URL
@@ -106,9 +109,9 @@ class GoogleSheetsProcessor:
                 title=self.worksheet_name, rows="100", cols="20"
             )
             # Set up header row
-            headers = list(flatten_user_info(user_name, user_info).keys())
+            headers = list(flatten_user_info(user_name, tg, user_info).keys())
             worksheet.append_row(headers)
 
         # Prepare and append row data
-        row = list(flatten_user_info(user_name, user_info).values())
+        row = list(flatten_user_info(user_name, tg, user_info).values())
         worksheet.append_row(row)
