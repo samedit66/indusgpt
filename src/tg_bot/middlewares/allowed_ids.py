@@ -3,6 +3,8 @@ from typing import Iterable
 from aiogram import BaseMiddleware
 from aiogram.types import Message
 
+from src.persistence import models
+
 
 class AllowedIdsMiddleware(BaseMiddleware):
     """
@@ -20,13 +22,7 @@ class AllowedIdsMiddleware(BaseMiddleware):
         self.allowed_ids: set[int] = set(allowed_ids)
 
     async def __call__(self, handler, event, data):
-        """
-        Intercept all incoming Message updates. If the text of the message is "/attach"
-        (possibly with bot username), check if the sender is in allowed_ids. If not,
-        do nothing (i.e., do not call the handler, do not send any reply). Otherwise,
-        continue to the handler.
-        """
-        # Only process Message events
+        # Only process Message events in a supergroup
         if (
             isinstance(event, Message)
             and event.text
@@ -34,16 +30,32 @@ class AllowedIdsMiddleware(BaseMiddleware):
         ):
             # Extract the command part (e.g., "/attach" or "/attach@YourBotName")
             command = event.text.lstrip().split()[0]
+
+            # We care about both "/attach" and "/detach" (with or without @BotName)
             if (
                 command == "/attach"
                 or command.startswith("/attach@")
                 or command == "/detach"
-                or command.startswith("/attach@")
+                or command.startswith("/detach@")
             ):
-                # 2) Must be an allowed user ID
-                user_id = event.from_user.id
-                if user_id not in self.allowed_ids:
-                    return  # drop
+                # 1) Fetch all telegram_id values from Manager and UserManager
+                manager_ids_from_manager = await models.Manager.all().values_list(
+                    "telegram_id", flat=True
+                )
+                manager_ids_from_usermanager = (
+                    await models.UserManager.all().values_list("telegram_id", flat=True)
+                )
 
-        # For all other updates (or allowed /attach), proceed as normal
+                # Combine them into a single set for quick membership testing
+                managers_ids = set(manager_ids_from_manager) | set(
+                    manager_ids_from_usermanager
+                )
+
+                # 2) Must be either in allowed_ids OR in managers_ids
+                user_id = event.from_user.id
+                if user_id not in self.allowed_ids and user_id not in managers_ids:
+                    # Drop the update (no reply, no handler invocation)
+                    return
+
+        # For all other updates (or if checks passed), proceed as normal
         return await handler(event, data)

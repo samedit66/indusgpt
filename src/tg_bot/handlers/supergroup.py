@@ -76,7 +76,9 @@ async def set_default_manager(message: types.Message, command: CommandObject) ->
         await manager.save()
         reply = f"Default manager updated to {manager_link}"
     else:
-        await Manager.create(manager_link=manager_link)
+        await Manager.create(
+            manager_link=manager_link, telegram_id=message.from_user.id
+        )
         reply = f"Default manager set to {manager_link}"
     await message.reply(reply)
 
@@ -107,7 +109,9 @@ async def set_manager_for_user(message: types.Message, command: CommandObject) -
         await user_manager.save()
         reply = f"Manager for this user updated to {manager_link}"
     else:
-        await UserManager.create(user_id=user_id, manager_link=manager_link)
+        await UserManager.create(
+            user_id=user_id, manager_link=manager_link, telegram_id=message.from_user.id
+        )
         reply = f"Manager for this user set to {manager_link}"
     await message.reply(reply)
 
