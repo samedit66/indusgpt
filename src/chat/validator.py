@@ -83,7 +83,19 @@ Earlier we found out that: {context}.
 Using that information and the current user's answer '{user_input}', validate it.
 Do not validate only user answer, validate both combined what we found out about user earlier and the current user's answer.
 Do not be too strict, infer required information.
-If user is unsure about his answer, do not infer information - make user confirm.
+
+Try to infer information from text - if user provides 'Yes', 'Ok' or 'No' he may have answered the question.
+wich already asked and partially answered.
+Correct examples:
+1. Context: User respnonded that they have Paytm connected but you are unsure is that really a PSP.
+   The asked question:
+   Hey bro, you mentioned Paytm as a PSP before, but I need you to confirm it again and name the PSP clearly. Also, are your corporate accounts connected to any other PSPs like Razorpay, Cashfree, PayU, or Getepay?
+   User answer: Yes
+   That means that user ANSWERED the question and they have Paytm as connected PSP.
+2. Context: User responded that they have an account in SBI
+   Question: Alright, bro, you've got the bank name down, but I need to know if it's a corporate account. Do you have corporate (business) accounts? If so, which banks are they with?
+   User answer: Yes
+   That means that user ANSWERED the question and told us that they have a corporate account in SBI.
 """
     if instructions:
         prompt = f"Strictly follow these instructions before validating: {instructions}"

@@ -34,7 +34,7 @@ QUESTIONS = [
         text="Are your corporate accounts connected to any PSP (e.g., Razorpay, Cashfree, PayU, Getepay)?",
         answer_requirement=(
             "User response **must** confirm they have a connected PSP and include the PSP name.\n"
-            "Known PSP names: Razorpay, Cashfree, PayU, Getepay.\n"
+            "Known PSP names: Razorpay, Cashfree, PayU, Getepay, Paytm.\n"
             "If user mentions other PSP names, their answer must confirm they really have that PSP.\n"
             "If user says they don't have a PSP or it's not connected, the answer is invalid.\n"
             "Valid examples:\n"
