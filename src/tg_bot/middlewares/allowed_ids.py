@@ -37,23 +37,30 @@ class AllowedIdsMiddleware(BaseMiddleware):
                 or command.startswith("/attach@")
                 or command == "/detach"
                 or command.startswith("/detach@")
+                or command == "/set_manager"
+                or command.startswith("/set_manager@")
+                or command == "/unset_manager"
+                or command.startswith("/unset_manager")
             ):
                 # 1) Fetch all telegram_id values from Manager and UserManager
                 manager_ids_from_manager = await models.Manager.all().values_list(
-                    "telegram_id", flat=True
+                    "manager_link", flat=True
                 )
                 manager_ids_from_usermanager = (
-                    await models.UserManager.all().values_list("telegram_id", flat=True)
+                    await models.UserManager.all().values_list(
+                        "manager_link", flat=True
+                    )
                 )
 
                 # Combine them into a single set for quick membership testing
-                managers_ids = set(manager_ids_from_manager) | set(
+                managers_links = set(manager_ids_from_manager) | set(
                     manager_ids_from_usermanager
                 )
 
                 # 2) Must be either in allowed_ids OR in managers_ids
                 user_id = event.from_user.id
-                if user_id not in self.allowed_ids and user_id not in managers_ids:
+                username = f"@{event.from_user.username}"
+                if not (user_id in self.allowed_ids or username in managers_links):
                     # Drop the update (no reply, no handler invocation)
                     return
 

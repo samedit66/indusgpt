@@ -64,7 +64,6 @@ class TopicGroup(Model):
 class Manager(Model):
     id = fields.IntField(pk=True)
     manager_link = fields.TextField()
-    telegram_id = fields.BigIntField()
 
     class Meta:
         table = "managers"
@@ -76,7 +75,6 @@ class UserManager(Model):
         "models.User", related_name="user_managers", on_delete=fields.CASCADE
     )
     manager_link = fields.TextField()
-    telegram_id = fields.BigIntField()
 
     class Meta:
         table = "user_managers"

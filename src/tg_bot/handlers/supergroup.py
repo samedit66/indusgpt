@@ -77,7 +77,7 @@ async def set_default_manager(message: types.Message, command: CommandObject) ->
         reply = f"Default manager updated to {manager_link}"
     else:
         await Manager.create(
-            manager_link=manager_link, telegram_id=message.from_user.id
+            manager_link=manager_link,
         )
         reply = f"Default manager set to {manager_link}"
     await message.reply(reply)
@@ -110,10 +110,56 @@ async def set_manager_for_user(message: types.Message, command: CommandObject) -
         reply = f"Manager for this user updated to {manager_link}"
     else:
         await UserManager.create(
-            user_id=user_id, manager_link=manager_link, telegram_id=message.from_user.id
+            user_id=user_id,
+            manager_link=manager_link,
         )
         reply = f"Manager for this user set to {manager_link}"
     await message.reply(reply)
+
+
+@router.message(
+    Command("unset_manager"),
+    F.chat.type == "supergroup",
+    F.message_thread_id.is_(None),
+)
+async def unset_default_manager(message: types.Message) -> None:
+    """
+    Unset (remove) the default manager for every new user.
+    Command `/unset_manager` needs to be called in the General chat.
+    """
+    # Try to fetch the single default Manager row
+    default_manager = await Manager.first()
+    if default_manager:
+        await default_manager.delete()
+        await message.reply("Default manager has been removed.")
+    else:
+        await message.reply("No default manager is currently set.")
+
+
+@router.message(
+    Command("unset_manager"),
+    F.chat.type == "supergroup",
+    F.text.is_not(None),
+    F.message_thread_id.is_not(None),
+)
+async def unset_manager_for_user(message: types.Message) -> None:
+    """
+    Unset (remove) the manager for the specific user whose topic this is.
+    Command `/unset_manager` needs to be called in a topic chat.
+    """
+    # First, find which user this topic belongs to
+    topic = await TopicGroup.filter(topic_group_id=message.message_thread_id).first()
+    if not topic:
+        await message.reply("Could not identify which user this topic belongs to.")
+        return
+
+    # Look for an existing UserManager entry for that user
+    user_manager = await UserManager.filter(user_id=topic.user_id).first()
+    if user_manager:
+        await user_manager.delete()
+        await message.reply("Manager assignment for this user has been removed.")
+    else:
+        await message.reply("No manager is currently set for this user.")
 
 
 @router.message(
