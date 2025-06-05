@@ -213,7 +213,9 @@ async def evaluate_user_information(
         case InvalidAnswer(reason_why_invalid=reason_why_invalid):
             prompt = (
                 f"User has not provided anything useful. "
-                f"Tell them that this is not enough and explain why: '{reason_why_invalid}'."
+                "If user says that will get what's missing right now, "
+                "tell them that it's okay and when they are ready they should hit you up."
+                f"Use the analysis from other agent why user answer is invalid: '{reason_why_invalid}'."
             )
         case NeedsMoreDetails(
             extracted_data=extracted_data,
@@ -221,7 +223,9 @@ async def evaluate_user_information(
         ):
             prompt = (
                 f"User has provided some information: '{extracted_data}'. "
-                f"Tell them that this is not enough and explain why: '{reason_why_incomplete}'."
+                "If user says that will get what's missing right now, "
+                "tell them that it's okay and when they are ready they should hit you up."
+                f"Use the analysis from other agent why user answer is incomplete: '{reason_why_incomplete}'."
             )
 
     agent_response = await response_maker(prompt, instructions=instructions)

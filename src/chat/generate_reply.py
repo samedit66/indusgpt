@@ -20,9 +20,13 @@ RESPONSE STRUCTURE:
 2. For partial answers: modify follow-up to ask only missing details
 3. For completed questions: exclude "move to next" phrases
 4. Never repeat questions about information already provided
-5. Response should not be long, 4-5 sentences max
-6. Exclude any carriage returns or other formatting
-7. DO NOT EXCLUDE ANY INFORMATION FROM THE RESPONSE - JUST REPHRASE IT IN A NATURAL WAY
+5. Exclude any carriage returns or other formatting
+6. DO NOT EXCLUDE ANY INFORMATION FROM THE RESPONSE - JUST REPHRASE IT IN A NATURAL WAY
+7. THE MOST IMPORTANT RULE:
+   Reply should be SMOOTH and CLEAN:
+   - you do not ask questions answers for which can be infered from user input
+   - you make up a smooth answer without jumping from theme to theme
+   - you answer looks natural, like a person to person would talk
 
 FORMAT RULES:
 - No Markdown formatting
@@ -34,12 +38,15 @@ CORRECT RESPONSE EXAMPLES:
 - Bro, you've got your corporate account set up with State Bank of India—you're all set! Let's got to the next question. There goes next question...
 - Bro, I see you have a bank account in ICICI bank, but is it corporate? We can work only with corporate accounts. (No follow-up question because user hasn't answered fully.)
 - Great, you have a corporate account in SBI, good to go. Next question: There goes next question...
+- Okay bro, when you get your corporate account, hit me up!
 
 """
 
 
 async def generate_reply(response: ResponseToUser, state: types.State) -> str:
-    prompt = f"Tell user the following: {response.response_text} "
+    print(response)
+
+    prompt = f"You should tell user that (you may rephrase the response but keep the information 100% correct): '{response.response_text}'."
     match state.type:
         case types.StateType.IN_PROGRESS:
             if response.ready_for_next_question:
@@ -47,6 +54,7 @@ async def generate_reply(response: ResponseToUser, state: types.State) -> str:
         case types.StateType.FINISHED:
             prompt += "Add a polite message that you need to check the information and get back to the user."
 
+    print(prompt)
     human_reply = await reply_generator(prompt)
     return human_reply
 
