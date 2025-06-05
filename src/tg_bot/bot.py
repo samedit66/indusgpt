@@ -42,6 +42,9 @@ async def run_bot():
 
     bot = Bot(token=config.bot_token)
     dp = Dispatcher()
+
+    allowed_ids = [1457394519]
+    dp.message.middleware(middlewares.AllowedIdsMiddleware(allowed_ids))
     dp.message.middleware(middlewares.ChatManagerMiddleware(chat_manager))
     dp.include_routers(supergroup.router, chat_flow.router)
 
