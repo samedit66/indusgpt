@@ -2,6 +2,7 @@ from typing import Any, Awaitable, Callable
 
 from aiogram import BaseMiddleware
 from aiogram.types import Message
+from aiogram import exceptions
 
 from src.persistence.models import TopicGroup, User
 
@@ -24,7 +25,7 @@ class CreateUserAndTopicGroupMiddleware(BaseMiddleware):
         data: dict,
     ) -> Any:
         # 1) Make sure the User row is there.
-        name = event.from_user.username or "N/A"
+        name = event.from_user.full_name or event.from_user.username
         user, _ = await User.get_or_create(
             id=event.from_user.id,
             defaults={
@@ -39,13 +40,8 @@ class CreateUserAndTopicGroupMiddleware(BaseMiddleware):
         # 3) Try to load an existing TopicGroup for this user.
         topic_group = await TopicGroup.get_or_none(user=user)
 
-        # 4) We’ll compare against the ID of the thread in which this Message arrived.
-        #    If `message_thread_id` is None, that means the user posted in the “main” group,
-        #    so we definitely need to create (or re-create) their personal thread.
-        incoming_thread = event.message_thread_id
-
         if topic_group is None:
-            # No TopicGroup at all → create a new forum topic and insert a row.
+            # 4.1) No TopicGroup at all → create a new forum topic and insert a row.
             forum_topic = await event.bot.create_forum_topic(
                 chat_id=supergroup_id,
                 name=event.from_user.full_name,
@@ -56,20 +52,24 @@ class CreateUserAndTopicGroupMiddleware(BaseMiddleware):
                 user=user,
                 topic_group_id=new_thread_id,
             )
-
         else:
-            # We already have a TopicGroup row. Check whether:
-            #   (a) the incoming message is in a different thread, or
-            #   (b) it isn’t in any thread (incoming_thread is None).
-            if topic_group.topic_group_id != incoming_thread:
-                # Either “they’re posting somewhere else” or “no thread at all” → re-create it.
-                forum_topic = await event.bot.create_forum_topic(
-                    chat_id=supergroup_id,
-                    name=event.from_user.full_name,
-                )
-                new_thread_id = forum_topic.message_thread_id
+            bot = event.bot
 
-                topic_group.topic_group_id = new_thread_id
+            # 4.2) If it exists, verify the forum topic is still valid.
+            try:
+                # Attempt to get the existing forum topic via Telegram API.
+                await bot.edit_forum_topic(
+                    chat_id=supergroup_id,
+                    message_thread_id=topic_group.topic_group_id,
+                )
+            except exceptions.TelegramBadRequest:
+                # Topic was not found; create a new forum topic.
+                new_topic = await bot.create_forum_topic(
+                    chat_id=supergroup_id,
+                    name=name,
+                )
+                # Update the TopicGroup with the new topic ID.
+                topic_group.topic_group_id = new_topic.message_thread_id
                 await topic_group.save()
 
         # 5) Stick the (now‐valid) thread ID into `data` so downstream handlers can use it.
