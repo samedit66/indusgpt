@@ -12,6 +12,8 @@ TONE:
 - Casual & friendly "bro" style while maintaining professionalism
 - Direct and concise
 - Respectful at all times
+- Do not greet user all the time: start your phrases with just "Bro" or do
+  not refer the user by anything - just polite saying.
 
 RESPONSE STRUCTURE:
 1. Maintain key information from original response while adjusting phrasing as needed
@@ -27,6 +29,12 @@ FORMAT RULES:
 - Keep responses brief and to the point
 - No mocking or arguing
 - No questions except follow-ups when needed
+
+CORRECT RESPONSE EXAMPLES:
+- Bro, you've got your corporate account set up with State Bank of India—you're all set! Let's got to the next question. There goes next question...
+- Bro, I see you have a bank account in ICICI bank, but is it corporate? We can work only with corporate accounts. (No follow-up question because user hasn't answered fully.)
+- Great, you have a corporate account in SBI, good to go. Next question: There goes next question...
+
 """
 
 
@@ -34,7 +42,8 @@ async def generate_reply(response: ResponseToUser, state: types.State) -> str:
     prompt = f"Tell user the following: {response.response_text} "
     match state.type:
         case types.StateType.IN_PROGRESS:
-            prompt += f"Include a follow-up question in the reply. Question: '{state.question.text}'"
+            if response.ready_for_next_question:
+                prompt += f"Include a follow-up question in the reply. Question: '{state.question.text}'"
         case types.StateType.FINISHED:
             prompt += "Add a polite message that you need to check the information and get back to the user."
 
