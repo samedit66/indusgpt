@@ -41,10 +41,12 @@ async def detach(message: types.Message) -> None:
     Unset default supergroup for this bot.
     Command `/detach` should be called in case you want to stop using bot for this supergroup.
     """
-    group = await SuperGroup.filter(group_id=message.chat.id).first()
+    group = await SuperGroup.first()
+
     if group is None:
         reply = "Default supergroup is not set"
     else:
+        # Delete that one record
         await group.delete()
         reply = f"Supergroup ({group.group_id}) unset"
 
