@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# start.sh — ensure db.sqlite3 and bot.log exist, then bring up containers.
+# run.sh — ensure db.sqlite3 and bot.log exist, then bring up containers.
 #
 
 # 1) If db.sqlite3 doesn’t exist in the current folder, create it:
