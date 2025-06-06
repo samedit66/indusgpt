@@ -12,6 +12,7 @@ from src import chat
 from src.tg_bot.handlers import supergroup, chat_flow
 from src.tg_bot import middlewares
 from src.tg_bot import chat_settings
+from src.tg_bot import tortoise_config
 
 
 async def run_bot():
@@ -49,9 +50,9 @@ async def run_bot():
     dp.message.middleware(middlewares.ChatManagerMiddleware(chat_manager))
     dp.include_routers(supergroup.router, chat_flow.router)
 
-    asyncio.create_task(periodic_flush_task(10))
+    asyncio.create_task(periodic_flush_task(30))
 
-    await persistence.init_db(config.db_url, ["src.persistence.models"])
+    await tortoise_config.init_db(config.db_url, ["src.persistence.models"])
 
     await bot.set_my_description("Hi! To start the conversation, use /start command.")
     await bot.delete_webhook(drop_pending_updates=True)

@@ -1,5 +1,3 @@
-from tortoise import Tortoise
-
 from src.persistence import models
 from src import types
 
@@ -103,14 +101,3 @@ class TortoiseContext(types.Context):
 
     async def clear(self) -> None:
         await models.Context.all().delete()
-
-
-async def init_db(
-    db_url: str,
-    models: list[str],
-) -> None:
-    await Tortoise.init(
-        db_url=db_url,
-        modules={"models": models},
-    )
-    await Tortoise.generate_schemas()

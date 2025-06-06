@@ -90,7 +90,7 @@ async def flush_all_buffers() -> None:
             continue
 
         # 1) Объединяем тексты всех сообщений пользователя
-        combined_user_text = "\n".join(
+        combined_user_text = " ".join(
             msg.text for msg in buffer.stored_messages if msg.text
         ).strip()
 
