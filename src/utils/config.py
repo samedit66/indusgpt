@@ -10,11 +10,12 @@ class Config:
     openai_base_url: str
     model_name: str
     bot_token: str
-    db_url: str
+    db_file: str
     log_file: str
     google_credentials_path: str
     google_sheet_url: str
     google_sheet_worksheet_name: str
+    data_dir: str
 
 
 def load_config() -> Config:
@@ -25,9 +26,10 @@ def load_config() -> Config:
         openai_base_url=os.environ["OPENAI_API_BASE_URL"],
         model_name=os.environ["MODEL"],
         bot_token=os.environ["TELEGRAM_BOT_TOKEN"],
-        db_url=os.environ["DATABASE_URL"],
+        db_file=os.environ["DATABASE_FILE"],
         log_file=os.environ["LOG_FILE"],
         google_credentials_path=os.environ["GOOGLE_CREDENTIALS_PATH"],
         google_sheet_url=os.environ["GOOGLE_SHEET_URL"],
         google_sheet_worksheet_name=os.environ["GOOGLE_SHEET_WORKSHEET_NAME"],
+        data_dir=os.environ["DATA_DIR"],
     )

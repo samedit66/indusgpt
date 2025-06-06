@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import pathlib
 
 from aiogram import Bot, Dispatcher
 
@@ -18,11 +19,12 @@ from src.tg_bot import tortoise_config
 async def run_bot():
     config = load_config()
 
+    log_file_path = pathlib.Path(config.data_dir) / config.log_file
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s | %(levelname)s | %(message)s",
         handlers=[
-            logging.FileHandler(config.log_file, encoding="utf-8"),
+            logging.FileHandler(log_file_path, encoding="utf-8"),
             logging.StreamHandler(),
         ],
     )
@@ -52,7 +54,8 @@ async def run_bot():
 
     asyncio.create_task(periodic_flush_task(30))
 
-    await tortoise_config.init_db(config.db_url, ["src.persistence.models"])
+    db_url = f"sqlite://{pathlib.Path(config.data_dir) / config.db_file}"
+    await tortoise_config.init_db(db_url, ["src.persistence.models"])
 
     await bot.set_my_description("Hi! To start the conversation, use /start command.")
     await bot.delete_webhook(drop_pending_updates=True)

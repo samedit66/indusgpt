@@ -4,8 +4,8 @@ services:
     build: .
 
     volumes:
-      - ./db.sqlite3:/app/db.sqlite3
-      - ./bot.log:/app/bot.log
+      - ./data:/app/data
+      - ./google_credentials.json:/app/google_credentials.json
 
     env_file: ".env"
 
@@ -21,8 +21,7 @@ services:
           # different platform in the container
           ignore:
             - .venv/
-            - db.sqlite3
-            - bot.log
+            - data/
 
         # Rebuild the image if dependencies change by checking uv.lock
         - action: rebuild
