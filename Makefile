@@ -1,8 +1,8 @@
 .PHONY: run
 run:
-	uv run main.py
+	uv run --active main.py
 
 .PHONY: precommit
 precommit:
-	uv run pre-commit install
-	uv run pre-commit run --all-files
+	uv run --active pre-commit install
+	uv run --active pre-commit run --all-files

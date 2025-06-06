@@ -1,8 +1,6 @@
 services:
   bot:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    build: .
     # keep a TTY open (useful for `develop.watch`)
     tty: true
     working_dir: /app
