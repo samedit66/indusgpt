@@ -170,12 +170,13 @@ class ChatManager:
             agent_answer (Answer): The response from DialogAgent containing
                 a boolean 'ready_for_next_question' and the latest user_input.
         """
-        if agent_responce.extracted_data is not None:
-            await self.chat_state_manager.update_answer(
-                user_id,
-                agent_responce.extracted_data,
-            )
+        current_question = await self.current_question(user_id)
+        context = f"Question: '{current_question}'\nUser responded: '{agent_responce.user_input}'"
 
+        if agent_responce.extracted_data is not None:
+            context += f"Inferred information from user response: {agent_responce.extracted_data}"
+
+        await self.chat_state_manager.update_answer(user_id, context)
         if agent_responce.ready_for_next_question:
             await self.chat_state_manager.finish_question(user_id)
 

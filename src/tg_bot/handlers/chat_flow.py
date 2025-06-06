@@ -1,3 +1,4 @@
+import asyncio
 from dataclasses import dataclass, field
 import logging
 
@@ -62,94 +63,121 @@ async def handle_message_from_user(
 ) -> None:
     user_id = message.from_user.id
 
+    # If this is the first time we've seen this user, create their buffer and start its task
     if user_id not in message_buffer:
-        message_buffer[user_id] = UserMessageBuffer(
+        buf = UserMessageBuffer(
             supergroup_id=supergroup_id,
             topic_group_id=topic_group_id,
             chat_manager=chat_manager,
         )
+        message_buffer[user_id] = buf
 
+        # Create a per‐user flushing coroutine
+        buf.flushing_task = asyncio.create_task(_per_user_flusher(user_id))
+
+    # Store the incoming text into that user's buffer
     message_buffer[user_id].store(message)
 
 
-async def flush_all_buffers() -> None:
+async def _per_user_flusher(user_id: int) -> None:
     """
-    Для каждого Buffer, хранящего непустой список stored_messages:
-      1) Собираем все тексты из stored_messages в одну строку.
-      2) Вызываем chat_manager.reply(...) для этого объединенного текста и получаем ответ.
-      3) Берем последнее сохраненное сообщение пользователя (Buffer.stored_messages[-1])
-         и через его .answer() отправляем бот‐сообщение пользователю.
-      4) Копируем это бот‐сообщение в супергруппу/топик-группу.
-      5) Если пользователь завершил диалог, уведомляем личного менеджера.
-      6) Очищаем stored_messages в этом Buffer.
+    This task wakes up every 30 seconds and—*for this single user*—checks
+    if there are buffered messages. If there are, it calls chat_manager.reply(),
+    sends the reply, copies it to the supergroup, notifies manager if finished,
+    and clears the buffer. Once the dialog is finished, or if we fail repeatedly,
+    it simply returns (exits).
     """
-    to_clear: list[int] = []
+    buf = message_buffer[user_id]
 
-    for user_id, buffer in message_buffer.items():
-        if not buffer.stored_messages:
-            continue
+    try:
+        while True:
+            await asyncio.sleep(30)  # wait 30 seconds between flushes
 
-        # 1) Объединяем тексты всех сообщений пользователя
-        combined_user_text = " ".join(
-            msg.text for msg in buffer.stored_messages if msg.text
-        ).strip()
+            # If the user buffer has no messages, just loop again
+            if not buf.stored_messages:
+                # But first check if the dialog is finished; if yes, exit the loop
+                try:
+                    finished = await buf.chat_manager.has_user_finished(user_id)
+                except Exception as e:
+                    logger.error(f"Error checking finished status for {user_id}: {e}")
+                    # If we can't even check, it might be safer to exit
+                    finished = True
 
-        # 2) Получаем ответ от chat_manager
-        try:
-            reply_text = await buffer.chat_manager.reply(user_id, combined_user_text)
-        except Exception as e:
-            logger.error(f"Error generating reply for user {user_id}: {e}")
-            to_clear.append(user_id)
-            continue
+                if finished:
+                    break
+                continue
 
-        # 3) Берем последнее сообщение пользователя, чтобы через него послать ответ
-        last_user_msg = buffer.stored_messages[-1]
-        try:
-            bot_msg = await last_user_msg.answer(reply_text)
-        except Exception as e:
-            logger.error(f"Error sending combined reply to {user_id}: {e}")
-            to_clear.append(user_id)
-            continue
+            # 1) Combine all pending texts
+            combined_user_text = " ".join(
+                msg.text for msg in buf.stored_messages if msg.text
+            ).strip()
 
-        # 4) Копируем бот‐сообщение в супергруппу/топик-группу
-        try:
-            await bot_msg.send_copy(
-                chat_id=buffer.supergroup_id,
-                message_thread_id=buffer.topic_group_id,
-            )
-        except Exception as e:
-            logger.error(
-                f"Error copying bot message for user {user_id} "
-                f"into supergroup {buffer.supergroup_id}, topic {buffer.topic_group_id}: {e}"
-            )
-
-        # 5) Если диалог завершен, уведомляем личного менеджера
-        try:
-            finished = await buffer.chat_manager.has_user_finished(user_id)
-        except Exception as e:
-            logger.error(f"Error checking finished status for user {user_id}: {e}")
-            finished = False
-
-        if finished:
+            # 2) Ask chat_manager for a reply
             try:
-                user = await User.filter(id=user_id).first()
-                user_manager = (
-                    await UserManager.filter(user=user).first() or await Manager.first()
-                )
-                if user_manager:
-                    await last_user_msg.answer(
-                        f"Your personal manager {user_manager.manager_link} will contact you soon."
-                    )
-                else:
-                    await last_user_msg.answer(
-                        "A personal manager will contact you soon."
-                    )
+                reply_text = await buf.chat_manager.reply(user_id, combined_user_text)
             except Exception as e:
-                logger.error(f"Error sending manager notification to {user_id}: {e}")
+                logger.error(f"Error generating reply for user {user_id}: {e}")
+                # If chat_manager is broken, just clear and exit
+                buf.clear()
+                break
 
-        # 6) Помечаем этот Buffer на очистку
-        to_clear.append(user_id)
+            # 3) Send the reply under the last user message
+            last_user_msg = buf.stored_messages[-1]
+            try:
+                bot_msg = await last_user_msg.answer(reply_text)
+            except Exception as e:
+                logger.error(f"Error sending reply to {user_id}: {e}")
+                buf.clear()
+                break
 
-    # Очищаем все stored_messages в тех Buffer-ах, которые обработали
-    for user_id in to_clear:
-        message_buffer[user_id].clear()
+            # 4) Copy that bot message into the supergroup/topic
+            try:
+                await bot_msg.send_copy(
+                    chat_id=buf.supergroup_id,
+                    message_thread_id=buf.topic_group_id,
+                )
+            except Exception as e:
+                logger.error(
+                    f"Error copying bot message for user {user_id} "
+                    f"into supergroup {buf.supergroup_id}, topic {buf.topic_group_id}: {e}"
+                )
+
+            # 5) If finished, notify the manager
+            try:
+                finished = await buf.chat_manager.has_user_finished(user_id)
+            except Exception as e:
+                logger.error(f"Error checking finished status for user {user_id}: {e}")
+                finished = False
+
+            if finished:
+                try:
+                    user = await User.filter(id=user_id).first()
+                    user_manager = (
+                        await UserManager.filter(user=user).first()
+                        or await Manager.first()
+                    )
+                    if user_manager:
+                        await last_user_msg.answer(
+                            f"Your personal manager {user_manager.manager_link} will contact you soon."
+                        )
+                    else:
+                        await last_user_msg.answer(
+                            "A personal manager will contact you soon."
+                        )
+                except Exception as e:
+                    logger.error(
+                        f"Error sending manager notification to {user_id}: {e}"
+                    )
+                # Once finished, break out of the loop
+                buf.clear()
+                break
+
+            # 6) Clear the buffer (we’ve just processed all pending messages)
+            buf.clear()
+
+    except asyncio.CancelledError:
+        # If someone externally cancels the task, just clean up and exit
+        buf.clear()
+    finally:
+        # Remove the buffer and task from our dict so we don't leak
+        del message_buffer[user_id]

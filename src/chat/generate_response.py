@@ -1,3 +1,4 @@
+import logging
 from typing import Optional
 
 from pydantic import BaseModel, Field
@@ -197,12 +198,15 @@ async def evaluate_user_information(
     context: str | None = None,
     instructions: str | None = None,
 ) -> ResponseToUser:
+    logging.info(f"User context: {context!r}")
+
     status = await validator(
         user_information,
         question=question,
         context=context,
         instructions=instructions,
     )
+    logging.info(status)
 
     match status.is_valid:
         case ValidAnswer(extracted_data=extracted_data):
@@ -223,12 +227,15 @@ async def evaluate_user_information(
         ):
             prompt = (
                 f"User has provided some information: '{extracted_data}'. "
-                "If user says that will get what's missing right now, "
+                "If user says that they will get what's missing right now, "
                 "tell them that it's okay and when they are ready they should hit you up."
                 f"Use the analysis from other agent why user answer is incomplete: '{reason_why_incomplete}'."
             )
+    logging.info(f"{prompt!r}")
 
     agent_response = await response_maker(prompt, instructions=instructions)
+    logging.info(agent_response)
+
     return ResponseToUser(
         user_input=user_information,
         response_text=agent_response,

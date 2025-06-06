@@ -20,6 +20,7 @@ Return one of:
 
 Provide a concise rationale.
 If the answer is valid or partially valid, extract the needed data.
+Do not be too strict: user may inderectly answer the question, try to infer required information when possible.
 """
 
 
@@ -77,15 +78,19 @@ def expand_query(
     instructions: str | None = None,
 ) -> str:
     query = f"""
+**Context of conversation:**
+{context}
+
+**How to validate**
 User was asked: {question.text}.
 Requirement: {question.answer_requirement}
-Earlier we found out that: {context}.
 Using that information and the current user's answer '{user_input}', validate it.
 Do not validate only user answer, validate both combined what we found out about user earlier and the current user's answer.
 Do not be too strict, infer required information.
-
 Try to infer information from text - if user provides 'Yes', 'Ok' or 'No' he may have answered the question.
 wich already asked and partially answered.
+
+**PAY ATTENTION TO THE FOLLOWING CORRECT EXAMPLES**
 Correct examples:
 1. Context: User respnonded that they have Paytm connected but you are unsure is that really a PSP.
    The asked question:
@@ -96,9 +101,19 @@ Correct examples:
    Question: Alright, bro, you've got the bank name down, but I need to know if it's a corporate account. Do you have corporate (business) accounts? If so, which banks are they with?
    User answer: Yes
    That means that user ANSWERED the question and told us that they have a corporate account in SBI.
+3. Context: User responded that they have an account with Airtel Payment Bank.
+            User responded that they have an account with Airtel Payment Bank and mentioned having 19 accounts to provide.
+   Question: I need to know if your accounts are corporate and which banks they're with. When you've got that info, let me know!
+   User answer: Yes
+   That means that user ANSWERED the question and told us that they have a corporate account in Airtel Payment Bank.
+4. Question: Do you have corporate (business) accounts? In which banks?
+   User answer: Yes
+   That means that user PARTIALLY ANSWERED the question and told us that they have a corporate account but did not specify the bank name.
 """
     if instructions:
-        prompt = f"Strictly follow these instructions before validating: {instructions}"
+        prompt = (
+            f"**Strictly follow these instructions before validating**:\n{instructions}"
+        )
         query = prompt + "\n\n" + query
     return query
 

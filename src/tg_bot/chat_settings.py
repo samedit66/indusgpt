@@ -23,11 +23,17 @@ QUESTIONS = [
             "- I have a corporate account in Sber bank.\n"
             "- I got a business account in Bank of Baroda.\n"
             "- Yes, I have a corporate account in ICICI.\n"
+            "- SBI yes\n"
+            "- State bank yes bisuness account\n"
             "Invalid examples:\n"
             "- I have a personal account in ICICI.\n"
             "- I have savings account in SBI.\n"
             "- I have current account with QR.\n"
             "- Only saving account\n"
+            "- Current only IOB\n"
+            "- Kotak Mahindra bank\n"
+            "- SBI No I don't have business account\n"
+            "- Saving account\n"
         ),
     ),
     types.Question(

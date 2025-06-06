@@ -1,4 +1,3 @@
-import asyncio
 import logging
 import pathlib
 
@@ -52,19 +51,9 @@ async def run_bot():
     dp.message.middleware(middlewares.ChatManagerMiddleware(chat_manager))
     dp.include_routers(supergroup.router, chat_flow.router)
 
-    asyncio.create_task(periodic_flush_task(30))
-
     db_url = f"sqlite://{pathlib.Path(config.data_dir) / config.db_file}"
     await tortoise_config.init_db(db_url, ["src.persistence.models"])
 
     await bot.set_my_description("Hi! To start the conversation, use /start command.")
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)
-
-
-async def periodic_flush_task(schedule_time: int) -> None:
-    await asyncio.sleep(1)
-
-    while True:
-        await asyncio.sleep(schedule_time)
-        await chat_flow.flush_all_buffers()
