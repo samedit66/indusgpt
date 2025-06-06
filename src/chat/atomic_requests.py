@@ -21,6 +21,11 @@ Input: "Login is admin, password is 12345"
 Output: One atomic request:
 1. "Login is admin, password is 12345"
 
+Input: "Yes sir in ICICI bank"
+Output: One atomic request:
+1. "Yes sir in ICICI bank"
+
+
 Rules:
 1. Each atomic request should be self-contained and meaningful
 2. Separate statements about different topics into different requests
@@ -30,6 +35,7 @@ Rules:
 6. Do not split a single atomic request into multiple requests:
    Related information should be in the same request:
    "Login is admin, password is 12345" -> "Login is admin, password is 12345"
+   "Yes sir in ICICI bank" -> "Yes sir in ICICI bank"
 
 Return a list of atomic requests, each as a separate string.
 """

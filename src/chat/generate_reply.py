@@ -44,8 +44,6 @@ CORRECT RESPONSE EXAMPLES:
 
 
 async def generate_reply(response: ResponseToUser, state: types.State) -> str:
-    print(response)
-
     prompt = f"You should tell user that (you may rephrase the response but keep the information 100% correct): '{response.response_text}'."
     match state.type:
         case types.StateType.IN_PROGRESS:
@@ -54,7 +52,6 @@ async def generate_reply(response: ResponseToUser, state: types.State) -> str:
         case types.StateType.FINISHED:
             prompt += "Add a polite message that you need to check the information and get back to the user."
 
-    print(prompt)
     human_reply = await reply_generator(prompt)
     return human_reply
 
