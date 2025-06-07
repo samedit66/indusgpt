@@ -63,7 +63,6 @@ class ChatStateManager:
         :param user_id: identifier for the conversation participant
         """
         answer = await self.user_answer_storage.get(user_id)
-        await self.user_answer_storage.clear(user_id)
         await self.question_list.advance(user_id, answer)
 
         # TODO: Возможно, стоит делать это в отдельном методе...

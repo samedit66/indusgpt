@@ -1,3 +1,4 @@
+import logging
 from typing import Callable, Iterable
 
 from src import types
@@ -20,6 +21,8 @@ or add a goodbye if conversation is finished -- more context needs to be provide
 This callable takes a `ResponeToUser` to enrich the context and current chat state.
 Based on them, it returns a natural reply.
 """
+
+logger = logging.getLogger(__name__)
 
 
 class ChatManager:
@@ -126,6 +129,7 @@ class ChatManager:
 
         # Invoke the dialog agent and update state
         agent_response = await self._talk(user_id, user_input)
+        logger.info(f"Agent response: {agent_response!r}")
         await self._update_state(user_id, agent_response)
 
         # Build the outgoing reply
@@ -174,8 +178,9 @@ class ChatManager:
         context = f"Question: '{current_question}'\nUser responded: '{agent_responce.user_input}'"
 
         if agent_responce.extracted_data is not None:
-            context += f"Inferred information from user response: {agent_responce.extracted_data}"
+            context += f"\nInferred information from user response: {agent_responce.extracted_data}\n"
 
+        context += "\n"
         await self.chat_state_manager.update_answer(user_id, context)
         if agent_responce.ready_for_next_question:
             await self.chat_state_manager.finish_question(user_id)

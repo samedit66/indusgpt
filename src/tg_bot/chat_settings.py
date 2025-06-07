@@ -17,7 +17,14 @@ QUESTIONS = [
         text="Do you have corporate (business) accounts? In which banks?",
         answer_requirement=(
             "User response **must** confirm that they have a corporate/business bank account "
-            "and say the bank name. User MUST say the bank name and CONFIRM that they have a corporate account.\n"
+            "and say the bank name. User MUST say the bank name and SAY that they have a CORPORATE/BUSINESS account.\n"
+            "Other types of accounts are invalid:\n"
+            "If user says that they have current account, or personal account, "
+            "or savings account that means they DO NOT HAVE CORPORATE ACCOUNT - that's invalid.\n\n"
+            "**Pay attention to the following rules**:\n"
+            "- CURRENT ACCOUNT IS NOT CORPORATE/BUSINESS ACCOUNT\n"
+            "- PERSONAL ACCOUNT IS NOT CORPORATE/BUSINESS ACCOUNT\n"
+            "- SAVINGS ACCOUNT IS NOT CORPORATE/BUSINESS ACCOUNT\n\n"
             "Valid examples:\n"
             "- Yes corporate account in ICICI\n"
             "- I have a corporate account in Sber bank.\n"
@@ -26,6 +33,8 @@ QUESTIONS = [
             "- SBI yes\n"
             "- State bank yes bisuness account\n"
             "Invalid examples:\n"
+            "- I don't have corporate\n"
+            "- No corporate\n"
             "- I have a personal account in ICICI.\n"
             "- I have savings account in SBI.\n"
             "- I have current account with QR.\n"
@@ -34,6 +43,7 @@ QUESTIONS = [
             "- Kotak Mahindra bank\n"
             "- SBI No I don't have business account\n"
             "- Saving account\n"
+            "- Canara Current account\n"
         ),
     ),
     types.Question(

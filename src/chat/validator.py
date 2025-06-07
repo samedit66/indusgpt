@@ -1,5 +1,6 @@
 from __future__ import annotations
 from typing import Literal, Union
+import logging
 
 from pydantic import BaseModel, Field
 
@@ -71,6 +72,9 @@ class InvalidAnswer(BaseModel):
     )
 
 
+logger = logging.getLogger(__name__)
+
+
 def expand_query(
     user_input: str,
     question: types.Question,
@@ -84,11 +88,10 @@ def expand_query(
 **How to validate**
 User was asked: {question.text}.
 Requirement: {question.answer_requirement}
-Using that information and the current user's answer '{user_input}', validate it.
+Validate user response: '{user_input}'.
 Do not validate only user answer, validate both combined what we found out about user earlier and the current user's answer.
-Do not be too strict, infer required information.
-Try to infer information from text - if user provides 'Yes', 'Ok' or 'No' he may have answered the question.
-wich already asked and partially answered.
+Do not be too strict, infer required information from the context when possible.
+Try to infer information from text - if user provides 'Yes', 'Ok' or 'No' he may have answered the question which already was asked and partially answered.
 
 **PAY ATTENTION TO THE FOLLOWING CORRECT EXAMPLES**
 Correct examples:
@@ -115,6 +118,8 @@ Correct examples:
             f"**Strictly follow these instructions before validating**:\n{instructions}"
         )
         query = prompt + "\n\n" + query
+
+    logger.info(f"Validator query: {query!r}")
     return query
 
 
