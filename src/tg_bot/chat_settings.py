@@ -32,6 +32,7 @@ QUESTIONS = [
             "\n"
             "Valid examples:\n"
             "- BANK OF MAHARASTRA yes\n"
+            "- Yes City union bank\n"
             "- Yes corporate account in ICICI\n"
             "- I have a corporate account in Sber bank.\n"
             "- I got a business account in Bank of Baroda.\n"
