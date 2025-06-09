@@ -466,6 +466,7 @@ dependencies = [
     { name = "google-auth" },
     { name = "gspread" },
     { name = "openai" },
+    { name = "pyairtable" },
     { name = "tortoise-orm" },
 ]
 
@@ -486,6 +487,7 @@ requires-dist = [
     { name = "google-auth", specifier = ">=2.40.2" },
     { name = "gspread", specifier = ">=6.2.1" },
     { name = "openai", specifier = ">=1.77.0" },
+    { name = "pyairtable", specifier = ">=3.1.1" },
     { name = "tortoise-orm", specifier = ">=0.25.0" },
 ]
 
@@ -495,6 +497,15 @@ dev = [
     { name = "colorama", specifier = ">=0.4.6" },
     { name = "pre-commit", specifier = ">=4.2.0" },
     { name = "ruff", specifier = ">=0.11.8" },
+]
+
+[[package]]
+name = "inflection"
+version = "0.5.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/e1/7e/691d061b7329bc8d54edbf0ec22fbfb2afe61facb681f9aaa9bff7a27d04/inflection-0.5.1.tar.gz", hash = "sha256:1a29730d366e996aaacffb2f1f1cb9593dc38e2ddd30c91250c6dde09ea9b417", size = 15091, upload-time = "2020-08-22T08:16:29.139Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/59/91/aa6bde563e0085a02a435aa99b49ef75b0a4b062635e606dab23ce18d720/inflection-0.5.1-py2.py3-none-any.whl", hash = "sha256:f38b2b640938a4f35ade69ac3d053042959b62a0f1076a5bbaa1b9526605a8a2", size = 9454, upload-time = "2020-08-22T08:16:27.816Z" },
 ]
 
 [[package]]
@@ -768,6 +779,22 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/3e/66/2e90547d6b60180fb29e23dc87bd8c116517d4255240ec6d3f7dc23d1926/propcache-0.3.1-cp313-cp313t-win32.whl", hash = "sha256:359e81a949a7619802eb601d66d37072b79b79c2505e6d3fd8b945538411400d", size = 42573, upload-time = "2025-03-26T03:05:39.193Z" },
     { url = "https://files.pythonhosted.org/packages/cb/8f/50ad8599399d1861b4d2b6b45271f0ef6af1b09b0a2386a46dbaf19c9535/propcache-0.3.1-cp313-cp313t-win_amd64.whl", hash = "sha256:e7fb9a84c9abbf2b2683fa3e7b0d7da4d8ecf139a1c635732a8bda29c5214b0e", size = 46757, upload-time = "2025-03-26T03:05:40.811Z" },
     { url = "https://files.pythonhosted.org/packages/b8/d3/c3cb8f1d6ae3b37f83e1de806713a9b3642c5895f0215a62e1a4bd6e5e34/propcache-0.3.1-py3-none-any.whl", hash = "sha256:9a8ecf38de50a7f518c21568c80f985e776397b902f1ce0b01f799aba1608b40", size = 12376, upload-time = "2025-03-26T03:06:10.5Z" },
+]
+
+[[package]]
+name = "pyairtable"
+version = "3.1.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "inflection" },
+    { name = "pydantic" },
+    { name = "requests" },
+    { name = "typing-extensions" },
+    { name = "urllib3" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/04/e8/f07d9e76b617549fb16405598f4d86902d7e89c8418de984c9687ad7428b/pyairtable-3.1.1.tar.gz", hash = "sha256:b185fef12119f249e0e704ab4e4b15a29080fc892ad4d551a1053a1bb609ef2e", size = 147131, upload-time = "2025-04-07T23:10:51.701Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/96/a4/8ca901ac31299ea4dc7252c4f41a04deadd89d0969fc68df50c8a153b847/pyairtable-3.1.1-py2.py3-none-any.whl", hash = "sha256:3849def274f714f53b4ea73bf5a43a6f6360ede7472a7b69b018967e338d7e88", size = 99926, upload-time = "2025-04-07T23:10:50.225Z" },
 ]
 
 [[package]]

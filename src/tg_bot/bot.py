@@ -35,11 +35,11 @@ async def run_bot():
         generate_response=chat.generate_response,
         generate_reply=chat.generate_reply,
         on_all_finished=[
-            processors.GoogleSheetsProcessor(
-                config.google_credentials_path,
-                config.google_sheet_url,
-                config.google_sheet_worksheet_name,
-            ),
+            processors.AirtableProcessor(
+                access_token=config.airtable_access_token,
+                base_id=config.airtable_base_id,
+                table_id=config.airtable_table_id,
+            )
         ],
     )
 

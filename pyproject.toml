@@ -12,6 +12,7 @@ dependencies = [
     "google-auth>=2.40.2",
     "gspread>=6.2.1",
     "openai>=1.77.0",
+    "pyairtable>=3.1.1",
     "tortoise-orm>=0.25.0",
 ]
 
