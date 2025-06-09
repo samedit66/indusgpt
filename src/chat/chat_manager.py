@@ -134,7 +134,26 @@ class ChatManager:
 
         # Build the outgoing reply
         current_state = await self.chat_state_manager.current_state(user_id)
-        return await self.generate_reply(agent_response, current_state)
+        reply = await self.generate_reply(agent_response, current_state)
+        logger.info("Reply: %s", reply)
+
+        while (
+            not (await self.chat_state_manager.all_finished(user_id))
+            and agent_response.ready_for_next_question
+        ):
+            current_state = await self.chat_state_manager.current_state(user_id)
+            agent_response = await self._talk(user_id, current_state.partial_answer)
+            logger.info(f"Agent response: {agent_response!r}")
+            await self._update_state(user_id, agent_response)
+
+            if agent_response.ready_for_next_question:
+                reply = await self.generate_reply(agent_response, current_state)
+                logger.info("Reply: %s", reply)
+            else:
+                reply = await self.current_question(user_id)
+                logger.info("Reply: %s", reply)
+
+        return reply
 
     async def stop_talking_with(self, user_id: int) -> None:
         await self.chat_state_manager.stop_talking_with(user_id)
