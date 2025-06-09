@@ -38,6 +38,7 @@ Label a message **faq** if the user is asking for something or making any kind o
 - The message uses words like **how**, **what**, **when**, **where**, **who**, **why**, **can**, **is**, **are**, **please**, **tell me**, **show me**.  
 - The user states a desire or need (e.g. “I want…”, “I need…”).  
 - The user asks to perform an action on their behalf.
+- The user may ask question in Hindi (e.g "Kay hai", "Ka hai" means "what is is?")
 
 **Examples**  
 - “What commission do you charge?”  
@@ -45,7 +46,9 @@ Label a message **faq** if the user is asking for something or making any kind o
 - “Is that legal?”  
 - “Tell me details.”  
 - “I want a 30% commission.”  
-- “I don’t have a website—can I still sign up?”  
+- “I don’t have a website—can I still sign up?"
+- "Kay hai PSP"
+- "PSP KAY HAY"
 ---
 
 ### 3. information

@@ -22,6 +22,7 @@ Return one of:
 Provide a concise rationale.
 If the answer is valid or partially valid, extract the needed data.
 Do not be too strict: user may inderectly answer the question, try to infer required information when possible.
+If you can fully infer information from context which is required by the question then USER'S ANSWER IS TOTALLY VALID.
 """
 
 
