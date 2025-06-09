@@ -5,6 +5,7 @@ from src import types
 
 from .chat_state_manager import ChatStateManager
 from .generate_response import ResponseToUser
+from src.chat import summarizer
 
 type ResponseGenerator = Callable[[str, types.State], ResponseToUser]
 """
@@ -200,6 +201,8 @@ class ChatManager:
             context += f"\nInferred information from user response: {agent_responce.extracted_data}\n"
 
         context += "\n"
+        context = await summarizer.summarize_text(context)
+        logger.info("Summarized context: %s", context)
         await self.chat_state_manager.update_answer(user_id, context)
         if agent_responce.ready_for_next_question:
             await self.chat_state_manager.finish_question(user_id)
