@@ -16,10 +16,11 @@ QUESTIONS = [
     types.Question(
         text="Do you have corporate (business) accounts? In which banks?",
         answer_requirement=(
-            "User response **must** confirm that they have a corporate/business bank account "
-            "and say the bank name. User MUST say the bank name and SAY that they have a CORPORATE/BUSINESS account.\n"
+            "User response **must** confirm that they have a corporate/business/current (see below when current accounts are OK) bank account "
+            "and say the bank name. User MUST say the bank name and SAY that they have a CORPORATE/BUSINESS/CURRENT account.\n"
             "Other types of accounts are invalid:\n"
-            "If user says that they have current account, or personal account, "
+            "If user says that they have current account and mentions that they have PSP (Razorpay, Cashfree, PayU, Getepay, Paytm, etc.) connected - that's valid.\n"
+            "If user says that they have current account (without mentioning connected PSP), or personal account, "
             "or savings account that means they DO NOT HAVE CORPORATE ACCOUNT - that's invalid.\n\n"
             "**Pay attention to the following rules**:\n"
             "- CURRENT ACCOUNT IS NOT CORPORATE/BUSINESS ACCOUNT\n"
