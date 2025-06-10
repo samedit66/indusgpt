@@ -59,6 +59,7 @@ QUESTIONS = [
             "- SBI No I don't have business account\n"
             "- Saving account\n"
             "- Canara Current account\n"
+            "- I do not have any corporate account my savings account\n"
         ),
     ),
     types.Question(
