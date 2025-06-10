@@ -1,6 +1,7 @@
 from typing import Iterable
 
 from src import types
+from src.chat import summarizer
 
 
 class ChatStateManager:
@@ -62,7 +63,9 @@ class ChatStateManager:
 
         :param user_id: identifier for the conversation participant
         """
-        answer = await self.user_answer_storage.get(user_id)
+        context = await self.user_answer_storage.get(user_id)
+        current_question = (await self.current_state(user_id))[1].text
+        answer = await summarizer.summarize_text(context, current_question)
         await self.question_list.advance(user_id, answer)
 
         # TODO: Возможно, стоит делать это в отдельном методе...

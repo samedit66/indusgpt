@@ -200,7 +200,6 @@ class ChatManager:
         if agent_responce.extracted_data is not None:
             context += f"\nInferred information from user response: {agent_responce.extracted_data}\n"
 
-        context += "\n"
         context = await summarizer.summarize_text(context)
         logger.info("Summarized context: %s", context)
         await self.chat_state_manager.update_answer(user_id, context)
