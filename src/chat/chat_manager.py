@@ -130,29 +130,38 @@ class ChatManager:
 
         # Invoke the dialog agent and update state
         agent_response = await self._talk(user_id, user_input)
-        logger.info(f"Agent response: {agent_response!r}")
         await self._update_state(user_id, agent_response)
+
+        logger.info(f"Agent response: {agent_response!r}")
 
         # Build the outgoing reply
         current_state = await self.chat_state_manager.current_state(user_id)
         reply = await self.generate_reply(agent_response, current_state)
-        logger.info("Reply: %s", reply)
+
+        logger.info(f"Reply: {reply!r}")
 
         while (
             not (await self.chat_state_manager.all_finished(user_id))
             and agent_response.ready_for_next_question
         ):
-            current_state = await self.chat_state_manager.current_state(user_id)
-            agent_response = await self._talk(user_id, current_state.partial_answer)
+            prompt = (
+                "The following text user responded not to the current question, but earlier.\n"
+                "So, when analyzing the text for the given answer you must search for CONCRETE answer, "
+                "answers like 'yes' or 'no' may corrupt the questions analasys because these 'yes' and 'no' may "
+                "be given to previous question, not current.\n"
+                f"User input: {user_input}"
+            )
+            agent_response = await self._talk(user_id, prompt)
             logger.info(f"Agent response: {agent_response!r}")
             await self._update_state(user_id, agent_response)
 
             if agent_response.ready_for_next_question:
+                current_state = await self.chat_state_manager.current_state(user_id)
                 reply = await self.generate_reply(agent_response, current_state)
-                logger.info("Reply: %s", reply)
             else:
                 reply = await self.current_question(user_id)
-                logger.info("Reply: %s", reply)
+
+            logger.info(f"Reply: {reply!r}")
 
         return reply
 
@@ -200,8 +209,13 @@ class ChatManager:
         if agent_responce.extracted_data is not None:
             context += f"\nInferred information from user response: {agent_responce.extracted_data}\n"
 
+        logger.info(f"Qustion: {current_question!r}")
+        logger.info(f"Context for question before summarizing: {context!r}")
+
         context = await summarizer.summarize_text(context)
-        logger.info("Summarized context: %s", context)
+
+        logger.info(f"Context for question after summarizing: {context!r}")
+
         await self.chat_state_manager.update_answer(user_id, context)
         if agent_responce.ready_for_next_question:
             await self.chat_state_manager.finish_question(user_id)
