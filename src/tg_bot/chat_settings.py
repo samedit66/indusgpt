@@ -177,7 +177,8 @@ QUESTIONS = [
     types.Question(
         text="Are you open to working under a profit-sharing model (5% of transaction volume) instead of a one-time deal?",
         answer_requirement=(
-            "User response **must** clearly indicate agreement or disagreement to the profit-sharing model.\n\n"
+            "User response **must** clearly indicate agreement to the profit-sharing model.\n"
+            "Agreemnt to one time deal or disagreemnet at all is INVALID answer!\n\n"
             "Examples of valid responses:\n"
             "- Yes, I agree to 5% profit sharing\n"
             "- Of course.\n"
@@ -190,13 +191,16 @@ QUESTIONS = [
             "- I agree.\n"
             "- Okay sir\n"
             "- yes I am ready to work with 5% of the transaction volume\n"
+            "- Yes\n"
             "Examples of invalid responses:\n"
+            "- No\n"
             "- Maybe later\n"
             "- Need to think about it\n"
             "- What about 3%?\n"
             "- Let me check with my team\n"
             "- I prefer fixed price\n"
             "- I'm not sure about that\n"
+            "- One time deal how much\n"
         ),
     ),
 ]
