@@ -41,12 +41,6 @@ Follow these steps precisely:
 - **Length:** As short as possible while still conveying all necessary information about the user.
 - **Do Not:** Include any duplicated information in the summary.
 - **Specificity:** Ensure that all details about the user are accurately represented.
-
-### OUTPUT FORMAT ###
-
-Provide the final output exclusively in the following format:
-
-- **User Summary:** [Insert concise summary of the user, including all main information without duplicates.]
 """
 
 
