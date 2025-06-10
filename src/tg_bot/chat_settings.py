@@ -10,6 +10,8 @@ We are looking to buy or rent corporate accounts in India that can be connected 
 We are ready for long-term cooperation and offer up to 5% of the profit for stable account performance.  
 For example: ₹500,000 daily volume = ₹25,000 your share (5%).
 Let's build a strong and profitable partnership 💪
+
+I’m a bit tied up at the moment, so my response may not be immediate—thanks for your patience!
 """
 
 QUESTIONS = [
