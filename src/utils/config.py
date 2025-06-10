@@ -16,6 +16,7 @@ class Config:
     airtable_access_token: str
     airtable_base_id: str
     airtable_table_id: str
+    excel_sheet_name: str
 
 
 def load_config() -> Config:
@@ -32,4 +33,5 @@ def load_config() -> Config:
         airtable_access_token=os.environ["AIRTABLE_ACCESS_TOKEN"],
         airtable_base_id=os.environ["AIRTABLE_BASE_ID"],
         airtable_table_id=os.environ["AIRTABLE_TABLE_ID"],
+        excel_sheet_name=os.environ["EXCEL_SHEET_NAME"],
     )

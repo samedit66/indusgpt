@@ -10,6 +10,8 @@ We are looking to buy or rent corporate accounts in India that can be connected 
 We are ready for long-term cooperation and offer up to 5% of the profit for stable account performance.  
 For example: ₹500,000 daily volume = ₹25,000 your share (5%).
 Let's build a strong and profitable partnership 💪
+
+I’m a bit tied up at the moment, so my response may not be immediate—thanks for your patience!
 """
 
 QUESTIONS = [
@@ -29,6 +31,7 @@ QUESTIONS = [
             "- BOB means Bank of Boroda\n"
             "- PNB means Punjab National Bank\n"
             "- IPPB means Indian post payment bank\n"
+            "- IDFC (or idfc) means IDFC First Bank\n"
             "\n"
             "Valid examples:\n"
             "- BANK OF MAHARASTRA yes\n"
@@ -59,6 +62,7 @@ QUESTIONS = [
             "- SBI No I don't have business account\n"
             "- Saving account\n"
             "- Canara Current account\n"
+            "- I do not have any corporate account my savings account\n"
         ),
     ),
     types.Question(
@@ -127,8 +131,11 @@ QUESTIONS = [
     types.Question(
         text="Please describe your company's business activities and what products/services you plan to sell:",
         answer_requirement=(
-            "User response **must** describe their company's business activities and what products/services they plan to sell.\n\n"
+            "User response **must** describe their company's business activities or what products/services they plan to sell.\n"
+            "The provided description may be not detailed, but clearly tells the business activity\n\n"
             "Examples of valid responses:\n"
+            "- Food business\n"
+            "- Fast food cart"
             "- We sell electronics like smartphones and laptops\n"
             "- Our company provides IT consulting services\n"
             "- We're an online clothing store selling fashion accessories\n"
@@ -170,7 +177,8 @@ QUESTIONS = [
     types.Question(
         text="Are you open to working under a profit-sharing model (5% of transaction volume) instead of a one-time deal?",
         answer_requirement=(
-            "User response **must** clearly indicate agreement or disagreement to the profit-sharing model.\n\n"
+            "User response **must** clearly indicate agreement to the profit-sharing model.\n"
+            "Agreemnt to one time deal or disagreemnet at all is INVALID answer!\n\n"
             "Examples of valid responses:\n"
             "- Yes, I agree to 5% profit sharing\n"
             "- Of course.\n"
@@ -183,13 +191,16 @@ QUESTIONS = [
             "- I agree.\n"
             "- Okay sir\n"
             "- yes I am ready to work with 5% of the transaction volume\n"
+            "- Yes\n"
             "Examples of invalid responses:\n"
+            "- No\n"
             "- Maybe later\n"
             "- Need to think about it\n"
             "- What about 3%?\n"
             "- Let me check with my team\n"
             "- I prefer fixed price\n"
             "- I'm not sure about that\n"
+            "- One time deal how much\n"
         ),
     ),
 ]

@@ -8,14 +8,14 @@ class UserRequests(BaseModel):
 
 
 INSTRUCTIONS = """
-You are an atomic request separator.
-Your task is to break down a user's message into individual atomic requests.
+You are an atomic "information - questions" separator.
+Your task is to break down a user's message into individual questions and information.
 
 For example:
 Input: "I have a corporate bank account, but what's mean PSP?"
 Output: Two atomic requests:
-1. "I have a corporate bank account"
-2. "what's mean PSP?"
+1. Information: "I have a corporate bank account"
+2. Question: "what's mean PSP?"
 
 Input: "Login is admin, password is 12345"
 Output: One atomic request:
@@ -25,6 +25,10 @@ Input: "Yes sir in ICICI bank"
 Output: One atomic request:
 1. "Yes sir in ICICI bank"
 
+Input: "Сompany is BrrBrrPatapimi Address is Russia Moscow Phone numebr +7949329432 Email is samedit66@aaaaaa.ru"
+Output: One atomic request:
+1. "Сompany is BrrBrrPatapimi Address is Russia Moscow Phone numebr +7949329432 Email is samedit66@aaaaaa.ru"
+Rationale: User provided information about the company, it's all related, so it's one request.
 
 Rules:
 1. Each atomic request should be self-contained and meaningful

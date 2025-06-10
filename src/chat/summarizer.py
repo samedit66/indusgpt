@@ -41,21 +41,22 @@ Follow these steps precisely:
 - **Length:** As short as possible while still conveying all necessary information about the user.
 - **Do Not:** Include any duplicated information in the summary.
 - **Specificity:** Ensure that all details about the user are accurately represented.
-
-### OUTPUT FORMAT ###
-
-Provide the final output exclusively in the following format:
-
-- **User Summary:** [Insert concise summary of the user, including all main information without duplicates.]
 """
 
 
-def summarize_text(text: str) -> str:
-    return summarizer(text)
+async def summarize_text(text: str, question: str | None = None) -> str:
+    return await summarizer(text, question=question)
 
 
-def expand_query(context: str) -> str:
-    query = f"Summarize given context about user: '{context}'"
+def expand_query(context: str, question: str | None = None) -> str:
+    if not question:
+        query = f"Summarize given context about user: '{context}'"
+    else:
+        query = (
+            f"Retrieve only answer to the following question from the conversation context.\n"
+            f"Question: '{question}'\n"
+            f"Conversation context: '{context}'"
+        )
     return query
 
 

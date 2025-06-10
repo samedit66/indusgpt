@@ -39,7 +39,7 @@ async def run_bot():
                 access_token=config.airtable_access_token,
                 base_id=config.airtable_base_id,
                 table_id=config.airtable_table_id,
-            )
+            ),
         ],
     )
 
