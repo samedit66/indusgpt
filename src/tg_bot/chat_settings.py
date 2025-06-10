@@ -31,6 +31,7 @@ QUESTIONS = [
             "- BOB means Bank of Boroda\n"
             "- PNB means Punjab National Bank\n"
             "- IPPB means Indian post payment bank\n"
+            "- IDFC (or idfc) means IDFC First Bank\n"
             "\n"
             "Valid examples:\n"
             "- BANK OF MAHARASTRA yes\n"
