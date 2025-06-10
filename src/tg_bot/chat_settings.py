@@ -131,8 +131,11 @@ QUESTIONS = [
     types.Question(
         text="Please describe your company's business activities and what products/services you plan to sell:",
         answer_requirement=(
-            "User response **must** describe their company's business activities and what products/services they plan to sell.\n\n"
+            "User response **must** describe their company's business activities or what products/services they plan to sell.\n"
+            "The provided description may be not detailed, but clearly tells the business activity\n\n"
             "Examples of valid responses:\n"
+            "- Food business\n"
+            "- Fast food cart"
             "- We sell electronics like smartphones and laptops\n"
             "- Our company provides IT consulting services\n"
             "- We're an online clothing store selling fashion accessories\n"
