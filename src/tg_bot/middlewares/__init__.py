@@ -3,6 +3,7 @@ from .filter_users import FinishedUsersMiddleware
 from .create_topic_group import CreateUserAndTopicGroupMiddleware
 from .chat_manager import ChatManagerMiddleware
 from .allowed_ids import AllowedIdsMiddleware
+from .airtable import AirtableMiddleware
 
 __all__ = [
     "FinishedUsersMiddleware",
@@ -10,4 +11,5 @@ __all__ = [
     "CreateUserAndTopicGroupMiddleware",
     "ChatManagerMiddleware",
     "AllowedIdsMiddleware",
+    "AirtableMiddleware",
 ]

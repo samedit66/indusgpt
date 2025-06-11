@@ -19,6 +19,27 @@ from src import processors
 router = Router()
 
 
+@router.message(Command("export_to_airtable"), F.chat.type == "supergroup")
+async def export_to_airtable(
+    message: types.Message,
+    chat_manager: ChatManager,
+    airtable_processor: processors.AirtableProcessor,
+) -> None:
+    users = await User.all()
+    if not users:
+        await message.reply("No users found")
+        return
+
+    await message.reply(f"Found {len(users)} users. Sending to airtable...")
+
+    for user in users:
+        if await chat_manager.has_user_finished(
+            user.id
+        ):  # Only include users who have at least started answering
+            qa_pairs = await chat_manager.qa_pairs(user.id)
+            await airtable_processor(user.id, qa_pairs)
+
+
 @router.message(Command("attach"), F.chat.type == "supergroup")
 async def attach(message: types.Message) -> None:
     """
@@ -300,9 +321,7 @@ async def export(message: types.Message, chat_manager: ChatManager) -> None:
         await message.reply("No users found")
         return
 
-    await message.reply(
-        f"Found {len(users)} unfinished users. Generating PDF report..."
-    )
+    await message.reply(f"Found {len(users)} users. Generating PDF report...")
 
     # Collect Q&A pairs for all unfinished users
     qa_data = {}

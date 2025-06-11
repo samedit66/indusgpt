@@ -28,6 +28,12 @@ async def run_bot():
         ],
     )
 
+    airtable_processor = processors.AirtableProcessor(
+        access_token=config.airtable_access_token,
+        base_id=config.airtable_base_id,
+        table_id=config.airtable_table_id,
+    )
+
     chat_manager = chat.ChatManager(
         question_list=persistence.TortoiseQuestionList(chat_settings.QUESTIONS),
         user_answer_storage=persistence.TortoiseUserAnswerStorage(),
@@ -35,11 +41,7 @@ async def run_bot():
         generate_response=chat.generate_response,
         generate_reply=chat.generate_reply,
         on_all_finished=[
-            processors.AirtableProcessor(
-                access_token=config.airtable_access_token,
-                base_id=config.airtable_base_id,
-                table_id=config.airtable_table_id,
-            ),
+            airtable_processor,
         ],
     )
 
@@ -49,6 +51,7 @@ async def run_bot():
     allowed_ids = [1457394519]
     dp.message.middleware(middlewares.AllowedIdsMiddleware(allowed_ids))
     dp.message.middleware(middlewares.ChatManagerMiddleware(chat_manager))
+    dp.message.middleware(middlewares.AirtableMiddleware(airtable_processor))
     dp.include_routers(supergroup.router, chat_flow.router)
 
     db_url = f"sqlite://{pathlib.Path(config.data_dir) / config.db_file}"
