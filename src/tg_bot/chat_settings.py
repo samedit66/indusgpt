@@ -51,6 +51,7 @@ QUESTIONS = [
             "- Yes in Airtel payment bank\n"
             "\n"
             "Invalid examples:\n"
+            "- Yes i have an Axis Bank current account (user mentions having current account - so it's invalid)"
             "- I don't have corporate\n"
             "- No corporate\n"
             "- I have a personal account in ICICI.\n"
@@ -129,7 +130,7 @@ QUESTIONS = [
         ),
     ),
     types.Question(
-        text="Please describe your company's business activities and what products/services you plan to sell:",
+        text="Please describe your company's business activities and what products/services you plan to sell",
         answer_requirement=(
             "User response **must** describe their company's business activities or what products/services they plan to sell.\n"
             "The provided description may be not detailed, but clearly tells the business activity\n\n"
