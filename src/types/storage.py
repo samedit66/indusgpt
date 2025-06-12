@@ -31,3 +31,12 @@ class UserAnswerStorage(ABC):
 
         :param user_id: identifier for the conversation participant
         """
+
+    @abstractmethod
+    async def replace(self, user_id: int, new_answer: str) -> None:
+        """
+        Replaces current saved draft for the specified user with new one.
+
+        :param user_id: identifier for the conversation participant
+        :param new_answer: new draft answer
+        """

@@ -5,7 +5,6 @@ from src import types
 
 from .chat_state_manager import ChatStateManager
 from .generate_response import ResponseToUser
-from src.chat import summarizer
 
 type ResponseGenerator = Callable[[str, types.State], ResponseToUser]
 """
@@ -209,14 +208,10 @@ class ChatManager:
         if agent_responce.extracted_data is not None:
             context += f"\nInferred information from user response: {agent_responce.extracted_data}\n"
 
-        logger.info(f"Qustion: {current_question!r}")
-        logger.info(f"Context for question before summarizing: {context!r}")
-
-        context = await summarizer.summarize_text(context)
-
-        logger.info(f"Context for question after summarizing: {context!r}")
-
         await self.chat_state_manager.update_answer(user_id, context)
+        logger.info(
+            f"Summarized context: {await self.chat_state_manager.user_answer_storage.get(user_id)}"
+        )
         if agent_responce.ready_for_next_question:
             await self.chat_state_manager.finish_question(user_id)
 

@@ -34,6 +34,11 @@ Follow these steps precisely:
 - **Input:** "I have corporate account in SBI. It is connected to Razorpay. Login: admin password: 12412421 to the account. Company name is GuziniBambini, address is Russia, Moscos, Street 17, phone number is +7999535253 email is samedit66@yandex.ru. We plan to sell dairy products (milk, vegetables). I don't have a website"
 - **Output:** "The user has a corporate account in SBI connected to Razorpay. Login to Razorpay account is admin, password is 12412421. The company name is GuziniBambini, located in Moscow, Russia, at Street 17. The contact phone number is +7999535253, and the email is samedit66@yandex.ru. They plan to sell dairy products, including milk and vegetables, and do not have a website."
 
+**Example 3:**
+- **Input:** "The user has a corporate account but did not specify the bank name. The user has a corporate account but did not specify the bank name. The user has a corporate account in Jio Payments Bank."
+- **Rationale:** At last we know that user has a corporate bank account, so we the info about not having one gets outdated.
+- **Output:** "The user has a corporate account in Jio Payments Bank."
+
 ### CONSTRAINTS ###
 
 - **Tone:** Neutral and informative.

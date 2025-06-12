@@ -24,6 +24,15 @@ class TortoiseUserAnswerStorage(types.UserAnswerStorage):
     async def clear(self, user_id: int) -> None:
         await models.PartialAnswer.filter(user_id=user_id).delete()
 
+    async def replace(self, user_id: int, new_answer: str) -> None:
+        user = await models.User.filter(id=user_id).first()
+        existing = await models.PartialAnswer.filter(user=user).first()
+        if existing:
+            existing.content = new_answer
+            await existing.save()
+        else:
+            await models.PartialAnswer.create(user=user, content=new_answer)
+
 
 class TortoiseQuestionList(types.QuestionList):
     def __init__(self, questions: list[types.Question]):
