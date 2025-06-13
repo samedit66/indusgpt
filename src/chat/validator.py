@@ -100,11 +100,11 @@ Correct examples:
    The asked question:
    Hey bro, you mentioned Paytm as a PSP before, but I need you to confirm it again and name the PSP clearly. Also, are your corporate accounts connected to any other PSPs like Razorpay, Cashfree, PayU, or Getepay?
    User answer: Yes
-   That means that user ANSWERED the question and they have Paytm as connected PSP.
+   Rationale: That means that user ANSWERED the question and they have Paytm as connected PSP.
 2. Context: User responded that they have an account in SBI
    Question: Alright, bro, you've got the bank name down, but I need to know if it's a corporate account. Do you have corporate (business) accounts? If so, which banks are they with?
    User answer: Yes
-   That means that user ANSWERED the question and told us that they have a corporate account in SBI.
+   Rationale:That means that user ANSWERED the question and told us that they have a corporate account in SBI.
 3. Context: User responded that they have an account with Airtel Payment Bank.
             User responded that they have an account with Airtel Payment Bank and mentioned having 19 accounts to provide.
    Question: I need to know if your accounts are corporate and which banks they're with. When you've got that info, let me know!
@@ -112,7 +112,10 @@ Correct examples:
    That means that user ANSWERED the question and told us that they have a corporate account in Airtel Payment Bank.
 4. Question: Do you have corporate (business) accounts? In which banks?
    User answer: Yes
-   That means that user PARTIALLY ANSWERED the question and told us that they have a corporate account but did not specify the bank name.
+   Rationale: That means that user PARTIALLY ANSWERED the question and told us that they have a corporate account but did not specify the bank name.
+5. Context: User responded that they have an account in India Overseas Bank. Later user responded with "yes" indicating agreement about the question - probably, about having a corporate account.
+   User answer: Yes
+   Rationale: It's valid answer. DO NOT BE THIS WAY STRICT - USER PROVIDED 'YES' TO THE EARLIER INFO ABOUT BANK ACCOUNT, so they have a corporate accoint in India Overseas Bank.
 """
     if instructions:
         prompt = (
