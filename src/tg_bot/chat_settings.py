@@ -26,7 +26,8 @@ QUESTIONS = [
             "Other types of accounts are invalid:\n"
             "If user says that they have current account, or personal account, "
             "or savings account that means they DO NOT HAVE CORPORATE ACCOUNT - that's invalid.\n\n"
-            "If user says 'Okay' or 'Ok' it's not valid - require from them clear 'Yes'!\n"
+            "If user says 'Okay' or 'Ok' it's not valid - require from them clear 'Yes'!"
+            "If user mentions bank names, extract infotmation about that - it may be useful in the future.\n\n"
             "**Pay attention to the following rules**:\n"
             "- CURRENT ACCOUNT IS NOT CORPORATE/BUSINESS ACCOUNT\n"
             "- PERSONAL ACCOUNT IS NOT CORPORATE/BUSINESS ACCOUNT\n"
@@ -82,6 +83,7 @@ QUESTIONS = [
             "- No, I don't have any corporate account.\n"
             "- Current only IOB\n"
             "- I don't have business accounts\n"
+            "- Indian bank with MQR 10 lac transfer limit per day (user did not mention this is a corporate account)\n"
         ),
     ),
     types.Question(
