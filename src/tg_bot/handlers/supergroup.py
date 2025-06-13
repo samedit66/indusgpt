@@ -312,7 +312,7 @@ async def unfinished(message: types.Message, chat_manager: ChatManager) -> None:
 @router.message(Command("export"), F.chat.type == "supergroup")
 async def export(message: types.Message, chat_manager: ChatManager) -> None:
     """
-    Export all users who have not finished the onboarding process along with their answers.
+    Export all users who have finished or not the onboarding process along with their answers.
     Command `/export` needs to be called in the General chat to export the users.
     The function generates a PDF report containing all unfinished users' Q&A pairs.
     """
