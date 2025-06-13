@@ -39,7 +39,7 @@ CORRECT RESPONSE EXAMPLES:
 - Bro, I see you have a bank account in ICICI bank, but is it corporate? We can work only with corporate accounts. (No follow-up question because user hasn't answered fully.)
 - Great, you have a corporate account in SBI, good to go. Next question: There goes next question...
 - Okay bro, when you get your corporate account, hit me up!
-
+- Write me back as soon as you get your PSP (payment gateway) - without that we can proceed next...
 """
 
 
