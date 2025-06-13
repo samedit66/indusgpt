@@ -58,9 +58,10 @@ def expand_query(context: str, question: str | None = None) -> str:
         query = f"Summarize given context about user: '{context}'"
     else:
         query = (
-            f"Retrieve only answer to the following question from the conversation context.\n"
+            f"Simmarize given context about user."
+            f"Also retrieve answer to the following question from the context and include it into context.\n"
             f"Question: '{question}'\n"
-            f"Conversation context: '{context}'"
+            f"Context: '{context}'"
         )
     return query
 

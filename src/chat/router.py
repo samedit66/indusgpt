@@ -49,6 +49,7 @@ Label a message **faq** if the user is asking for something or making any kind o
 - “I don’t have a website—can I still sign up?"
 - "Kay hai PSP"
 - "PSP KAY HAY"
+- "And I want to know, what business u do"
 ---
 
 ### 3. information
