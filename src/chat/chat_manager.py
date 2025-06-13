@@ -184,11 +184,11 @@ class ChatManager:
 
         full_context = f"{stored_context}\n\n{user_input}"
 
-        logger.info(f"Full context: {full_context!r}")
+        logger.info(f"talk_: Full context: {full_context!r}")
 
         summarized = await summarizer.summarize_text(full_context, question)
 
-        logger.info(f"Summarized context: {summarized!r}")
+        logger.info(f"talk_: Summarized context: {summarized!r}")
 
         instructions = await self.context.get()
         answer = await self.generate_response(
@@ -198,7 +198,7 @@ class ChatManager:
             instructions=instructions,
         )
 
-        logger.info(f"Agent answer: {answer!r}")
+        logger.info(f"talk_: Agent answer: {answer!r}")
 
         return answer
 
@@ -212,12 +212,18 @@ class ChatManager:
             agent_answer (Answer): The response from DialogAgent containing
                 a boolean 'ready_for_next_question' and the latest user_input.
         """
-        current_question = await self.current_question(user_id)
-        context = f"Question: '{current_question}'\nUser responded: '{agent_responce.user_input}'"
+        _, _, stored_context = await self.chat_state_manager.current_state(user_id)
+
+        context = f"Stored context: {stored_context}\nUser responded: '{agent_responce.user_input}'"
+        logger.info(f"_update_state: Context before: {context!r}")
+
         if agent_responce.extracted_data is not None:
             context += f"\nInferred information from user response: {agent_responce.extracted_data}\n"
+            await self.chat_state_manager.update_answer(user_id, context)
 
-        await self.chat_state_manager.update_answer(user_id, context)
+        _, _, stored_context = await self.chat_state_manager.current_state(user_id)
+        logger.info(f"_update_state: Context after: {stored_context!r}")
+
         if agent_responce.ready_for_next_question:
             await self.chat_state_manager.finish_question(user_id)
 
