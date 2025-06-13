@@ -55,6 +55,12 @@ QUESTIONS = [
             "- Yes in Airtel payment bank\n"
             "- India overseas Bank yes\n"
             "- Axis neo for coperate\n"
+            "- Axis corporate\n"
+            "- Yes I have copparate account PNB\n"
+            "- Yes I have business account Punjab national bank\n"
+            "- Union Bank of India Corporate ac\n"
+            "- Yes boss I have DBS\n"
+            "- Yes it's corporate account Indian bank dear\n"
             "\n"
             "Invalid examples:\n"
             "- Yes i have an Axis Bank current account (user mentions having current account - so it's invalid)"
@@ -72,6 +78,10 @@ QUESTIONS = [
             "- I do not have any corporate account my savings account\n"
             "- Saving accounts Punjab National bank Current account Yes (user mentioned that they have current account - it's invalid)\n"
             "- India overseas Bank Okay sir (not valid because user did not said 'Yes', 'Okay' doesnt' count)\n"
+            "- No corportae account linked to a PSP\n"
+            "- No, I don't have any corporate account.\n"
+            "- Current only IOB\n"
+            "- I don't have business accounts\n"
         ),
     ),
     types.Question(
