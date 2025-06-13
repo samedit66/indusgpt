@@ -18,12 +18,15 @@ QUESTIONS = [
     types.Question(
         text="Do you have corporate (business) accounts? In which banks?",
         answer_requirement=(
-            "User MUST agree that they HAVE A CORPORATE/BUSINESS bank account and TELL THE BANK NAME.\n"
+            "User MUST agree (say 'Yes') that they HAVE A CORPORATE/BUSINESS bank account and TELL THE BANK NAME.\n"
             "Users usually do not explicitly tell 'I have a corporate account', but say things like 'Yes' and the bank name.\n"
+            "When user mentions just bank name - that means that they have an UNKNOWN TYPE of account in that bank "
+            "(confimation or saying 'Yes' still needed), remember that!\n"
             "If user says that they have SAVINGS or CURRENT answer is INVALID!\n"
             "Other types of accounts are invalid:\n"
             "If user says that they have current account, or personal account, "
             "or savings account that means they DO NOT HAVE CORPORATE ACCOUNT - that's invalid.\n\n"
+            "If user says 'Okay' or 'Ok' it's not valid - require from them clear 'Yes'!\n"
             "**Pay attention to the following rules**:\n"
             "- CURRENT ACCOUNT IS NOT CORPORATE/BUSINESS ACCOUNT\n"
             "- PERSONAL ACCOUNT IS NOT CORPORATE/BUSINESS ACCOUNT\n"
@@ -50,6 +53,7 @@ QUESTIONS = [
             "- Yes, I have a Business account at  SBI\n"
             "- I have Federal Bank and Induslnd Bank Federal E-biz corporate\n"
             "- Yes in Airtel payment bank\n"
+            "- India overseas Bank yes\n"
             "\n"
             "Invalid examples:\n"
             "- Yes i have an Axis Bank current account (user mentions having current account - so it's invalid)"
@@ -66,6 +70,7 @@ QUESTIONS = [
             "- Canara Current account\n"
             "- I do not have any corporate account my savings account\n"
             "- Saving accounts Punjab National bank Current account Yes (user mentioned that they have current account - it's invalid)\n"
+            "- India overseas Bank Okay sir (not valid because user did not said 'Yes', 'Okay' doesnt' count)\n"
         ),
     ),
     types.Question(
