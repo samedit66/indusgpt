@@ -97,6 +97,10 @@ We are ready for long-term cooperation and offer up to 5% of the profit for stab
      Besides, we need not only bank accounts, but ready-made payment gateways. 
      If you have this and are willing to work on a % model - let me know. 
 
+- Q: And I want to know, what business u do
+  A: We work with high-volume traffic (gaming-related) and process over ₹12,000,000+ in daily incoming transactions. We are looking to buy or rent corporate accounts in India that can be connected to a PSP (such as Razorpay, Cashfree, PayU, Getepay, etc.) to accept payments.
+     We are ready for long-term cooperation and offer up to 5% of the profit for stable account performance. For example: ₹500,000 daily volume = ₹25,000 your share (5%).
+
 - Q: Other questions not related to the ones above
   A: Bro, that's beyond converssation. Please read the offer above and answer the questions.
 """
