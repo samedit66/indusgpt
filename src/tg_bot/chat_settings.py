@@ -20,6 +20,7 @@ QUESTIONS = [
         answer_requirement=(
             "User MUST agree that they HAVE A CORPORATE/BUSINESS bank account and TELL THE BANK NAME.\n"
             "Users usually do not explicitly tell 'I have a corporate account', but say things like 'Yes' and the bank name.\n"
+            "If user says that they have SAVINGS or CURRENT answer is INVALID!\n"
             "Other types of accounts are invalid:\n"
             "If user says that they have current account, or personal account, "
             "or savings account that means they DO NOT HAVE CORPORATE ACCOUNT - that's invalid.\n\n"
@@ -64,6 +65,7 @@ QUESTIONS = [
             "- Saving account\n"
             "- Canara Current account\n"
             "- I do not have any corporate account my savings account\n"
+            "- Saving accounts Punjab National bank Current account Yes (user mentioned that they have current account - it's invalid)\n"
         ),
     ),
     types.Question(
