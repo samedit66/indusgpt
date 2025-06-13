@@ -63,6 +63,7 @@ def expand_query(context: str, question: str | None = None) -> str:
             f"Also retrieve answer to the following question from the context and include it into context.\n"
             f"Question: '{question}'\n"
             f"Context: '{context}'"
+            f"DO NOT EXCLUDE ANY STORED INFORMATION - JUST SUMMARIZE IT!"
         )
     return query
 
