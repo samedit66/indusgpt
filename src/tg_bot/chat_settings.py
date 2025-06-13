@@ -54,6 +54,7 @@ QUESTIONS = [
             "- I have Federal Bank and Induslnd Bank Federal E-biz corporate\n"
             "- Yes in Airtel payment bank\n"
             "- India overseas Bank yes\n"
+            "- Axis neo for coperate\n"
             "\n"
             "Invalid examples:\n"
             "- Yes i have an Axis Bank current account (user mentions having current account - so it's invalid)"
@@ -116,6 +117,7 @@ QUESTIONS = [
             "- Yeah.\n"
             "- Yes.\n"
             "- Yes, I'll share them right now.\n"
+            "- Yes I will provide them tomorrow\n"
         ),
     ),
     types.Question(
@@ -134,6 +136,7 @@ QUESTIONS = [
             "- Just Acme Corp and its address\n"
             "- I'll send it later\n"
             "- Only phone number provided\n"
+            "- Yes I will provide them tomorrow\n"
         ),
     ),
     types.Question(

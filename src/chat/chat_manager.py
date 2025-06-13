@@ -224,6 +224,7 @@ class ChatManager:
         _, _, stored_context = await self.chat_state_manager.current_state(user_id)
         logger.info(f"_update_state: Context after: {stored_context!r}")
 
+        logger.info(f"_update_state: Agent response: {agent_responce!r}")
         if agent_responce.ready_for_next_question:
             await self.chat_state_manager.finish_question(user_id)
 
