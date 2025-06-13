@@ -2,6 +2,7 @@ import logging
 from typing import Callable, Iterable
 
 from src import types
+from src.chat import summarizer
 
 from .chat_state_manager import ChatStateManager
 from .generate_response import ResponseToUser
@@ -131,13 +132,11 @@ class ChatManager:
         agent_response = await self._talk(user_id, user_input)
         await self._update_state(user_id, agent_response)
 
-        logger.info(f"Agent response: {agent_response!r}")
-
         # Build the outgoing reply
         current_state = await self.chat_state_manager.current_state(user_id)
         reply = await self.generate_reply(agent_response, current_state)
 
-        logger.info(f"Reply: {reply!r}")
+        logger.info(f"Agent reply: {reply!r}")
 
         while (
             not (await self.chat_state_manager.all_finished(user_id))
@@ -151,7 +150,6 @@ class ChatManager:
                 f"User input: {user_input}"
             )
             agent_response = await self._talk(user_id, prompt)
-            logger.info(f"Agent response: {agent_response!r}")
             await self._update_state(user_id, agent_response)
 
             if agent_response.ready_for_next_question:
@@ -180,16 +178,28 @@ class ChatManager:
             Answer: The agent's response object, containing the generated text,
                 a flag 'ready_for_next_question', and the processed user_input.
         """
-        _, question, partial_answer = await self.chat_state_manager.current_state(
+        _, question, stored_context = await self.chat_state_manager.current_state(
             user_id
         )
+
+        full_context = f"{stored_context}\n\n{user_input}"
+
+        logger.info(f"Full context: {full_context!r}")
+
+        summarized = await summarizer.summarize_text(full_context, question)
+
+        logger.info(f"Summarized context: {summarized!r}")
+
         instructions = await self.context.get()
         answer = await self.generate_response(
             user_input=user_input,
             question=question,
-            context=partial_answer,
+            context=summarized,
             instructions=instructions,
         )
+
+        logger.info(f"Agent answer: {answer!r}")
+
         return answer
 
     async def _update_state(self, user_id: int, agent_responce: ResponseToUser) -> None:
@@ -204,14 +214,10 @@ class ChatManager:
         """
         current_question = await self.current_question(user_id)
         context = f"Question: '{current_question}'\nUser responded: '{agent_responce.user_input}'"
-
         if agent_responce.extracted_data is not None:
             context += f"\nInferred information from user response: {agent_responce.extracted_data}\n"
 
         await self.chat_state_manager.update_answer(user_id, context)
-        logger.info(
-            f"Summarized context: {await self.chat_state_manager.user_answer_storage.get(user_id)}"
-        )
         if agent_responce.ready_for_next_question:
             await self.chat_state_manager.finish_question(user_id)
 
