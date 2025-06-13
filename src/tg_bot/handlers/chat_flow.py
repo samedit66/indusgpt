@@ -37,21 +37,53 @@ message_buffer: dict[int, UserMessageBuffer] = {}
 
 
 @router.message(Command("start"), F.chat.type == "private")
-async def start(message: types.Message, chat_manager: chat.ChatManager) -> None:
-    await message.answer(chat_settings.INTRODUCTION)
-    await message.answer(await chat_manager.current_question(message.from_user.id))
+async def start(
+    message: types.Message,
+    supergroup_id: int,
+    topic_group_id: int,
+    chat_manager: chat.ChatManager,
+) -> None:
+    bot_msg = await message.answer(chat_settings.INTRODUCTION)
+    await bot_msg.send_copy(
+        chat_id=supergroup_id,
+        message_thread_id=topic_group_id,
+    )
+
+    bot_msg = await message.answer(
+        await chat_manager.current_question(message.from_user.id)
+    )
+    await bot_msg.send_copy(
+        chat_id=supergroup_id,
+        message_thread_id=topic_group_id,
+    )
 
 
 @router.message(F.content_type == ContentType.VOICE, F.chat.type == "private")
-async def voice_message(message: types.Message):
-    await message.answer(
+async def voice_message(
+    message: types.Message,
+    supergroup_id: int,
+    topic_group_id: int,
+) -> None:
+    bot_msg = await message.answer(
         "Bro, please write the lyrics, I can't listen to it right now."
+    )
+    await bot_msg.send_copy(
+        chat_id=supergroup_id,
+        message_thread_id=topic_group_id,
     )
 
 
 @router.message(F.content_type != ContentType.TEXT, F.chat.type == "private")
-async def not_text_message(message: types.Message):
-    await message.answer("Bro, please write the lyrics")
+async def not_text_message(
+    message: types.Message,
+    supergroup_id: int,
+    topic_group_id: int,
+) -> None:
+    bot_msg = await message.answer("Bro, please write the lyrics")
+    await bot_msg.send_copy(
+        chat_id=supergroup_id,
+        message_thread_id=topic_group_id,
+    )
 
 
 @router.message(F.chat.type == "private")
@@ -89,9 +121,12 @@ async def _per_user_flusher(user_id: int) -> None:
     """
     buf = message_buffer[user_id]
 
+    need_to_sleep = True
     try:
         while True:
-            await asyncio.sleep(30)  # wait 30 seconds between flushes
+            if need_to_sleep:
+                await asyncio.sleep(30)  # wait 30 seconds between flushes
+                need_to_sleep = False
 
             # If the user buffer has no messages, just loop again
             if not buf.stored_messages:
@@ -108,8 +143,9 @@ async def _per_user_flusher(user_id: int) -> None:
                 continue
 
             # 1) Combine all pending texts
+            stored_messages = buf.stored_messages.copy()
             combined_user_text = " ".join(
-                msg.text for msg in buf.stored_messages if msg.text
+                msg.text for msg in stored_messages if msg.text
             ).strip()
 
             # 2) Ask chat_manager for a reply
@@ -121,8 +157,17 @@ async def _per_user_flusher(user_id: int) -> None:
                 buf.clear()
                 break
 
+            # 2.1) Check if user write anything new - they may have provided new information,
+            # which we need for a complete answer
+            if len(stored_messages) < len(buf.stored_messages):
+                need_to_sleep = False
+                continue
+            else:
+                need_to_sleep = True
+                buf.clear()
+
             # 3) Send the reply under the last user message
-            last_user_msg = buf.stored_messages[-1]
+            last_user_msg = stored_messages[-1]
             try:
                 bot_msg = await last_user_msg.answer(reply_text)
             except Exception as e:
@@ -157,23 +202,33 @@ async def _per_user_flusher(user_id: int) -> None:
                         or await Manager.first()
                     )
                     if user_manager:
-                        await last_user_msg.answer(
+                        bot_msg = await last_user_msg.answer(
                             f"Your personal manager {user_manager.manager_link} will contact you soon."
                         )
                     else:
-                        await last_user_msg.answer(
+                        bot_msg = await last_user_msg.answer(
                             "A personal manager will contact you soon."
                         )
+                    await bot_msg.send_copy(
+                        chat_id=buf.supergroup_id,
+                        message_thread_id=buf.topic_group_id,
+                    )
                 except Exception as e:
                     logger.error(
                         f"Error sending manager notification to {user_id}: {e}"
                     )
                 # Once finished, break out of the loop
                 buf.clear()
+                need_to_sleep = True
                 break
 
             # 6) Clear the buffer (we’ve just processed all pending messages)
-            buf.clear()
+            if len(stored_messages) < len(buf.stored_messages):
+                need_to_sleep = False
+                continue
+            else:
+                need_to_sleep = True
+                buf.clear()
 
     except asyncio.CancelledError:
         # If someone externally cancels the task, just clean up and exit
