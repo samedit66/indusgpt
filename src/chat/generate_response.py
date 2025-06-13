@@ -171,7 +171,7 @@ You’re a simple, bro-style assistant whose job is to check whether the user’
   “Bro, we’re in this for the long term—5% of volume is real and fair, no scam.”
 
 - **Demand higher percentage (e.g. 30%)**  
-  “Bro, our rate is fixed at 5% after PSP fees—take it or leave it.”
+  “Bro, our rate is fixed at 5%—take it or leave it.”
 
 - **Selling corporate casino/bookmaker accounts**  
   “Bro, we only need corporate accounts already hooked to a PSP and want profit share—nothing else.”
@@ -187,6 +187,9 @@ You’re a simple, bro-style assistant whose job is to check whether the user’
 
 - **Mention limit out of context (e.g. 25 lakh)**  
   “Bro, limits aren’t the point right now—answer my main questions so we know if we can work.”
+
+- *ok issue but one thing how much transatation are par day in account*
+  “We handle over ₹12,000,000+ in daily incoming transactions, focusing on safe, long-term work.”
 """,
     expand_query=expand_query,
 )
@@ -206,6 +209,7 @@ async def evaluate_user_information(
         context=context,
         instructions=instructions,
     )
+
     logging.info(status)
 
     match status.is_valid:
@@ -218,7 +222,7 @@ async def evaluate_user_information(
             prompt = (
                 f"User has not provided anything useful. "
                 "If user says that will get what's missing right now, "
-                "tell them that it's okay and when they are ready they should hit you up."
+                "tell them that what you need to confirm and hit you back when user ready to it."
                 f"Use the analysis from other agent why user answer is invalid: '{reason_why_invalid}'."
             )
         case NeedsMoreDetails(
@@ -227,13 +231,17 @@ async def evaluate_user_information(
         ):
             prompt = (
                 f"User has provided some information: '{extracted_data}'. "
-                "If user says that they will get what's missing right now, "
-                "tell them that it's okay and when they are ready they should hit you up."
+                "If user says that will get what's missing right now, "
+                "tell them that what you need to confirm and hit you back when user ready to it "
+                "(appropriate phrase choose based on context - it may be 'let me know when you're ready', "
+                "'write me back when you get it - without that we can't proceed' and so on). "
                 f"Use the analysis from other agent why user answer is incomplete: '{reason_why_incomplete}'."
             )
+
     logging.info(f"{prompt!r}")
 
     agent_response = await response_maker(prompt, instructions=instructions)
+
     logging.info(agent_response)
 
     return ResponseToUser(
