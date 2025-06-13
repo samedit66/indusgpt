@@ -56,8 +56,10 @@ class ChatStateManager:
         """
         stored_context = await self.user_answer_storage.get(user_id)
         full_context = f"{stored_context}\n\n{partial_answer}"
+
         question = await self.question_list.current_question(user_id)
         summarized_context = await summarizer.summarize_text(full_context, question)
+
         await self.user_answer_storage.replace(user_id, summarized_context)
 
     async def finish_question(self, user_id: int) -> None:
