@@ -89,6 +89,7 @@ async def generate_single_response(
     instructions: str | None = None,
 ) -> ResponseToUser:
     intent = await router(user_input, context=context, instructions=instructions)
+    logging.info(f"generate_single_response: intent: {intent}")
 
     match intent:
         case Intent(category="faq"):
@@ -127,8 +128,9 @@ You’re a simple, bro-style assistant whose job is to check whether the user’
 
 ## 2. How to Format Your Reply
 - **No** Markdown or fancy formatting—just plain text.  
-- **Always** keep it under two short sentences.  
-- **Never** ask the user any questions.
+- **Always** keep it under two short sentences.
+- **Ask questions** only when some data is missing.
+- **Never** ask questions in any other case, just say what user is missings or needs to get.
 
 ## 3. When to Use Each Response Type
 - **Confirmation**: User has exactly what we need.  
@@ -196,57 +198,53 @@ You’re a simple, bro-style assistant whose job is to check whether the user’
 
 
 async def evaluate_user_information(
-    user_information: str,
+    user_input: str,
     question: types.Question,
     context: str | None = None,
     instructions: str | None = None,
 ) -> ResponseToUser:
-    logging.info(f"User context: {context!r}")
-
     status = await validator(
-        user_information,
+        user_input,
         question=question,
         context=context,
         instructions=instructions,
     )
+    logging.info(f"evaluate_user_information: Status: {status!r}")
 
-    logging.info(status)
-
+    extracted_data = None
+    ready_for_next_question = False
     match status.is_valid:
-        case ValidAnswer(extracted_data=extracted_data):
+        case ValidAnswer(extracted_user_answer=extracted_user_answer):
+            extracted_data = extracted_user_answer
+            ready_for_next_question = True
             prompt = (
-                f"User successfully provided the information: '{extracted_data}'. "
-                "Tell them that they are good to go and we can proceed with the next question."
+                f"User successfully provided the information: '{extracted_user_answer}'. "
+                "Tell them that they successfully answered the question."
             )
         case InvalidAnswer(reason_why_invalid=reason_why_invalid):
             prompt = (
+                f"The last time user wrote the following message: '{user_input}'."
                 f"User has not provided anything useful. "
                 "If user says that will get what's missing right now, "
                 "tell them that what you need to confirm and hit you back when user ready to it."
                 f"Use the analysis from other agent why user answer is invalid: '{reason_why_invalid}'."
             )
         case NeedsMoreDetails(
-            extracted_data=extracted_data,
             reason_why_incomplete=reason_why_incomplete,
         ):
             prompt = (
-                f"User has provided some information: '{extracted_data}'. "
+                f"The last time user wrote the following message: '{user_input}'."
+                f"Reason why user's answer is incomplete: '{reason_why_incomplete}'."
                 "If user says that will get what's missing right now, "
                 "tell them that what you need to confirm and hit you back when user ready to it "
                 "(appropriate phrase choose based on context - it may be 'let me know when you're ready', "
                 "'write me back when you get it - without that we can't proceed' and so on). "
-                f"Use the analysis from other agent why user answer is incomplete: '{reason_why_incomplete}'."
             )
 
-    logging.info(f"{prompt!r}")
-
-    agent_response = await response_maker(prompt, instructions=instructions)
-
-    logging.info(agent_response)
-
+    response_text = await response_maker(prompt, instructions=instructions)
     return ResponseToUser(
-        user_input=user_information,
-        response_text=agent_response,
-        extracted_data=status.is_valid.extracted_data,
-        ready_for_next_question=isinstance(status.is_valid, ValidAnswer),
+        user_input=user_input,
+        response_text=response_text,
+        extracted_data=extracted_data,
+        ready_for_next_question=ready_for_next_question,
     )
