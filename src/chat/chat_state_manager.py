@@ -1,7 +1,6 @@
 from typing import Iterable
 
 from src import types
-from src.chat import summarizer
 
 
 class ChatStateManager:
@@ -47,31 +46,29 @@ class ChatStateManager:
         partial_answer = await self.user_answer_storage.get(user_id)
         return types.State(types.StateType.IN_PROGRESS, question, partial_answer)
 
-    async def update_answer(self, user_id: int, partial_answer: str) -> None:
-        """
-        Persists the latest draft of the user’s response.
+    async def remember(
+        self,
+        user_id: int,
+        question: str,
+        user_input: str,
+        response_text: str,
+    ) -> None:
+        context = f"""
+Question: '{question}'
+User responded: '{user_input}'
+Response to user: '{response_text}'
 
-        :param user_id: identifier for the conversation participant
-        :param partial_answer: text to store as the current, incomplete answer
-        """
-        stored_context = await self.user_answer_storage.get(user_id)
-        full_context = f"{stored_context}\n\n{partial_answer}"
 
-        question = await self.question_list.current_question(user_id)
-        summarized_context = await summarizer.summarize_text(full_context, question)
+"""
+        await self.user_answer_storage.append(user_id, context)
 
-        await self.user_answer_storage.replace(user_id, summarized_context)
-
-    async def finish_question(self, user_id: int) -> None:
+    async def finish_question(self, user_id: int, answer: str) -> None:
         """
         Finalizes the current answer, clears the draft, and advances to the next question.
         If all questions are answered, triggers any registered callbacks.
 
         :param user_id: identifier for the conversation participant
         """
-        context = await self.user_answer_storage.get(user_id)
-        current_question = (await self.current_state(user_id))[1].text
-        answer = await summarizer.summarize_text(context, current_question)
         await self.question_list.advance(user_id, answer)
 
         # TODO: Возможно, стоит делать это в отдельном методе...

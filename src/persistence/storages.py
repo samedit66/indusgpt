@@ -9,7 +9,7 @@ class TortoiseUserAnswerStorage(types.UserAnswerStorage):
         user = await models.User.filter(id=user_id).first()
         existing = await models.PartialAnswer.filter(user=user).first()
         if existing:
-            existing.content += f"\n{partial_answer}"
+            existing.content += f"{partial_answer}"
             await existing.save()
         else:
             await models.PartialAnswer.create(user=user, content=partial_answer)

@@ -13,6 +13,8 @@ Classify each user message into one of two categories:
 1. **start**
 2. **faq**  
 3. **information**
+
+Pay attention to the fact that users may not know English very well (see examples).
 ---
 
 ### 1. start
@@ -27,6 +29,7 @@ Label a message **start** if the user is greeting.
 - “Hi there!”
 - “Hey, how’s it going?”
 - “Good morning!”
+- "Hii"
 ---
 
 ### 2. faq
@@ -50,6 +53,7 @@ Label a message **faq** if the user is asking for something or making any kind o
 - "Kay hai PSP"
 - "PSP KAY HAY"
 - "And I want to know, what business u do"
+- "Current account also accept??
 ---
 
 ### 3. information
@@ -66,7 +70,8 @@ Label a message **information** if the user is just providing facts, confirmatio
 - “I have a business account at HSBC.”  
 - “My username is user123.”  
 - “Okay.”  
-- “Thanks.”  
+- “Thanks.” 
+- "Esaf connect with Gatepay"
 - “xyz”  
 - “u”
 - “t”

@@ -19,10 +19,11 @@ Return one of:
   • needs more details — partially meets it
   • no — does not meet it
 
-Provide a concise rationale.
-If the answer is valid or partially valid, extract the needed data.
-Do not be too strict: user may inderectly answer the question, try to infer required information when possible.
-If you can fully infer information from context which is required by the question then USER'S ANSWER IS TOTALLY VALID.
+**PAY HIGH ATTENTION TO THE FOLLOWING!**
+- Provide a concise rationale.
+- Extract the data from the answer only if the answer is fully valid.
+- User may indirectly answer the question, try to infer required information from the context.
+- If the context indicates a possible answer, take it.
 """
 
 
@@ -36,7 +37,7 @@ class ValidationResult(BaseModel):
 
 class ValidAnswer(BaseModel):
     answer_kind: Literal["Valid."]
-    extracted_data: str = Field(
+    extracted_user_answer: str = Field(
         ...,
         description=(
             "Consice and concrete user's answer "
@@ -47,13 +48,6 @@ class ValidAnswer(BaseModel):
 
 class NeedsMoreDetails(BaseModel):
     answer_kind: Literal["Needs more details."]
-    extracted_data: str = Field(
-        ...,
-        description=(
-            "Consice and concrete partial user's answer "
-            "to the given question starting with 'User responded that...'."
-        ),
-    )
     reason_why_incomplete: str = Field(
         ...,
         description=(
@@ -64,9 +58,6 @@ class NeedsMoreDetails(BaseModel):
 
 class InvalidAnswer(BaseModel):
     answer_kind: Literal["Invalid."]
-    extracted_data: None = Field(
-        None, description="No data was extracted from the user input."
-    )
     reason_why_invalid: str = Field(
         ...,
         description="Explanation why the user's answer doesn't correspond to the given question.",
@@ -88,11 +79,15 @@ def expand_query(
 
 **How to validate**
 User was asked: {question.text}.
+
 Requirement: {question.answer_requirement}
+
 Validate user response: '{user_input}'.
+
 Do not validate only user answer, validate both combined what we found out about user earlier and the current user's answer.
 Do not be too strict, infer required information from the context when possible.
 Try to infer information from text - if user provides 'Yes', 'Ok' or 'No' he may have answered the question which already was asked and partially answered.
+EXPLICIT CONFIRMATION OF INFORMATION IS NOT NEEDED IF YOU CAN INFER INFORMATION FROM BOTH CONTEXT AND USER RESPONSE!
 
 **PAY ATTENTION TO THE FOLLOWING CORRECT EXAMPLES**
 Correct examples:
@@ -123,7 +118,6 @@ Correct examples:
         )
         query = prompt + "\n\n" + query
 
-    logger.info(f"Validator query: {query!r}")
     return query
 
 

@@ -22,6 +22,7 @@ Follow these steps precisely:
 2. **Identify and Eliminate Duplicates:** Determine any repeated information within the text and ensure it is only included once in the summary.
 3. **Extract User-Related Information:** Focus on extracting and preserving all relevant details about the user from the original text.
 4. **Condensate Information:** Condense the extracted information into a concise summary without losing essential details about the user.
+5. **DO NOT EXCLUDE ANY INFORMATION ABOUT USER - EVERYTHING THAT USER PROVIDED SHOULD BE STORED IN A SUMMARIZED CONTEXT**
 
 ### EXAMPLES ###
 
@@ -62,6 +63,7 @@ def expand_query(context: str, question: str | None = None) -> str:
             f"Also retrieve answer to the following question from the context and include it into context.\n"
             f"Question: '{question}'\n"
             f"Context: '{context}'"
+            f"DO NOT EXCLUDE ANY STORED INFORMATION - JUST SUMMARIZE IT!"
         )
     return query
 
