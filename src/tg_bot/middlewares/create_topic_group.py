@@ -25,7 +25,7 @@ class CreateUserAndTopicGroupMiddleware(BaseMiddleware):
         data: dict,
     ) -> Any:
         # 1) Make sure the User row is there.
-        name = event.from_user.full_name or event.from_user.username
+        name = event.from_user.username or event.from_user.full_name
         user, _ = await User.get_or_create(
             id=event.from_user.id,
             defaults={
