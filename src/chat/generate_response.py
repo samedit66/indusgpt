@@ -43,7 +43,7 @@ async def generate_response(
     responses = await get_responses_for_requests(
         requests.requests, question, context, instructions
     )
-    return combine_responses(user_input, responses)
+    return await combine_responses(user_input, responses)
 
 
 async def get_responses_for_requests(
@@ -64,7 +64,7 @@ async def get_responses_for_requests(
     return responses
 
 
-def combine_responses(
+async def combine_responses(
     user_input: str,
     responses: list[ResponseToUser],
 ) -> ResponseToUser:
@@ -74,9 +74,22 @@ def combine_responses(
     ]
     extracted_data = " ".join(extracted_datas) if extracted_datas else None
 
+    query = f"""
+Combine the following several responses into one.
+Requirements:
+- Put answer to the asked questions. You may modify responses to not have repeated answers.
+- Put the next question after it it exists.
+- Make response not too long (4-5 sentences max)
+- Save all the given information, but elimate redundant infomation (like if user asked a question, but provided answer to it in one message)
+- If only one response exist, leave it as is.
+
+Responses:
+{"\n".join(response_texts)}
+"""
+    combined_response = await response_maker(query)
     return ResponseToUser(
         user_input=user_input,
-        response_text=" ".join(response_texts),
+        response_text=combined_response,
         extracted_data=extracted_data,
         ready_for_next_question=any(r.ready_for_next_question for r in responses),
     )
@@ -226,19 +239,22 @@ async def evaluate_user_information(
                 f"The last time user wrote the following message: '{user_input}'."
                 f"User has not provided anything useful. "
                 "If user says that will get what's missing right now, "
-                "tell them that what you need to confirm and hit you back when user ready to it."
-                f"Use the analysis from other agent why user answer is invalid: '{reason_why_invalid}'."
+                "tell them that what you need to confirm and hit you back when user gets it.\n"
+                "If user says that they don't have what's required by the question, "
+                "tell them what without it you cannot proceed further."
+                "If user says nonsense, tell them that this is beyond conversation.\n"
+                f"To make up a pretty and useful answer, Use the analysis from other agent why user answer is invalid: '{reason_why_invalid}'."
             )
         case NeedsMoreDetails(
             reason_why_incomplete=reason_why_incomplete,
         ):
             prompt = (
-                f"The last time user wrote the following message: '{user_input}'."
-                f"Reason why user's answer is incomplete: '{reason_why_incomplete}'."
-                "If user says that will get what's missing right now, "
-                "tell them that what you need to confirm and hit you back when user ready to it "
-                "(appropriate phrase choose based on context - it may be 'let me know when you're ready', "
-                "'write me back when you get it - without that we can't proceed' and so on). "
+                f"The last time user wrote the following message: '{user_input}'.\n"
+                "If user says that they will get what's missing right now, "
+                "tell them what you are waiting for what's missing right now.\n"
+                "If user says that they don't have what's required by the question, "
+                "tell them what without it you cannot proceed further."
+                f"To make up a pretty and useful answer, use the analysis from other agent why user answer is incomplete: '{reason_why_incomplete}'."
             )
 
     response_text = await response_maker(prompt, instructions=instructions)
