@@ -123,13 +123,30 @@ def expand_query(
 Quesiton: "{question.text}"
 User responded: "{user_input}"
 
-**Requirement:**  
+**Requirement:**
+**IMPORATNT:** CONFIRMATION OF SOME INFORMATION DOES NOT REQUIRE REPEATING INFO AGAIN - JUST A 'Yes' IS SUITABLE!  
 "{question.answer_requirement}"
 
 Analyze and validate the whole context of conversation.
 It's important to validate the whole context because user's may answer partially across several messages.
 If answer to the question can be inferred from the whole context, infer it, and extract information which is needed by the requirement.
 If you cannot infer the needed information from the context, explain why, but try your best to infer it.
+
+**Examples:**
+
+1. Unknown PSP name
+Question: \'Are your corporate account(s) connected to any payment gateway (PSP) (e.g., Razorpay, Cashfree, PayU, Getepay)?\nPlease answer me with a clear \'Yes\' or \'No\' and the PSP name(s).
+User input: Yes sbi\'\nResponse to user: \'Okay bro, SBI is your bank, but I need to know the PSP connected to your corporate account.\'\n\n\n\nQuestion: \'Are your corporate account(s) connected to any payment gateway (PSP) (e.g., Razorpay, Cashfree, PayU, Getepay)?\nPlease answer me with a clear \'Yes\' or \'No\' and the PSP name(s).\'
+User responded: \'Yes sabpaisa\'
+Response to user: \'Okay bro, you mentioned \'sabpaisa\' as your PSP, but I need you to confirm it by saying \'Yes\'—without it, we can\'t proceed.
+Quesiton: "Are your corporate account(s) connected to any payment gateway (PSP) (e.g., Razorpay, Cashfree, PayU, Getepay)?
+Please answer me with a clear \'Yes\' or \'No\' and the PSP name(s)."
+User responded: "Yes"
+
+Validation result: user have succesfully answered the question and told us that they have PSP called 'SabPaisa'.
+Rationale: see the whole context, user enteredd unknwon PSP name, then got asked to confim it, then user said 'Yes'.
+Although user after second question have not provided PSP name it's okay: they were asked just to confirm already said PSP name as their PSP.
+So, the explicilt requirement about repeating PSP name is redundant - user already said it, we just need a 'Yes' to be fully sure.
 """
     if instructions:
         prompt = (
