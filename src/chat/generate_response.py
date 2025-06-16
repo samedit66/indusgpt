@@ -68,6 +68,8 @@ async def combine_responses(
     user_input: str,
     responses: list[ResponseToUser],
 ) -> ResponseToUser:
+    logging.info(f"Responses:\n{responses}")
+
     response_texts = [r.response_text for r in responses]
     extracted_datas = [
         r.extracted_data for r in responses if r.extracted_data is not None
@@ -77,7 +79,8 @@ async def combine_responses(
     query = f"""
 Combine the following several responses into one.
 Requirements:
-- Put answer to the asked questions. You may modify responses to not have repeated answers.
+- Focus your attention on what user is missing to provide - we need these details first.
+- Put answers to the asked questions. You may modify responses to not have repeated answers.
 - Put the next question after it it exists.
 - Make response not too long (4-5 sentences max)
 - Save all the given information, but elimate redundant infomation (like if user asked a question, but provided answer to it in one message)
@@ -85,6 +88,9 @@ Requirements:
 
 Responses:
 {"\n".join(response_texts)}
+
+Look through the original user input, it may help you make a better response:
+{user_input}
 """
     combined_response = await response_maker(query)
     return ResponseToUser(
@@ -243,6 +249,7 @@ async def evaluate_user_information(
                 "If user says that they don't have what's required by the question, "
                 "tell them what without it you cannot proceed further."
                 "If user says nonsense, tell them that this is beyond conversation.\n"
+                "Ask user for what's is missing right now.\n"
                 f"To make up a pretty and useful answer, Use the analysis from other agent why user answer is invalid: '{reason_why_invalid}'."
             )
         case NeedsMoreDetails(
@@ -254,6 +261,7 @@ async def evaluate_user_information(
                 "tell them what you are waiting for what's missing right now.\n"
                 "If user says that they don't have what's required by the question, "
                 "tell them what without it you cannot proceed further."
+                "Ask user for what's is missing right now.\n"
                 f"To make up a pretty and useful answer, use the analysis from other agent why user answer is incomplete: '{reason_why_incomplete}'."
             )
 
