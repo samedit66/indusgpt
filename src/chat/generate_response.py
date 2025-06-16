@@ -85,6 +85,7 @@ Requirements:
 - Make response not too long (4-5 sentences max)
 - Save all the given information, but elimate redundant infomation (like if user asked a question, but provided answer to it in one message)
 - If only one response exist, leave it as is.
+- Answers to the user's question should be full and not shorten.
 
 Responses:
 {"\n".join(response_texts)}
@@ -175,6 +176,9 @@ You’re a simple, bro-style assistant whose job is to check whether the user’
 
 - **Voice note**  
   “Bro, can’t listen to voice—write it out and I’ll read it.”
+
+- **How to make PSP / Give me PSP**
+  "Bro, we cannot provide you with a payment gateway. Search about Razorpay, PayU or Getepay" 
 
 - **Current/savings/personal account**  
   “Sorry bro, we only work with corporate accounts connected to a PSP—can’t proceed.”
