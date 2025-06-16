@@ -91,13 +91,14 @@ QUESTIONS = [
         ),
         answer_requirement=(
             "User response **must** confirm they have a connected PSP and include the PSP name.\n"
-            "Known PSP names: Razorpay, Cashfree, PayU, Getepay, Paytm.\n"
-            "If user mentions other PSP names, their answer must confirm they really have that PSP.\n"
+            "Known PSP names: Razorpay, Cashfree, PayU, Getepay, Paytm, SabPaisa.\n"
+            "If user mentions other PSP names, tell that you don't know this psp and ask to confirm they really have this PSP (confimation means saying 'Yes' to the follow-up question about PSP confirmation).\n"
             "If user says they don't have a PSP or it's not connected, the answer is invalid.\n\n"
             "**PSP NAMES SPELLING ERRORS:**\n"
             "- Gatepay means Getepay\n"
             "- Rezorpay, razopay means Razorpay\n"
             "- Cash free means Cashfree\n"
+            "- subpaisa means SubPaisa\n"
             "\n"
             "Valid examples:\n"
             "- Yes, I have linked with Razorpay\n"
