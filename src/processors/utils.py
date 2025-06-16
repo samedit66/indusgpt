@@ -1,3 +1,5 @@
+import datetime
+
 from src.chat import info_extractor
 
 
@@ -41,4 +43,6 @@ def flatten_user_info(
         "hosting_access_details": user_info.hosting.access_details or "",
         # Profit sharing
         "profit_sharing": user_info.profit_sharing.agreement,
+        # Creation timestamp
+        "created_at": datetime.now().isoformat(),
     }
