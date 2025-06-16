@@ -44,5 +44,5 @@ def flatten_user_info(
         # Profit sharing
         "profit_sharing": user_info.profit_sharing.agreement,
         # Creation timestamp
-        "created_at": datetime.now().isoformat(),
+        "created_at": datetime.datetime.now().isoformat(),
     }
