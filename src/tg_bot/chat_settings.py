@@ -16,9 +16,16 @@ I’m a bit tied up at the moment, so my response may not be immediate—thanks 
 
 QUESTIONS = [
     types.Question(
-        text="Do you have corporate (business) accounts? In which banks?",
+        text=(
+            "Do you have corporate (business) account(s)? In which banks?\n"
+            "Please answer me with a clear 'Yes' or 'No' and the bank name(s)."
+        ),
         answer_requirement=(
-            "User must tell the bank name and share agreemnet/say yes/confirm they have a corporate account.\n\n"
+            "User must tell the bank name and share agreemnet/say yes/confirm they have a corporate account. "
+            "User must share this info in one message or across several messages\n\n"
+            "**Tips:**\n"
+            "- When user tells just a bank name, it means that they have an unknown type of account, but they have an account there (INVALID ANSWER).\n"
+            "- When user says 'Yes', it means that they have a corporate account, but lack the bank name (INVALID ANSWER).\n"
             "**Pay attention to the following rules**:\n"
             "- CURRENT ACCOUNT IS NOT CORPORATE/BUSINESS ACCOUNT\n"
             "- PERSONAL ACCOUNT IS NOT CORPORATE/BUSINESS ACCOUNT\n"
@@ -78,7 +85,10 @@ QUESTIONS = [
         ),
     ),
     types.Question(
-        text="Are your corporate accounts connected to any PSP (e.g., Razorpay, Cashfree, PayU, Getepay)?",
+        text=(
+            "Are your corporate account(s) connected to any payment gateway (PSP) (e.g., Razorpay, Cashfree, PayU, Getepay)?\n"
+            "Please answer me with a clear 'Yes' or 'No' and the PSP name(s)."
+        ),
         answer_requirement=(
             "User response **must** confirm they have a connected PSP and include the PSP name.\n"
             "Known PSP names: Razorpay, Cashfree, PayU, Getepay, Paytm.\n"
@@ -104,7 +114,10 @@ QUESTIONS = [
         ),
     ),
     types.Question(
-        text="Can you provide login and password access to the PSP account?",
+        text=(
+            "Can you provide login and password access to the PSP account?\n"
+            "If you're ready, tell me these credentials (login, passsword)."
+        ),
         answer_requirement=(
             "User response **must** provide actual login credentials (login and password) or confirm and commit to "
             "providing them. Any response indicating inability or unwillingness to share credentials is invalid.\n"
@@ -194,7 +207,10 @@ QUESTIONS = [
         ),
     ),
     types.Question(
-        text="Are you open to working under a profit-sharing model (5% of transaction volume) instead of a one-time deal?",
+        text=(
+            "Are you open to working under a profit-sharing model (5% of transaction volume) instead of a one-time deal?\n"
+            "Please answer me with a clear 'Yes' or 'No'"
+        ),
         answer_requirement=(
             "User response **must** clearly indicate agreement to the profit-sharing model.\n"
             "Agreemnt to one time deal or disagreemnet at all is INVALID answer!\n\n"
