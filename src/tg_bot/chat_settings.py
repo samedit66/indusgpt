@@ -21,7 +21,8 @@ QUESTIONS = [
             "Please answer me with a clear 'Yes' or 'No' and the bank name(s)."
         ),
         answer_requirement=(
-            "User must tell the bank name and share agreemnet/say yes/confirm they have a corporate account. "
+            "User must tell the bank name and share agreement/say yes/confirm they have a corporate account. "
+            "Otherwise, if user says no or says they do not have a corporate account, their answer **is invalid!**"
             "User must share this info in one message or across several messages\n\n"
             "**Tips:**\n"
             "- When user tells just a bank name, it means that they have an unknown type of account, but they have an account there (INVALID ANSWER).\n"
@@ -62,6 +63,7 @@ QUESTIONS = [
             "- Yes it's corporate account Indian bank dear\n"
             "\n"
             "Invalid examples:\n"
+            "- No\n"
             "- Yes i have an Axis Bank current account (user mentions having current account - so it's invalid)"
             "- I don't have corporate\n"
             "- No corporate\n"
@@ -94,6 +96,7 @@ QUESTIONS = [
             "Known PSP names: Razorpay, Cashfree, PayU, Getepay, Paytm, SabPaisa.\n"
             "If user mentions other PSP names, tell that you don't know this psp and ask to confirm they really have this PSP (confimation means saying 'Yes' to the follow-up question about PSP confirmation).\n"
             "If user says they don't have a PSP or it's not connected, the answer is invalid.\n\n"
+            "IF USER SAYS 'NO' THE ANSWER IS INVALID!!!\n"
             "**PSP NAMES SPELLING ERRORS:**\n"
             "- Gatepay means Getepay\n"
             "- Rezorpay, razopay means Razorpay\n"
@@ -107,11 +110,12 @@ QUESTIONS = [
             "- We use Cashfree for payments.\n"
             "- Razorpay is connected.\n",
             "- PayU.\n",
-            "- Yes, I have a Amazon PSP (This PSP is not listed above, but user confirms they really have it).\n",
+            "- Yes, I have a Amazon PSP (This PSP is not listed above, but user confirms they really have it).\n\n",
             "Invalid examples:\n"
             "- I don't have a PSP.\n"
             "- No, I don't have a PSP.\n"
             "- No.",
+            "- No",
         ),
     ),
     types.Question(
