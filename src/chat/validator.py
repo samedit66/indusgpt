@@ -10,20 +10,64 @@ from .simple_agent import SimpleAgent
 
 
 INSTRUCTIONS = """
-You are a validator agent.
-Your task is to validate information provided by user to the given question.
-Assess it against the question and requirements.
+# Validator Agent Instructions
 
-Return one of:
-  • yes — fully meets the requirement
-  • needs more details — partially meets it
-  • no — does not meet it
+You are a validator agent. Your task is to assess whether the combined conversation context and the user’s current input satisfy the answer requirements for the question.
 
-**PAY HIGH ATTENTION TO THE FOLLOWING!**
-- Provide a concise rationale.
-- Extract the data from the answer only if the answer is fully valid.
-- User may indirectly answer the question, try to infer required information from the context.
-- If the context indicates a possible answer, take it.
+## Return one of:
+- **yes** — fully meets the requirement  
+- **needs more details** — partially meets the requirement  
+- **no** — does not meet the requirement  
+
+## Process
+1. Review **both** the conversation context **and** the user’s current input.  
+2. Compare them against the **answer requirement** for the question.  
+3. If the user’s response (possibly spread over multiple messages) fully satisfies the requirement, return **yes** and **extract only the answer**.  
+4. If it partially satisfies the requirement, return **needs more details**.  
+5. If it does not satisfy the requirement at all, return **no**.  
+6. Only ask for clarification if you **cannot** infer and extract a valid answer from the combined context and input.  
+
+**Note:**
+- Users may split their answer across several messages. Always read the entire chat history before deciding.
+- Always try infer information before telling "needs more details" or "no" - user probably said what you need already.
+
+**Examples:**
+1. You have to validate the following:
+   Context of conversation:
+   - Question: 'Do you have corporate (business) accounts? In which banks?'
+   - User responded: 'Hdfc'
+   - Requirement: 'User must tell the bank name and share agreemnet/say yes/confirm they have a corporate account'.
+   User's input: 'Yes I Have Corporate Account'.
+   Validation result:
+       User mentioned 'HDFC' bank which indicates that they have an account there.
+       Later user told us that they have a corporate account.
+       That means that they successfully answered: bank name told, corporate account confimed (all according to the requirement).
+2. You have to validate the following:
+   Context of conversation:
+   - Question: 'Are your corporate accounts connected to any PSP (e.g., Razorpay, Cashfree, PayU, Getepay)?'
+   - User responded: 'Cashfree'
+   - Requirement: 'User response **must** confirm they have a connected PSP and include the PSP name'.
+   Validation result:
+       User mentioned alone 'Cashfree' which indicates that they have an account there.
+       So, explicit confirmation is not required.
+       That means that they successfully answered: PSP name told and confirmed.
+3. You have to validate the following:
+   Context of conversation:
+   - Question: 'Are your corporate accounts connected to any PSP (e.g., Razorpay, Cashfree, PayU, Getepay)?'
+   - User responded: 'Cashfree'
+   - Requirement: 'User response **must** confirm they have a connected PSP and include the PSP name'.
+   Validation result:
+       User mentioned alone 'Cashfree' which indicates that they have an account there.
+       So, explicit confirmation is not required.
+       That means that they successfully answered: PSP name told and confirmed.
+4. You have to validate the following:
+   Context of conversation:
+   - Question: 'Are your corporate accounts connected to any PSP (e.g., Razorpay, Cashfree, PayU, Getepay)?'
+   - User responded: 'Ok'
+   - Requirement: 'User response **must** confirm they have a connected PSP and include the PSP name'.
+   Validation result:
+       User just told 'Ok' which is invalid because we cannot determine if they really have a PSP connected.
+       That means that they failed to response and provide any useful information.
 """
 
 
@@ -70,54 +114,29 @@ logger = logging.getLogger(__name__)
 def expand_query(
     user_input: str,
     question: types.Question,
-    context: str,
+    context: str | None = None,
     instructions: str | None = None,
 ) -> str:
     query = f"""
-**Context of conversation:**
+**Context of conversation (messages that were in the chat earlier):**  
 {context}
+Quesiton: "{question.text}"
+User responded: "{user_input}"
 
-**How to validate**
-User was asked: {question.text}.
+**Requirement:**  
+"{question.answer_requirement}"
 
-Requirement: {question.answer_requirement}
-
-Validate user response: '{user_input}'.
-
-Do not validate only user answer, validate both combined what we found out about user earlier and the current user's answer.
-Do not be too strict, infer required information from the context when possible.
-Try to infer information from text - if user provides 'Yes', 'Ok' or 'No' he may have answered the question which already was asked and partially answered.
-EXPLICIT CONFIRMATION OF INFORMATION IS NOT NEEDED IF YOU CAN INFER INFORMATION FROM BOTH CONTEXT AND USER RESPONSE!
-
-**PAY ATTENTION TO THE FOLLOWING CORRECT EXAMPLES**
-Correct examples:
-1. Context: User respnonded that they have Paytm connected but you are unsure is that really a PSP.
-   The asked question:
-   Hey bro, you mentioned Paytm as a PSP before, but I need you to confirm it again and name the PSP clearly. Also, are your corporate accounts connected to any other PSPs like Razorpay, Cashfree, PayU, or Getepay?
-   User answer: Yes
-   Rationale: That means that user ANSWERED the question and they have Paytm as connected PSP.
-2. Context: User responded that they have an account in SBI
-   Question: Alright, bro, you've got the bank name down, but I need to know if it's a corporate account. Do you have corporate (business) accounts? If so, which banks are they with?
-   User answer: Yes
-   Rationale:That means that user ANSWERED the question and told us that they have a corporate account in SBI.
-3. Context: User responded that they have an account with Airtel Payment Bank.
-            User responded that they have an account with Airtel Payment Bank and mentioned having 19 accounts to provide.
-   Question: I need to know if your accounts are corporate and which banks they're with. When you've got that info, let me know!
-   User answer: Yes
-   That means that user ANSWERED the question and told us that they have a corporate account in Airtel Payment Bank.
-4. Question: Do you have corporate (business) accounts? In which banks?
-   User answer: Yes
-   Rationale: That means that user PARTIALLY ANSWERED the question and told us that they have a corporate account but did not specify the bank name.
-5. Context: User responded that they have an account in India Overseas Bank. Later user responded with "yes" indicating agreement about the question - probably, about having a corporate account.
-   User answer: Yes
-   Rationale: It's valid answer. DO NOT BE THIS WAY STRICT - USER PROVIDED 'YES' TO THE EARLIER INFO ABOUT BANK ACCOUNT, so they have a corporate accoint in India Overseas Bank.
+Analyze and validate the whole context of conversation.
+It's important to validate the whole context because user's may answer partially across several messages.
+If answer to the question can be inferred from the whole context, infer it, and extract information which is needed by the requirement.
+If you cannot infer the needed information from the context, explain why, but try your best to infer it.
 """
     if instructions:
         prompt = (
             f"**Strictly follow these instructions before validating**:\n{instructions}"
         )
         query = prompt + "\n\n" + query
-
+    logging.info(f"Validator query\n{query!r}\n")
     return query
 
 
