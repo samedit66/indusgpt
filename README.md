@@ -50,38 +50,25 @@ uv sync
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/indusgpt_dev.git
-cd indusgpt_dev
+git clone https://github.com/yourusername/indusgpt.git
+cd indusgpt
 ```
 
-2. Build the Docker image:
-```bash
-docker build -t indusgpt .
-```
+2. Set up environment variables in `.env.example`
 
-3. Run the container with environment variables:
+3. Build the Docker image:
 ```bash
-docker run -d --name indusgpt \
-  -e TELEGRAM_BOT_TOKEN="your_telegram_bot_token" \
-  -e OPENAI_API_KEY="your_openai_api_key" \
-  -e DATABASE_URL="sqlite://db.sqlite3" \
-  -e MODEL="gpt-4.1-2025-04-14" \
-  -e OPENAI_API_BASE_URL="https://api.openai.com/v1" \
-  -e LOG_FILE="bot.log" \
-  -e GOOGLE_CREDENTIALS_PATH="path_to_credentials" \
-  -e GOOGLE_SHEET_URL="your_sheet_url" \
-  -e GOOGLE_SHEET_WORKSHEET_NAME="UserInfo" \
-  indusgpt
+docker compose up --build -d
 ```
 
 4. View logs:
 ```bash
-docker logs -f indusgpt
+docker logs -f indusgpt-bot-1
 ```
 
 5. Stop the bot:
 ```bash
-docker stop indusgpt
+docker stop indusgpt-bot-1
 ```
 
 ## Environment Variables
