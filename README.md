@@ -58,7 +58,7 @@ cd indusgpt
 
 3. Build the Docker image:
 ```bash
-docker compose up --build -d
+./run.sh
 ```
 
 4. View logs:
