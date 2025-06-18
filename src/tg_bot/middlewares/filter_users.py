@@ -6,6 +6,12 @@ from aiogram.types import Message
 from src import chat
 
 
+DEFAULT_MESSAGE = (
+    "Bro, your information has been recorded and is under review. "
+    "Please wait to be contacted by a manager, and discuss all further questions with them."
+)
+
+
 class FinishedUsersMiddleware(BaseMiddleware):
     """
     Filter users who have finished the conversation.
@@ -27,6 +33,6 @@ class FinishedUsersMiddleware(BaseMiddleware):
 
         chat_manager: chat.ChatManager = data["chat_manager"]
         if await chat_manager.has_user_finished(event.from_user.id):
-            return
+            return await event.answer(DEFAULT_MESSAGE)
 
         return await handler(event, data)
