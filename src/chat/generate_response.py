@@ -115,7 +115,10 @@ async def generate_single_response(
         case Intent(category="faq"):
             # TODO: Возможно, стоит вынести в отдельную функцию
             agent_response = await faq_agent(
-                user_input, question_text=question.text, instructions=instructions
+                user_input,
+                question_text=question.text,
+                instructions=instructions,
+                context=context,
             )
             return ResponseToUser(
                 user_input=user_input,

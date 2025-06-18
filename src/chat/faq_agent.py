@@ -127,12 +127,18 @@ When you mention PSP always add in parenthesis what it is (e.g. "PSP (payment ga
 
 
 def expand_query(
-    user_input: str, question_text: str, instructions: str | None = None
+    user_input: str,
+    question_text: str,
+    instructions: str | None = None,
+    context: str | None = None,
 ) -> str:
     query = f"""
 User was asked the following question: '{question_text}'\n"
 Reply to the following user request: '{user_input}'"
 """
+    if context:
+        prompt = f"Context of the conversation (if user uses pronouns like 'it' it may involve something said earlier so use context): '{context}'"
+        query = prompt + "\n\n" + query
     if instructions:
         prompt = f"Strictly follow these instructions before answering: {instructions}"
         query = prompt + "\n\n" + query
