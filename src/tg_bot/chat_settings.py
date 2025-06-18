@@ -99,7 +99,7 @@ QUESTIONS = [
             "IF USER SAYS 'NO' THE ANSWER IS INVALID!!!\n"
             "**PSP NAMES SPELLING ERRORS:**\n"
             "- Gatepay means Getepay\n"
-            "- Rezorpay, razopay means Razorpay\n"
+            "- Rezorpay, razopay, Rozorpay means Razorpay\n"
             "- Cash free means Cashfree\n"
             "- subpaisa means SubPaisa\n"
             "\n"
