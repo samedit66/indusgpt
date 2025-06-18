@@ -108,25 +108,30 @@ QUESTIONS = [
             "- Yes, I have Razorpay connected.\n"
             "- My account is integrated with PayU.\n"
             "- We use Cashfree for payments.\n"
-            "- Razorpay is connected.\n",
+            "- Razorpay is connected.\n"
+            "- have sabpaisa\n"
             "- PayU.\n",
-            "- Yes, I have a Amazon PSP (This PSP is not listed above, but user confirms they really have it).\n\n",
+            "- Yes, I have a Amazon PSP (This PSP is not listed above, but user confirms they really have it).\n\n"
             "Invalid examples:\n"
             "- I don't have a PSP.\n"
             "- No, I don't have a PSP.\n"
-            "- No.",
+            "- No."
             "- No",
         ),
     ),
     types.Question(
         text=(
             "Can you provide login and password access to the PSP account?\n"
+            "If you have OTP, just share you phone number.\n"
             "If you're ready, tell me these credentials (login, passsword)."
         ),
         answer_requirement=(
-            "User response **must** provide actual login credentials (login and password) or confirm and commit to "
-            "providing them. Any response indicating inability or unwillingness to share credentials is invalid.\n"
-            "User MUST provide LOGIN and PASSWORD to have a valid answer.\n"
+            "User response **must** provide actual login credentials (login and password). "
+            "Login may be called by user as 'login id' or 'id' - they all mean just login. "
+            "Any response indicating inability or unwillingness to share credentials is invalid.\n"
+            "User have two ways how to answer valod: provide login and password or provide just a phone number if they have OTP.\n"
+            "If user says they have OTP ask just for login (which is phone number or some ID), password you set as 'Account is OTP'"
+            "User may provide first login, second password without indicating what is login and what is password.\n"
             "Examples of valid responses:\n"
             "- Login admin123, password test456\n"
             "- Username is merchant_1, pass is secure123, API key is abcd1234\n"
@@ -134,6 +139,11 @@ QUESTIONS = [
             "- Of course, the credentials are: user=admin pass=12345\n\n"
             "- Corporate ID- BALA8840\nC- User ID-GAURA670\nLogin password - R&2133\nTransaction password - G&8987\n"
             "- Credential at Cashfree\nUsername: xyzchakma1@gmail.com\nPassword: Admin@8729\n"
+            "- Login Id: indianmedhelp@gmail.com\nPassword: Popcorn@77\n"
+            "- Okay I have\n\nrksk38@gmail.com\nAppu@9898 (here the first one is login, the second one is password)\n"
+            "- Login id 9749633834\nPassword is Ashmiutsav\n"
+            "- And it gives otp then I login in, These my I'd - QiGscIp5MAbEXp (it's OTP case: you treat ID as login, password - you set to 'Account is OUT')"
+            "\n"
             "Examples of invalid responses:\n"
             "- I'll check with my team first\n"
             "- I need to think about it\n"
