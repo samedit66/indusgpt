@@ -21,9 +21,11 @@ QUESTIONS = [
             "Please answer me with a clear 'Yes' or 'No' and the bank name(s)."
         ),
         answer_requirement=(
-            "User must tell the bank name and share agreement/say yes/confirm they have a corporate account. "
-            "Otherwise, if user says no or says they do not have a corporate account, their answer **is invalid!**"
-            "User must share this info in one message or across several messages\n\n"
+            "**Rules:**\n"
+            " - User must confirm they have a corporate account and provide the bank name.\n"
+            " - It doesn’t have to be in one message—use earlier context to infer missing parts.\n"
+            " - If the user says “no” or they don’t have a corporate account, their answer is **invalid**.\n"
+            " - It’s fine for the user to send “Yes” in one message and the bank name in another.\n\n"
             "**Tips:**\n"
             "- When user tells just a bank name, it means that they have an unknown type of account, but they have an account there (INVALID ANSWER).\n"
             "- When user says 'Yes', it means that they have a corporate account, but lack the bank name (INVALID ANSWER).\n"
@@ -64,6 +66,7 @@ QUESTIONS = [
             "\n"
             "Invalid examples:\n"
             "- No\n"
+            "- I have psp But not connected to any cooperate account\n"
             "- Yes i have an Axis Bank current account (user mentions having current account - so it's invalid)"
             "- I don't have corporate\n"
             "- No corporate\n"
