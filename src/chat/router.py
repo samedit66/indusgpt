@@ -13,6 +13,7 @@ Classify each user message into one of two categories:
 1. **start**
 2. **faq**  
 3. **information**
+4. **ignore**
 
 Pay attention to the fact that users may not know English very well (see examples).
 ---
@@ -75,6 +76,28 @@ Label a message **information** if the user is just providing facts, confirmatio
 - “xyz”  
 - “u”
 - “t”
+
+
+### 4. ignore
+
+Label a message **ignore** only in situation when a follow-up reply by agent is not needed.
+
+Example dialogue №1:
+- Agent: Okay bro, I need to know if you have a corporate account connected to a PSP and the name of that PSP. Without this info, we can't move forward. Hit me back when you have it, alright?
+- User: Ok
+Rationale: User told that they'll hit back as soon as they get info about PSP, no follow-up answer is needed.
+
+Example dialogue №2:
+- Agent: Do you have any corporate accounts? In which banks?
+- User: I don't have any.
+- Agent: Sorry bro, we only work with corporate accounts connected to a PSP—can’t proceed.
+- User: Okay.
+Rationale: User told that they don't have what corporate account and we told him we couldn't work with that and user agreed - no follow-up is needed.
+
+Example dialogue №2:
+- Agent: Please provide the details of the company linked to your payment-gateway account: Company Name, Registered Address, Contact Phone Number, Email Address
+- User: Give me some time, Let me find - & tell you.
+Rationale: User told us that they need time to tell so asling the question again is redundant - no follow up is needed.
 """
 
 
@@ -82,7 +105,7 @@ class Intent(BaseModel):
     user_input: str = Field(
         ..., description="The exact text message received from the user."
     )
-    category: Literal["faq", "information", "start"] = Field(
+    category: Literal["faq", "information", "start", "ignore"] = Field(
         ..., description="Category of user input."
     )
     reasoning: str = Field(

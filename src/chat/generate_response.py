@@ -38,7 +38,7 @@ async def generate_response(
     question: types.Question,
     context: str | None = None,
     instructions: str | None = None,
-) -> ResponseToUser:
+) -> ResponseToUser | None:
     requests = await atomic_separator(user_input)
     responses = await get_responses_for_requests(
         requests.requests, question, context, instructions
@@ -50,7 +50,7 @@ async def get_responses_for_requests(
     requests: list[str],
     question: types.Question,
     context: str | None,
-    instructions: str | None,
+    instructions: str,
 ) -> list[ResponseToUser]:
     responses = []
     for request in requests:
@@ -60,6 +60,9 @@ async def get_responses_for_requests(
             context=context,
             instructions=instructions,
         )
+        if not response:
+            continue
+
         responses.append(response)
     return responses
 
@@ -67,14 +70,15 @@ async def get_responses_for_requests(
 async def combine_responses(
     user_input: str,
     responses: list[ResponseToUser],
-) -> ResponseToUser:
+) -> ResponseToUser | None:
     logging.info(f"Responses:\n{responses}")
 
-    response_texts = [r.response_text for r in responses]
-    extracted_datas = [
-        r.extracted_data for r in responses if r.extracted_data is not None
-    ]
+    response_texts = [r.response_text for r in responses if r]
+    extracted_datas = [r.extracted_data for r in responses if r and r.extracted_data]
     extracted_data = " ".join(extracted_datas) if extracted_datas else None
+
+    if not response_texts:
+        return None
 
     query = f"""
 Combine the following several responses into one.
@@ -107,11 +111,13 @@ async def generate_single_response(
     question: types.Question,
     context: str | None = None,
     instructions: str | None = None,
-) -> ResponseToUser:
+) -> ResponseToUser | None:
     intent = await router(user_input, context=context, instructions=instructions)
     logging.info(f"generate_single_response: intent: {intent}")
 
     match intent:
+        case Intent(category="ignore"):
+            return None
         case Intent(category="faq"):
             # TODO: Возможно, стоит вынести в отдельную функцию
             agent_response = await faq_agent(

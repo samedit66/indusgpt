@@ -166,6 +166,10 @@ async def _per_user_flusher(user_id: int) -> None:
                 need_to_sleep = True
                 buf.clear()
 
+            if not reply_text:
+                buf.clear()
+                break
+
             # 3) Send the reply under the last user message
             last_user_msg = stored_messages[-1]
             try:

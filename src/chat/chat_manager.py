@@ -129,6 +129,9 @@ class ChatManager:
 
         # Invoke the dialog agent and update state
         agent_response = await self._talk(user_id, user_input)
+        if not agent_response:
+            return None
+
         await self._update_state(user_id, agent_response)
 
         if await self.chat_state_manager.all_finished(user_id):
@@ -151,6 +154,9 @@ class ChatManager:
                 f"User input: {user_input}"
             )
             agent_response = await self._talk(user_id, prompt)
+            if not agent_response:
+                break
+
             await self._update_state(user_id, agent_response)
 
             if agent_response.ready_for_next_question:
@@ -163,7 +169,7 @@ class ChatManager:
     async def stop_talking_with(self, user_id: int) -> None:
         await self.chat_state_manager.stop_talking_with(user_id)
 
-    async def _talk(self, user_id: int, user_input: str) -> ResponseToUser:
+    async def _talk(self, user_id: int, user_input: str) -> ResponseToUser | None:
         """
         Retrieve the current question and partial answer, compose a prompt,
         and query the DialogAgent for its next fragment of reply.
