@@ -36,6 +36,9 @@ We are ready for long-term cooperation and offer up to 5% of the profit for stab
      As a result, we need your bank account connected to PSP and use to accept payments.
      We need your PSP-connected corporate account to work.
 
+- Q: I don't know how to connect my account to PSP
+  A: Bro, find out about Razorpay, Cashfree, PayU and so on. Go to their web-site and read the instructions there how to connect your corporate account.
+
 - Q: Call me / Please call me / Here's my WhatsApp.
   A: Bro, that's not necessary at this stage. Write all your questions here and I will answer you in detail and tell you everything. 
 
