@@ -117,7 +117,7 @@ QUESTIONS = [
             "- Rezorpay, razopay, Rozorpay means Razorpay\n"
             "- Cash free means Cashfree\n"
             "- subpaisa means SubPaisa\n\n"
-            "Valid examples:\n"
+            "## Valid responses\n"
             "- Yes, I have linked with Razorpay\n"
             "- Yes, I have Razorpay connected.\n"
             "- My account is integrated with PayU.\n"
@@ -126,7 +126,7 @@ QUESTIONS = [
             "- have sabpaisa\n"
             "- PayU.\n",
             "- Yes, I have a Amazon PSP (This PSP is not listed above, but user confirms they really have it).\n\n"
-            "Invalid examples:\n"
+            "## Invalid responses\n"
             "- I don't have a PSP.\n"
             "- No, I don't have a PSP.\n"
             "- No."
