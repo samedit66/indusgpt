@@ -112,7 +112,12 @@ async def generate_single_response(
     context: str | None = None,
     instructions: str | None = None,
 ) -> ResponseToUser | None:
-    intent = await router(user_input, context=context, instructions=instructions)
+    intent = await router(
+        user_input,
+        context=context,
+        instructions=instructions,
+        question=question.text,
+    )
     logging.info(f"generate_single_response: intent: {intent}")
 
     match intent:

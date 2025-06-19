@@ -81,6 +81,7 @@ Label a message **information** if the user is just providing facts, confirmatio
 ### 4. ignore
 
 Label a message **ignore** only in situation when a follow-up reply by agent is not needed.
+Use this option only if the input provided by user does not look like answer to the given question.
 
 Example dialogue №1:
 - Agent: Okay bro, I need to know if you have a corporate account connected to a PSP and the name of that PSP. Without this info, we can't move forward. Hit me back when you have it, alright?
@@ -98,6 +99,11 @@ Example dialogue №2:
 - Agent: Please provide the details of the company linked to your payment-gateway account: Company Name, Registered Address, Contact Phone Number, Email Address
 - User: Give me some time, Let me find - & tell you.
 Rationale: User told us that they need time to tell so asling the question again is redundant - no follow up is needed.
+
+Example dialogue №3:
+- Agent: Do you already have a website approved by the PSP? If yes — please give us hosting access (we may need to adjust code or API) If not — we will create the website ourselves
+- User: No
+Rationale: This is NOT ignore (it's actually 'information') because user has answered the question - they do not have website.
 """
 
 
@@ -114,9 +120,16 @@ class Intent(BaseModel):
 
 
 def expand_query(
-    user_input: str, context: str | None = None, instructions: str | None = None
+    user_input: str,
+    context: str | None = None,
+    instructions: str | None = None,
+    question: str | None = None,
 ) -> str:
-    query = f"Take into account the context: {context}.\nClassify the following user request: {user_input}"
+    query = (
+        f"Take into account the context: {context}.\n"
+        f"The asked question was: {question}\n"
+        f"Classify the following user request: {user_input}"
+    )
     if instructions:
         query = f"Strictly follow these instructions before classifying: {instructions}\n\n{query}"
     return query
