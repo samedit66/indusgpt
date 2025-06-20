@@ -12,6 +12,8 @@ For example: ₹500,000 daily volume = ₹25,000 your share (5%).
 Let's build a strong and profitable partnership 💪
 
 I’m a bit tied up at the moment, so my response may not be immediate—thanks for your patience!
+
+If I don't reply you too long, please, remind me about you.
 """
 
 QUESTIONS = [
@@ -193,7 +195,7 @@ QUESTIONS = [
         ),
     ),
     types.Question(
-        text="Please describe your company's business activities and what products/services you plan to sell",
+        text="Please describe your company's business activities and what products/services you plan to sell.",
         answer_requirement=(
             "User response **must** describe their company's business activities or what products/services they plan to sell.\n"
             "The provided description may be not detailed, but clearly tells the business activity\n\n"
