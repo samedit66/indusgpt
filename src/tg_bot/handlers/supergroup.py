@@ -1,6 +1,7 @@
 from aiogram import Router, F, types
 from aiogram.filters import Command, CommandObject
 from aiogram import enums as aiogram_enums
+from aiogram.utils import keyboard
 import os
 from datetime import datetime
 
@@ -395,6 +396,30 @@ async def stop_talking_with(message: types.Message, chat_manager: ChatManager) -
     await message.bot.send_message(
         chat_id=topic.user_id,
         text=reply,
+    )
+
+
+@router.message(
+    Command("link"),
+    F.chat.type == "supergroup",
+    F.text.is_not(None),
+    F.message_thread_id.is_not(None),
+)
+async def link(message: types.Message) -> None:
+    topic = await TopicGroup.filter(topic_group_id=message.message_thread_id).first()
+    if topic is None:
+        return
+
+    builder = keyboard.InlineKeyboardBuilder()
+    builder.row(
+        types.InlineKeyboardButton(
+            text="User",
+            url=f"tg://user?id={topic.user_id}",
+        )
+    )
+    await message.reply(
+        text="Link to user account",
+        reply_markup=builder.as_markup(),
     )
 
 
