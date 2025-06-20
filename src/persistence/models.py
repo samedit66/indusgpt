@@ -7,6 +7,8 @@ class User(Model):
     name = fields.TextField()
     url = fields.TextField()
     is_onboarding_completed = fields.BooleanField(default=False)
+    sent_messages_count = fields.IntField(default=0)
+    started_at = fields.DatetimeField(auto_now_add=True)
 
     class Meta:
         table = "users"

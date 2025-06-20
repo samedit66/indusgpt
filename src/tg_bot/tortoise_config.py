@@ -1,6 +1,24 @@
 import tortoise
 
 
+AERICH_CONFIG = {
+    "connections": {"default": "sqlite://data/db.sqlite3"},
+    "apps": {
+        "models": {
+            "models": [
+                "src.persistence.models",
+                "aerich.models",
+            ],
+            "default_connection": "default",
+        },
+    },
+    "tortoise": {
+        "use_tz": False,
+        "timezone": "UTC",
+    },
+}
+
+
 async def init_db(
     db_url: str,
     models: list[str],
@@ -13,7 +31,6 @@ async def init_db(
             "models": {
                 "models": [
                     *models,
-                    # "aerich.models" # include aerich.models if you add migrations later
                 ],
                 "default_connection": "default",
             },

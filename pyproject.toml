@@ -19,8 +19,14 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "aerich>=0.9.1",
     "aiogram>=3.20.0.post0",
     "colorama>=0.4.6",
     "pre-commit>=4.2.0",
     "ruff>=0.11.8",
 ]
+
+[tool.aerich]
+tortoise_orm = "src.tg_bot.tortoise_config.AERICH_CONFIG"
+location = "./migrations"
+src_folder = "./."
