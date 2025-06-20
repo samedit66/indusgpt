@@ -155,6 +155,7 @@ class ChatManager:
             )
             agent_response = await self._talk(user_id, prompt)
             if not agent_response:
+                reply_text = await self.current_question(user_id)
                 break
 
             await self._update_state(user_id, agent_response)
