@@ -5,6 +5,7 @@ import logging
 from aiogram import Router, F, types
 from aiogram.filters import Command
 from aiogram.types import ContentType
+from aiogram.utils import keyboard
 
 from src import chat
 from src.tg_bot import middlewares
@@ -42,6 +43,7 @@ async def start(
     supergroup_id: int,
     topic_group_id: int,
     chat_manager: chat.ChatManager,
+    airtable_daily_tracker: middlewares.airtable.AirtableDailyTracker,
 ) -> None:
     bot_msg = await message.answer(chat_settings.INTRODUCTION)
     await bot_msg.send_copy(
@@ -55,6 +57,13 @@ async def start(
     await bot_msg.send_copy(
         chat_id=supergroup_id,
         message_thread_id=topic_group_id,
+    )
+
+    user_id = message.from_user.id
+    await increase_messages_count(user_id)
+    await update_statistics(
+        user_id=user_id,
+        airtable_daily_tracker=airtable_daily_tracker,
     )
 
 
@@ -92,6 +101,7 @@ async def handle_message_from_user(
     supergroup_id: int,
     topic_group_id: int,
     chat_manager: chat.ChatManager,
+    airtable_daily_tracker: middlewares.airtable.AirtableDailyTracker,
 ) -> None:
     user_id = message.from_user.id
 
@@ -109,6 +119,11 @@ async def handle_message_from_user(
 
     # Store the incoming text into that user's buffer
     message_buffer[user_id].store(message)
+    await increase_messages_count(user_id=user_id)
+    await update_statistics(
+        user_id=user_id,
+        airtable_daily_tracker=airtable_daily_tracker,
+    )
 
 
 async def _per_user_flusher(user_id: int) -> None:
@@ -217,6 +232,21 @@ async def _per_user_flusher(user_id: int) -> None:
                         chat_id=buf.supergroup_id,
                         message_thread_id=buf.topic_group_id,
                     )
+
+                    builder = keyboard.InlineKeyboardBuilder()
+                    builder.row(
+                        types.InlineKeyboardButton(
+                            text="User",
+                            url=f"tg://user?id={user.id}",
+                        )
+                    )
+                    await last_user_msg.bot.send_message(
+                        chat_id=buf.supergroup_id,
+                        message_thread_id=buf.topic_group_id,
+                        text="Link to user account",
+                        reply_markup=builder.as_markup(),
+                    )
+
                 except Exception as e:
                     logger.error(
                         f"Error sending manager notification to {user_id}: {e}"
@@ -240,3 +270,25 @@ async def _per_user_flusher(user_id: int) -> None:
     finally:
         # Remove the buffer and task from our dict so we don't leak
         del message_buffer[user_id]
+
+
+async def increase_messages_count(user_id: int):
+    user = await User.filter(id=user_id).first()
+    user.sent_messages_count += 1
+    await user.save()
+
+
+async def update_statistics(
+    user_id: int,
+    airtable_daily_tracker: middlewares.airtable.AirtableDailyTracker,
+) -> None:
+    user = await User.filter(id=user_id).first()
+    sent_messages_count = user.sent_messages_count
+
+    logger.info(f"Message count of user {user_id}: {sent_messages_count}")
+    if sent_messages_count == 1:
+        airtable_daily_tracker.increase_clicked()
+        logger.info(f"Increased clicked for {user_id}")
+    elif sent_messages_count == 2:
+        airtable_daily_tracker.increase_talked()
+        logger.info(f"Increased talked for {user_id}")

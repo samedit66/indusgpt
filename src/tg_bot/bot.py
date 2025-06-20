@@ -34,6 +34,12 @@ async def run_bot():
         table_id=config.airtable_table_id,
     )
 
+    airtable_daily_tracker = middlewares.airtable.AirtableDailyTracker(
+        access_token=config.airtable_access_token,
+        base_id=config.airtable_base_id_daily_tracker,
+        table_id=config.airtable_table_id_daily_tracker,
+    )
+
     chat_manager = chat.ChatManager(
         question_list=persistence.TortoiseQuestionList(chat_settings.QUESTIONS),
         user_answer_storage=persistence.TortoiseUserAnswerStorage(),
@@ -52,6 +58,9 @@ async def run_bot():
     dp.message.middleware(middlewares.AllowedIdsMiddleware(allowed_ids))
     dp.message.middleware(middlewares.ChatManagerMiddleware(chat_manager))
     dp.message.middleware(middlewares.AirtableMiddleware(airtable_processor))
+    dp.message.middleware(
+        middlewares.AirtableDailyTrackerMiddleware(airtable_daily_tracker)
+    )
     dp.include_routers(supergroup.router, chat_flow.router)
 
     db_url = f"sqlite://{pathlib.Path(config.data_dir) / config.db_file}"

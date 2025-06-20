@@ -17,6 +17,8 @@ class Config:
     airtable_base_id: str
     airtable_table_id: str
     excel_sheet_name: str
+    airtable_base_id_daily_tracker: str
+    airtable_table_id_daily_tracker: str
 
 
 def load_config() -> Config:
@@ -34,4 +36,6 @@ def load_config() -> Config:
         airtable_base_id=os.environ["AIRTABLE_BASE_ID"],
         airtable_table_id=os.environ["AIRTABLE_TABLE_ID"],
         excel_sheet_name=os.environ["EXCEL_SHEET_NAME"],
+        airtable_base_id_daily_tracker=os.environ["AIRTABLE_BASE_ID_DAILY_TRACKER"],
+        airtable_table_id_daily_tracker=os.environ["AIRTABLE_TABLE_ID_DAILY_TRACKER"],
     )
