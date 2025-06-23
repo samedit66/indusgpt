@@ -101,6 +101,9 @@ class ChatManager:
         _, q, _ = await self.chat_state_manager.current_state(user_id)
         return q.text
 
+    async def stop_talking_with(self, user_id: int) -> None:
+        await self.chat_state_manager.stop_talking_with(user_id)
+
     async def reply(self, user_id: int, user_input: str) -> str | None:
         """
         Process a single user message, advance the Q&A state, and generate
@@ -137,10 +140,8 @@ class ChatManager:
         if await self.chat_state_manager.all_finished(user_id):
             return agent_response.response_text
 
-        if agent_response.ready_for_next_question:
-            reply_text = await self.current_question(user_id)
-        else:
-            reply_text = agent_response.response_text
+        if not agent_response.ready_for_next_question:
+            return agent_response.response_text
 
         while (
             not (await self.chat_state_manager.all_finished(user_id))
@@ -160,15 +161,11 @@ class ChatManager:
 
             await self._update_state(user_id, agent_response)
 
-            if agent_response.ready_for_next_question:
-                reply_text = agent_response.response_text
-            else:
-                reply_text = await self.current_question(user_id)
+            if await self.chat_state_manager.all_finished(user_id):
+                return agent_response.response_text
 
+        reply_text = await self.current_question(user_id)
         return reply_text
-
-    async def stop_talking_with(self, user_id: int) -> None:
-        await self.chat_state_manager.stop_talking_with(user_id)
 
     async def _talk(self, user_id: int, user_input: str) -> ResponseToUser | None:
         """
