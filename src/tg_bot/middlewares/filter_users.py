@@ -33,6 +33,10 @@ class FinishedUsersMiddleware(BaseMiddleware):
 
         chat_manager: chat.ChatManager = data["chat_manager"]
         if await chat_manager.has_user_finished(event.from_user.id):
-            return await event.answer(DEFAULT_MESSAGE)
+            bot_msg = await event.answer(DEFAULT_MESSAGE)
+            await bot_msg.send_copy(
+                chat_id=data["supergroup_id"],
+                message_thread_id=data["topic_group_id"],
+            )
 
         return await handler(event, data)
