@@ -73,8 +73,10 @@ async def combine_responses(
 ) -> ResponseToUser | None:
     logging.info(f"Responses:\n{responses}")
 
-    response_texts = [r.response_text for r in responses if r]
-    extracted_datas = [r.extracted_data for r in responses if r and r.extracted_data]
+    non_empty = [r for r in responses if r]
+
+    response_texts = [r.response_text for r in non_empty]
+    extracted_datas = [r.extracted_data for r in non_empty if r.extracted_data]
     extracted_data = " ".join(extracted_datas) if extracted_datas else None
 
     if not response_texts:
