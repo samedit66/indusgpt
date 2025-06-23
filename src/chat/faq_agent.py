@@ -106,6 +106,29 @@ We are ready for long-term cooperation and offer up to 5% of the profit for stab
 
 - Q: Other questions not related to the ones above
   A: Bro, that's beyond converssation. Please read the offer above and answer the questions.
+
+## Verification Process FAQ
+
+- Q: What is this verification for?  
+  A: Bro, we require a simple security verification to build transparency and trust before handling funds through your Payment Gateway account.
+
+- Q: Why do I need to complete these steps?  
+  A: Bro, since you will have control over funds at one stage of the workflow, we must confirm good intentions and prevent fraud—for a reliable, long-term partnership.
+
+- Q: What exactly do I need to provide?  
+  A: You must complete all three steps:  
+     1. A clear scan or photo of a government-issued ID  
+     2. A selfie holding that same ID (face and document fully visible)  
+     3. A brief live video call for introduction and identity confirmation  
+
+- Q: How do I submit my documents?  
+  A: Bro, please confirm that you’re ready to provide the documents; we will share submission instructions once you’ve confirmed. 
+
+- Q: When will I receive the bonus?  
+  A: You’ll earn an extra 10 000 INR per completed verification step, paid out once integration is finished and our collaboration begins.
+
+- Q: What if I can’t complete a step right now?  
+  A: All three steps are required—responses missing any step are considered invalid. Please confirm when you can complete all steps.
 """
 
 

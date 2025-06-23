@@ -20,7 +20,7 @@ QUESTIONS = [
     types.Question(
         text=(
             "Do you have corporate (business) account(s)? In which banks?\n"
-            "Please answer me with a clear 'Yes' or 'No' and the bank name(s)."
+            "Please answer me with a clear 'Yes' or 'No' and the bank name(s)"
         ),
         answer_requirement=(
             "**Rules:**\n"
@@ -94,7 +94,7 @@ QUESTIONS = [
     types.Question(
         text=(
             "Are your corporate account(s) connected to any payment gateway (PSP) (e.g., Razorpay, Cashfree, PayU, Getepay)?\n"
-            "Please answer me with a clear 'Yes' or 'No' and the PSP name(s)."
+            "Please answer me with a clear 'Yes' or 'No' and the PSP name(s)"
         ),
         answer_requirement=(
             "User response **must** confirm they have a connected PSP and include the PSP name.\n\n"
@@ -142,7 +142,7 @@ QUESTIONS = [
         text=(
             "Can you provide login and password access to the PSP account?\n"
             "If you have OTP, just share you phone number.\n"
-            "If you're ready, tell me these credentials (login, passsword)."
+            "If you're ready, tell me these credentials (login, passsword)"
         ),
         answer_requirement=(
             "User response **must** provide actual login credentials (login and password). "
@@ -195,7 +195,7 @@ QUESTIONS = [
         ),
     ),
     types.Question(
-        text="Please describe your company's business activities and what products/services you plan to sell.",
+        text="Please describe your company's business activities and what products/services you plan to sell",
         answer_requirement=(
             "User response **must** describe their company's business activities or what products/services they plan to sell.\n"
             "The provided description may be not detailed, but clearly tells the business activity\n\n"
@@ -270,6 +270,36 @@ QUESTIONS = [
             "- I prefer fixed price\n"
             "- I'm not sure about that\n"
             "- One time deal how much\n"
+        ),
+    ),
+    types.Question(
+        text=(
+            "Bro, please confirm that you will provide the following security verifications:\n"
+            "1. Government-issued identity document\n"
+            "2. Selfie holding the ID document clearly visible\n"
+            "3. Short video call with us for a personal introduction\n"
+            "\n"
+            "As a token of appreciation, we’re offering a bonus:\n"
+            "You’ll receive an additional 10 000 INR for each completed verification step, paid out once we complete the integration and begin our collaboration.\n"
+            "Please answer me with a clear 'Yes' or 'No' if you're ready to provide"
+        ),
+        answer_requirement=(
+            "**Rules:**\n"
+            "- The response **must** be a clear confirmation that you will provide all three items.\n"
+            "- Only explicit agreements such as “Yes,” “I agree,” “Absolutely,” or “I confirm” are valid.\n"
+            "- Responses like “Okay,” “Sure,” “No,” “Maybe,” or any expression of uncertainty are **invalid**.\n"
+            "\n"
+            "**Valid examples:**\n"
+            "- “Yes, I agree to provide the ID scan, selfie with ID, and schedule the video call.”\n"
+            "- “Absolutely—I will send the documents and set up the call.”\n"
+            "- “I confirm that I’ll complete all three verification steps.”\n"
+            "\n"
+            "**Invalid examples:**\n"
+            "- “Okay, I’ll try to send them.”\n"
+            "- “Sure.”\n"
+            "- “No.”\n"
+            "- “Maybe later.”\n"
+            "- “I’m not sure.”"
         ),
     ),
 ]
