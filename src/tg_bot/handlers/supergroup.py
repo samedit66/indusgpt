@@ -20,6 +20,12 @@ from src import processors
 router = Router()
 
 
+@router.message(Command("users_count"), F.chat.type == "supergroup")
+async def users_count_handler(message: types.Message) -> None:
+    total = await User.all().count()
+    await message.reply(f"Total users: {total}")
+
+
 @router.message(Command("export_to_airtable"), F.chat.type == "supergroup")
 async def export_to_airtable(
     message: types.Message,
