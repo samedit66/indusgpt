@@ -33,11 +33,15 @@ async def run_bot():
         base_id=config.airtable_base_id,
         table_id=config.airtable_table_id,
     )
-
     airtable_daily_tracker = middlewares.airtable.AirtableDailyTracker(
         access_token=config.airtable_access_token,
         base_id=config.airtable_base_id_daily_tracker,
         table_id=config.airtable_table_id_daily_tracker,
+    )
+    airtable_users_counter = middlewares.airtable.AirtableUsersCounter(
+        access_token=config.airtable_access_token,
+        base_id=config.airtable_base_id_users_count,
+        table_id=config.airtable_table_id_users_count,
     )
 
     chat_manager = chat.ChatManager(
@@ -60,6 +64,9 @@ async def run_bot():
     dp.message.middleware(middlewares.AirtableMiddleware(airtable_processor))
     dp.message.middleware(
         middlewares.AirtableDailyTrackerMiddleware(airtable_daily_tracker)
+    )
+    dp.message.middleware(
+        middlewares.AirtableUsersCounterMiddleware(airtable_users_counter)
     )
     dp.include_routers(supergroup.router, chat_flow.router)
 

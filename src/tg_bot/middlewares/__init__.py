@@ -5,6 +5,7 @@ from .chat_manager import ChatManagerMiddleware
 from .allowed_ids import AllowedIdsMiddleware
 from .airtable.processor_middleware import AirtableMiddleware
 from .airtable.tracker_middleware import AirtableDailyTrackerMiddleware
+from .airtable.users_counter_middleware import AirtableUsersCounterMiddleware
 from . import airtable
 
 __all__ = [
@@ -16,4 +17,5 @@ __all__ = [
     "AllowedIdsMiddleware",
     "AirtableMiddleware",
     "AirtableDailyTrackerMiddleware",
+    "AirtableUsersCounterMiddleware",
 ]

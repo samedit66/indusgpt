@@ -44,6 +44,7 @@ async def start(
     topic_group_id: int,
     chat_manager: chat.ChatManager,
     airtable_daily_tracker: middlewares.airtable.AirtableDailyTracker,
+    airtable_users_counter: middlewares.airtable.AirtableUsersCounter,
 ) -> None:
     bot_msg = await message.answer(chat_settings.INTRODUCTION)
     await bot_msg.send_copy(
@@ -64,6 +65,7 @@ async def start(
     await update_statistics(
         user_id=user_id,
         airtable_daily_tracker=airtable_daily_tracker,
+        airtable_users_counter=airtable_users_counter,
     )
 
 
@@ -102,6 +104,7 @@ async def handle_message_from_user(
     topic_group_id: int,
     chat_manager: chat.ChatManager,
     airtable_daily_tracker: middlewares.airtable.AirtableDailyTracker,
+    airtable_users_counter: middlewares.airtable.AirtableUsersCounter,
 ) -> None:
     user_id = message.from_user.id
 
@@ -123,6 +126,7 @@ async def handle_message_from_user(
     await update_statistics(
         user_id=user_id,
         airtable_daily_tracker=airtable_daily_tracker,
+        airtable_users_counter=airtable_users_counter,
     )
 
 
@@ -281,6 +285,7 @@ async def increase_messages_count(user_id: int):
 async def update_statistics(
     user_id: int,
     airtable_daily_tracker: middlewares.airtable.AirtableDailyTracker,
+    airtable_users_counter: middlewares.airtable.AirtableUsersCounter,
 ) -> None:
     user = await User.filter(id=user_id).first()
     sent_messages_count = user.sent_messages_count
@@ -288,6 +293,7 @@ async def update_statistics(
     logger.info(f"Message count of user {user_id}: {sent_messages_count}")
     if sent_messages_count == 1:
         airtable_daily_tracker.increase_clicked()
+        airtable_users_counter.increase_users_count()
         logger.info(f"Increased clicked for {user_id}")
     elif sent_messages_count == 2:
         airtable_daily_tracker.increase_talked()
