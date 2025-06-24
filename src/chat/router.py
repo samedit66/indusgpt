@@ -104,6 +104,11 @@ Example dialogue №3:
 - Agent: Do you already have a website approved by the PSP? If yes — please give us hosting access (we may need to adjust code or API) If not — we will create the website ourselves
 - User: No
 Rationale: This is NOT ignore (it's actually 'information') because user has answered the question - they do not have website.
+
+Exmaple dialogue №4:
+- Agent: Are your corporate account(s) connected to any payment gateway (PSP) (e.g., Razorpay, Cashfree, PayU, Getepay)? Please answer me with a clear 'Yes' or 'No' and the PSP name(s).
+- User: Yes
+Rationale: This is NOT ignore (it's actually 'information') because user has provided partial answer to the question - they have a PSP but missed name.
 """
 
 
