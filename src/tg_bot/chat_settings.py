@@ -279,9 +279,10 @@ QUESTIONS = [
             "2. Selfie holding the ID document clearly visible\n"
             "3. Short video call with us for a personal introduction\n"
             "\n"
+            "No docs are needed now, but we need to know that you're ready to do it."
             "As a token of appreciation, we’re offering a bonus:\n"
             "You’ll receive an additional 10 000 INR for each completed verification step, paid out once we complete the integration and begin our collaboration.\n"
-            "Please answer me with a clear 'Yes' or 'No' if you're ready to provide"
+            "Please answer me with a clear 'Yes' if you're ready to provide them"
         ),
         answer_requirement=(
             "**Rules:**\n"
@@ -293,6 +294,8 @@ QUESTIONS = [
             "- “Yes, I agree to provide the ID scan, selfie with ID, and schedule the video call.”\n"
             "- “Absolutely—I will send the documents and set up the call.”\n"
             "- “I confirm that I’ll complete all three verification steps.”\n"
+            "- Okay then I agree\n"
+            "- Yes\n"
             "\n"
             "**Invalid examples:**\n"
             "- “Okay, I’ll try to send them.”\n"
