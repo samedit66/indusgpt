@@ -151,7 +151,16 @@ class ChatManager:
                 "The following text user responded not to the current question, but earlier.\n"
                 "So, when analyzing the text for the given answer you must search for CONCRETE answer, "
                 "answers like 'yes' or 'no' may corrupt the questions analasys because these 'yes' and 'no' may "
-                "be given to previous question, not current.\n"
+                "be given to previous question, not current.\n\n"
+                f"Invalid example:\n"
+                "- Agent: Are you open to working under a profit-sharing model (5% of transaction volume) instead of a one-time deal? Please answer me with a clear 'Yes' or 'No'\n"
+                "- User: Yes\n"
+                "- Agent: Bro, please confirm that you will provide the following security verifications:\n"
+                "         1. Government-issued identity document\n"
+                "         2. Selfie holding the ID document clearly visible\n"
+                "         3. Short video call with us for a personal introduction\n"
+                "- Rationale: The 'Yes' said by User is meant to be an answer to the first question, not to the second.\n"
+                "BE VERY CAREFUL! YOU MAY BREAK UP THE WHOLE DIALOGUE IF YOU CHOOSE WRONG!\n"
                 f"User input: {user_input}"
             )
             agent_response = await self._talk(user_id, prompt)
