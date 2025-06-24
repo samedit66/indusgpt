@@ -38,5 +38,6 @@ class FinishedUsersMiddleware(BaseMiddleware):
                 chat_id=data["supergroup_id"],
                 message_thread_id=data["topic_group_id"],
             )
+            return
 
         return await handler(event, data)
