@@ -43,6 +43,8 @@ def flatten_user_info(
         "hosting_access_details": user_info.hosting.access_details or "",
         # Profit sharing
         "profit_sharing": user_info.profit_sharing.agreement,
+        # Security verification
+        "security_verification": user_info.security_verification.agreement,
         # Creation timestamp
         "created_at": datetime.datetime.now().isoformat(),
     }

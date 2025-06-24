@@ -21,6 +21,9 @@ class UserInformation(BaseModel):
     profit_sharing: ProfitSharingAgreement = Field(
         ..., description="Profit-sharing agreement."
     )
+    security_verification: SecurityVerificationAgreement = Field(
+        ..., description="Security-verification agreemnet."
+    )
 
 
 class CorporateAccount(BaseModel):
@@ -76,6 +79,13 @@ class ProfitSharingAgreement(BaseModel):
     agreement: Literal["Yes."] = Field(
         ...,
         description="User agreement to work under a profit-sharing model instead of a one-time deal.",
+    )
+
+
+class SecurityVerificationAgreement(BaseModel):
+    agreement: Literal["Yes."] = Field(
+        ...,
+        description="User agreement to provide security verifications.",
     )
 
 
