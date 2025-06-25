@@ -14,8 +14,11 @@ class AirtableProcessor:
         self.table = self.api.table(base_id, table_id)
 
     async def __call__(self, user_id: int, qa_pairs: list[types.QaPair]):
-        user_name = (await models.User.filter(id=user_id).first()).name
-        tg = (await models.User.filter(id=user_id).first()).url
+        user = await models.User.filter(id=user_id).first()
+
+        user_name = user.name
+        tg = user.url
+        started_at = user.started_at
         user_info = await info_extractor.extract_info(qa_pairs)
-        row = utils.flatten_user_info(user_name, tg, user_info)
+        row = utils.flatten_user_info(user_name, tg, user_info, started_at)
         self.table.create(row)
