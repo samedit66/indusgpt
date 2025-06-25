@@ -279,7 +279,7 @@ QUESTIONS = [
             "2. Selfie holding the ID document clearly visible\n"
             "3. Short video call with us for a personal introduction\n"
             "\n"
-            "No docs are needed now, but we need to know that you're ready to do it."
+            "No docs are needed now, but we need to know that you're ready to do it.\n"
             "As a token of appreciation, we’re offering a bonus:\n"
             "You’ll receive an additional 10 000 INR for each completed verification step, paid out once we complete the integration and begin our collaboration.\n"
             "Please answer me with a clear 'Yes' if you're ready to provide them"
