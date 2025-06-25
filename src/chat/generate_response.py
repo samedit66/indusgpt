@@ -74,6 +74,8 @@ async def combine_responses(
     logging.info(f"Responses:\n{responses}")
 
     non_empty = [r for r in responses if r]
+    if len(non_empty) == 1:
+        return non_empty[0]
 
     response_texts = [r.response_text for r in non_empty]
     extracted_datas = [r.extracted_data for r in non_empty if r.extracted_data]
