@@ -7,7 +7,7 @@ def flatten_user_info(
     user_name: str,
     tg: str,
     user_info: info_extractor.UserInformation,
-    started_at: datetime.date,
+    started_at: datetime.datetime,
 ) -> dict:
     """Flatten UserInformation for Google Sheets row.
 
@@ -47,6 +47,6 @@ def flatten_user_info(
         # Security verification
         "security_verification": user_info.security_verification.agreement,
         # Creation timestamp
-        "created_at": datetime.datetime.now().isoformat(),
-        "user_started_at": started_at.isoformat(),
+        "created_at": datetime.date.today().isoformat(),
+        "user_started_at": started_at.date().isoformat(),
     }
