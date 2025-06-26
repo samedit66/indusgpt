@@ -1,9 +1,11 @@
+from datetime import datetime
+import os
+import re
+
 from aiogram import Router, F, types
 from aiogram.filters import Command, CommandObject
 from aiogram import enums as aiogram_enums
 from aiogram.utils import keyboard
-import os
-from datetime import datetime
 
 from src.persistence.models import (
     SuperGroup,
@@ -18,6 +20,68 @@ from src import processors
 
 
 router = Router()
+
+
+@router.message(Command("stat"), F.chat.type == "supergroup")
+async def stat(message: types.Message, command: CommandObject) -> None:
+    HELP_TEXT = (
+        "Использование команды /stat:\n"
+        "/stat <день> - статистика с указанного дня текущего месяца и года\n"
+        "/stat <день>.<месяц> - статистика с указанного дня и месяца текущего года\n"
+        "/stat <день>.<месяц>.<год> - статистика с указанного дня, месяца и года\n"
+        "Примеры:\n"
+        "/stat 15\n"
+        "/stat 15.04\n"
+        "/stat 15.04.2025"
+    )
+    DATE_PATTERN = re.compile(
+        r"^(?P<day>\d{1,2})(?:\.(?P<month>\d{1,2})(?:\.(?P<year>\d{4}))?)?$"
+    )
+
+    args = command.args
+    if not args:
+        await message.reply(HELP_TEXT)
+        return
+
+    match = DATE_PATTERN.match(args)
+    if not match:
+        await message.reply("Неверный формат даты.\n" + HELP_TEXT)
+        return
+
+    try:
+        now = datetime.now()
+        day = int(match.group("day"))
+        month = int(match.group("month")) if match.group("month") else now.month
+        year = int(match.group("year")) if match.group("year") else now.year
+        start_date = datetime(year, month, day)
+    except ValueError:
+        await message.reply(
+            "Неверная дата. Проверьте, что день, месяц и год корректны."
+        )
+        return
+
+    # Запросы к базе
+    total = await User.filter(started_at__gte=start_date).count()
+    continued = await User.filter(
+        started_at__gte=start_date, sent_messages_count__gt=1
+    ).count()
+    completed = await User.filter(
+        started_at__gte=start_date, is_onboarding_completed=True
+    ).count()
+
+    # Вычисление конверсии
+    perc = (completed / total * 100) if total else 0
+
+    # Ответ
+    report = (
+        f"Статистика с {start_date.strftime('%d.%m.%Y')}:\n"
+        f"Юзеров активировало бота = {total}\n"
+        f"Юзеров продолжили диалог = {continued}\n"
+        f"Юзеров дали все данные = {completed}\n"
+        f"Дали все данные = {perc:.2f}% от общего числа активировавших бота"
+    )
+
+    await message.reply(report)
 
 
 @router.message(Command("users_count"), F.chat.type == "supergroup")
