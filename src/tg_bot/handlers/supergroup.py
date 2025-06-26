@@ -70,15 +70,17 @@ async def stat(message: types.Message, command: CommandObject) -> None:
     ).count()
 
     # Вычисление конверсии
-    perc = (completed / total * 100) if total else 0
+    rate_total = (completed / total * 100) if total else 0
+    rate_continued = (completed / continued * 100) if continued else 0
 
     # Ответ
     report = (
         f"Статистика с {start_date.strftime('%d.%m.%Y')}:\n"
         f"Юзеров активировало бота = {total}\n"
         f"Юзеров продолжили диалог = {continued}\n"
-        f"Юзеров дали все данные = {completed}\n"
-        f"Дали все данные = {perc:.2f}% от общего числа активировавших бота"
+        f"Юзеров дали все данные = {completed}\n\n"
+        f"Дали все данные = {rate_total:.2f}% от общего числа активировавших бота\n"
+        f"Дали все данные = {rate_continued:.2f}% от числа продолживших диалог"
     )
 
     await message.reply(report)
