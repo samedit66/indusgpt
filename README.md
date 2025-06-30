@@ -1,4 +1,4 @@
-# IndusGPT Bot
+# OnboardGPT
 
 A Telegram bot designed to facilitate user onboarding through interactive conversations.
 
